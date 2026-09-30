@@ -103,6 +103,49 @@ input:focus{outline:none}
 .toast.on{opacity:1}
 :focus-visible{outline:2px solid var(--peri);outline-offset:2px}
 .tools{display:flex;gap:8px}
+/* status */
+.stat{background:var(--card);border-radius:var(--r);padding:16px;margin:0 0 14px;box-shadow:0 1px 2px rgba(29,29,31,.04)}
+.stat-lbl{font-size:13px;color:var(--ink3)}
+.stat-now{font-size:22px;font-weight:700;margin-top:2px}
+.stat-when{font-size:13px;color:var(--ink2);margin-top:2px}
+.prog{display:flex;gap:4px;margin:12px 0 2px}
+.prog span{flex:1;height:6px;border-radius:3px;background:#e6e8f1}
+.prog span.on{background:#7fd1ae}
+.stat-acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.tint{border:0;background:var(--peri-tint);color:var(--peri);font-weight:600;font-size:15px;border-radius:12px;min-height:40px;padding:0 16px;cursor:pointer}
+.cta.mint{background:#1f8a5f;margin-top:14px}
+/* whatsapp nudge */
+.wa{background:#e2f5ea;border-radius:var(--r);padding:14px 16px;margin:0 0 14px;color:#1d5c3f}
+.wa p{margin:0 0 10px;font-size:15px;font-weight:600}
+.wa-row{display:flex;gap:10px;align-items:center}
+.wa-btn{flex:1;display:flex;align-items:center;justify-content:center;height:44px;border-radius:12px;background:#1f8a5f;color:#fff;font-weight:600;text-decoration:none}
+.wa-x{border:0;background:transparent;color:#1d5c3f;font-size:15px;cursor:pointer;padding:8px}
+/* add and remove */
+.hr{display:flex;align-items:center;gap:8px;flex:none}
+.x{width:28px;height:28px;border-radius:50%;border:0;background:var(--field);color:var(--ink3);font-size:18px;line-height:1;cursor:pointer}
+.pill.add{background:var(--peri-tint);color:var(--peri)}
+.addrow{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--peri);font-size:17px;font-weight:500;padding:14px 16px;cursor:pointer;position:relative}
+.addrow::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
+.empty{padding:16px;color:var(--ink2);font-size:15px}
+/* sheets */
+.mask{position:fixed;inset:0;background:rgba(29,29,31,.28);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.mask.on{display:flex}
+.sheet{position:relative;background:var(--canvas);width:100%;max-width:600px;max-height:86vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+@media (min-width:700px){.mask{align-items:center}.sheet{border-radius:20px}}
+.sheet h2{font-size:22px;margin:4px 0 4px}
+.sh-sub{color:var(--ink2);font-size:15px;margin:0 0 12px}
+.sheet-x{position:absolute;right:14px;top:14px;width:32px;height:32px;border-radius:50%;border:0;background:#e6e8f1;color:var(--ink2);font-size:20px;cursor:pointer}
+.opts{background:var(--card);border-radius:var(--r);overflow:hidden}
+.opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;padding:13px 16px;font-size:17px;cursor:pointer;position:relative}
+.opt + .opt::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
+.opt .ck{width:18px;color:var(--mint);font-weight:700}
+.opt .ot{flex:1}
+.opt .om{font-size:13px;color:var(--ink3)}
+.opt.cur .ot{font-weight:700}
+.opt.new .ot{color:var(--peri)}
+.srch{margin:10px 0 12px}
+.srch input{width:100%;height:44px;border:0;border-radius:12px;background:#e6e8f1;padding:0 14px;font-size:17px}
+
 body.out .tools,body.out .state{visibility:hidden}
 .si-text{color:var(--ink2);font-size:15px;margin:0 2px 12px}
 .si-note{background:var(--peri-tint);color:var(--peri);border-radius:12px;padding:10px 14px;font-size:15px;margin:0 0 14px}
@@ -131,24 +174,30 @@ body.out .tools,body.out .state{visibility:hidden}
   <p class="sub" id="sub">Restock order</p>
   <div id="body"></div>
 </main>
+<div class="mask" id="mask"><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Order options"></div></div>
 <div class="toast" id="toast" role="status"></div>
 <script>
 // Never run inside another site's page.
 if (window.top !== window.self) { try { window.top.location = window.self.location; } catch (e) { document.documentElement.innerHTML = ""; } }
 
-/* PPR Logistics. The restock order shared with the labs: what is under 15, how many to order,
-   the price per vial and shipping. It needs the password to open, and signs itself out after
-   8 hours. The password is not in this page; the script checks it and hands back a pass that
-   runs out. Money is kept in USD and shown in USD or AUD. */
+/* PPR Logistics. The restock order shared with the labs. It needs the password to open and
+   signs itself out after 8 hours. The password, the order and the WhatsApp number are never in
+   this file; they come from the script after sign in. Money is kept in USD and shown in USD or
+   AUD. The last order is kept on this device so the page shows straight away, then it checks
+   for anything newer. */
 (function () {
   var EP = "https://script.google.com/macros/s/AKfycby6GS7W7o7sFKceSUAxrYW6QHKvDyj8D9lljgDYtN3j_cqAEmg6gSj-kh0Oj5xrf_Dr7A/exec";
   var OUT8 = "You were signed out after 8 hours. Sign in again.";
-  var AUTH = null, D = null, CUR = "usd", busy = false, lastLoad = 0, saveT = null, saving = false, dirty = false, toastT = null, outT = null;
+  var STAGES = [["draft", "Not placed yet"], ["placed", "Order placed"], ["looking", "Being looked at"],
+    ["payreq", "Payment requested"], ["paid", "Payment made"], ["ordered", "Ordered"],
+    ["making", "Being made"], ["sent", "Sent"], ["delivered", "Delivered"]];
+  var AUTH = null, D = null, CUR = "usd", WA = null, busy = false, lastLoad = 0, saveT = null, saving = false,
+    dirty = false, toastT = null, outT = null;
   try { CUR = localStorage.getItem("pprlog.cur") === "aud" ? "aud" : "usd"; } catch (e) {}
   try { AUTH = JSON.parse(localStorage.getItem("pprlog.auth") || "null"); } catch (e) { AUTH = null; }
 
   function $(id) { return document.getElementById(id); }
-  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function rate() { return (D && D.rate) || 1.4; }
   function show(usd) { return CUR === "aud" ? usd * rate() : usd; }
   function toUsd(v) { return CUR === "aud" ? v / rate() : v; }
@@ -157,6 +206,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     return "$" + n + (cur ? " " + cur.toUpperCase() : "");
   }
   function num(s) { var v = parseFloat(String(s == null ? "" : s).replace(/[^0-9.]/g, "")); return isFinite(v) ? v : 0; }
+  function fix(v) { return (Math.round(show(v) * 100) / 100).toFixed(2); }
   function toast(t) { var el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(function () { el.classList.remove("on"); }, 2200); }
   function state(kind, text) { var el = $("state"); el.className = "state" + (kind ? " " + kind : ""); el.textContent = text || ""; }
   function note(kind, title, text) {
@@ -169,6 +219,12 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     return fetch(EP, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body), signal: signal })
       .then(function (r) { return r.json(); });
   }
+  function stageIx(s) { for (var i = 0; i < STAGES.length; i++) if (STAGES[i][0] === s) return i; return 0; }
+  function fmtTime(t) {
+    var d = new Date(t); if (isNaN(d)) return "";
+    return d.toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+  }
+  function whenFor(s) { var t = ""; (D.history || []).forEach(function (h) { if (h.s === s) t = h.t; }); return t ? fmtTime(t) : ""; }
 
   /* ---------- signing in and out ---------- */
   function signedIn() { return !!(AUTH && AUTH.pass && AUTH.exp > Date.now()); }
@@ -177,8 +233,8 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     if (signedIn()) outT = setTimeout(function () { signOut(OUT8); }, Math.min(AUTH.exp - Date.now() + 500, 2147000000));
   }
   function signOut(msg) {
-    AUTH = null; D = null; lastLoad = 0; dirty = false; clearTimeout(saveT); clearTimeout(outT);
-    try { localStorage.removeItem("pprlog.auth"); } catch (e) {}
+    AUTH = null; D = null; WA = null; lastLoad = 0; dirty = false; clearTimeout(saveT); clearTimeout(outT); closeSheet();
+    try { localStorage.removeItem("pprlog.auth"); localStorage.removeItem("pprlog.last"); } catch (e) {}
     showSignIn(msg || "");
   }
   function showSignIn(msg) {
@@ -203,7 +259,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
       if (j && j.ok && j.pass) {
         AUTH = { pass: j.pass, exp: +j.exp };
         try { localStorage.setItem("pprlog.auth", JSON.stringify(AUTH)); } catch (e) {}
-        document.body.classList.remove("out"); armExpiry(); load();
+        document.body.classList.remove("out"); armExpiry(); load(false);
         return;
       }
       var e = j && j.error;
@@ -215,37 +271,74 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   }
 
   /* ---------- the order ---------- */
+  function build(d) {
+    D = {
+      items: (d.items || []).map(function (i) { return { sku: i.sku, name: i.name, left: i.left, need: +i.need || 0, qty: +i.qty || 0, price: +i.price || 0, base: +i.base || 0 }; }),
+      extra: (d.extra || []).map(function (x) { return { id: x.id, sku: x.sku || "", name: x.name, left: x.left == null ? null : +x.left, qty: +x.qty || 0, price: +x.price || 0, base: +x.base || 0 }; }),
+      removed: (d.removed || []).slice(), products: d.products || [], status: d.status || "draft", history: d.history || [],
+      wa: d.wa || "", low: d.low || 15, rate: d.rate || 1.4, shipUsd: +d.shipUsd || 0, shipBase: +d.shipBase || 0
+    };
+  }
+  function snapshot() {
+    return { items: D.items, extra: D.extra, removed: D.removed, products: D.products, status: D.status, history: D.history,
+      wa: D.wa, low: D.low, rate: D.rate, shipUsd: D.shipUsd, shipBase: D.shipBase };
+  }
+  function remember() { if (!D || !AUTH) return; try { localStorage.setItem("pprlog.last", JSON.stringify({ exp: AUTH.exp, d: snapshot() })); } catch (e) {} }
+  function remembered() {
+    try { var c = JSON.parse(localStorage.getItem("pprlog.last") || "null"); return c && AUTH && c.exp === AUTH.exp ? c.d : null; } catch (e) { return null; }
+  }
+  function all() { return D.items.concat(D.extra); }
   function sums() {
     var sub = 0, vials = 0, prods = 0;
-    D.items.forEach(function (it) { if (it.qty > 0) { sub += it.qty * it.price; vials += it.qty; prods++; } });
+    all().forEach(function (it) { if (it.qty > 0) { sub += it.qty * it.price; vials += it.qty; prods++; } });
     return { sub: sub, ship: D.shipUsd, total: sub + D.shipUsd, vials: vials, prods: prods };
   }
-  function fix(v) { return (Math.round(show(v) * 100) / 100).toFixed(2); }
+  function itemOf(el) {
+    var row = el.closest(".item"); if (!row) return null;
+    return (row.dataset.k === "x" ? D.extra : D.items)[+row.dataset.i] || null;
+  }
 
+  function rowHtml(it, kind, i) {
+    var pill;
+    if (it.left == null) pill = '<span class="pill add">Added</span>';
+    else pill = '<span class="pill' + (it.left <= 0 ? " out" : it.left < 5 ? " low" : "") + '">' + (it.left <= 0 ? "Out of stock" : it.left + " left") + '</span>';
+    return '<div class="item" data-k="' + kind + '" data-i="' + i + '">' +
+      '<div class="head"><span class="nm">' + esc(it.name) + '</span><span class="hr">' + pill +
+        '<button type="button" class="x" data-act="remove" aria-label="Remove ' + esc(it.name) + '">&times;</button></span></div>' +
+      '<div class="ctrls">' +
+        '<label class="fld"><span class="cap">Qty</span><span class="step">' +
+          '<button type="button" data-act="minus" aria-label="10 fewer">&minus;</button>' +
+          '<input data-f="qty" inputmode="numeric" value="' + it.qty + '" aria-label="Quantity of ' + esc(it.name) + '">' +
+          '<button type="button" data-act="plus" aria-label="10 more">+</button></span></label>' +
+        '<label class="fld"><span class="cap">Price per vial</span><span class="money"><b>$</b>' +
+          '<input data-f="price" inputmode="decimal" value="' + (it.price > 0 ? fix(it.price) : "") + '" placeholder="Add" aria-label="Price per vial of ' + esc(it.name) + '"></span></label>' +
+        '<span class="line" data-line>' + money(show(it.qty * it.price)) + '</span>' +
+      '</div></div>';
+  }
+  function statusCard() {
+    var ix = stageIx(D.status), when = whenFor(D.status), bars = "";
+    for (var i = 1; i < STAGES.length; i++) bars += '<span class="' + (i <= ix ? "on" : "") + '"></span>';
+    var acts = D.status === "draft"
+      ? '<button class="cta mint" id="place" type="button">Place order</button>'
+      : '<div class="stat-acts"><button class="tint" id="chg" type="button">Update status</button>' +
+        (D.status === "delivered" ? '<button class="tint" id="neworder" type="button">Start a new order</button>' : '') + '</div>';
+    return '<div class="stat"><div class="stat-lbl">Order status</div><div class="stat-now">' + esc(STAGES[ix][1]) + '</div>' +
+      (when ? '<div class="stat-when">' + esc(when) + '</div>' : '') +
+      '<div class="prog" aria-hidden="true">' + bars + '</div>' + acts + '</div>';
+  }
   function render() {
     var low = D.low || 15;
     $("sub").textContent = "Restock order for anything under " + low + " in stock";
-    if (!D.items.length) { note("ok", "All stocked up", "Nothing is under " + low + " right now."); return; }
-    var rows = D.items.map(function (it, i) {
-      var pc = it.left <= 0 ? " out" : it.left < 5 ? " low" : "", pt = it.left <= 0 ? "Out of stock" : it.left + " left";
-      return '<div class="item" data-i="' + i + '">' +
-        '<div class="head"><span class="nm">' + esc(it.name) + '</span><span class="pill' + pc + '">' + pt + '</span></div>' +
-        '<div class="ctrls">' +
-          '<label class="fld"><span class="cap">Qty</span><span class="step">' +
-            '<button type="button" data-act="minus" aria-label="10 fewer">&minus;</button>' +
-            '<input data-f="qty" inputmode="numeric" value="' + it.qty + '" aria-label="Quantity of ' + esc(it.name) + '">' +
-            '<button type="button" data-act="plus" aria-label="10 more">+</button></span></label>' +
-          '<label class="fld"><span class="cap">Price per vial</span><span class="money"><b>$</b>' +
-            '<input data-f="price" inputmode="decimal" value="' + (it.price > 0 ? fix(it.price) : "") + '" placeholder="Add" aria-label="Price per vial of ' + esc(it.name) + '"></span></label>' +
-          '<span class="line" data-line>' + money(show(it.qty * it.price)) + '</span>' +
-        '</div></div>';
-    }).join("");
-    $("body").innerHTML =
+    var list = D.items.map(function (it, i) { return rowHtml(it, "i", i); }).join("") +
+      D.extra.map(function (x, i) { return rowHtml(x, "x", i); }).join("");
+    if (!list) list = '<div class="empty">Nothing on the order yet. Add an item, or it fills itself when stock drops under ' + low + '.</div>';
+    $("body").innerHTML = statusCard() + '<div id="waBox">' + waCard() + '</div>' +
       '<div class="seg" role="group" aria-label="Currency">' +
         '<button type="button" data-cur="usd" class="' + (CUR === "usd" ? "on" : "") + '">USD</button>' +
         '<button type="button" data-cur="aud" class="' + (CUR === "aud" ? "on" : "") + '">AUD</button></div>' +
       '<p class="rate">1 USD is ' + rate().toFixed(2) + ' AUD</p>' +
-      '<div class="group">' + rows +
+      '<div class="group">' + list +
+        '<button type="button" class="addrow" id="addBtn">+ Add item</button>' +
         '<div class="ship"><div><span class="nm">Shipping</span><small>For the whole order</small></div>' +
           '<span class="money"><b>$</b><input data-f="ship" inputmode="decimal" value="' + fix(D.shipUsd) + '" aria-label="Shipping"></span></div>' +
       '</div>' +
@@ -264,12 +357,46 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     $("tSub").textContent = money(show(t.sub));
     $("tShip").textContent = money(show(t.ship));
     $("tCount").textContent = t.prods + (t.prods === 1 ? " product, " : " products, ") + t.vials + " vials";
-    D.items.forEach(function (it, i) {
-      var el = document.querySelector('.item[data-i="' + i + '"] [data-line]');
-      if (el) el.textContent = money(show(it.qty * it.price));
+    Array.prototype.forEach.call(document.querySelectorAll(".item"), function (row) {
+      var it = itemOf(row), el = row.querySelector("[data-line]");
+      if (it && el) el.textContent = money(show(it.qty * it.price));
     });
   }
 
+  /* ---------- WhatsApp: a button with the message ready, the person just sends it ---------- */
+  function orderLines() {
+    var out = [];
+    all().forEach(function (it) {
+      if (it.qty > 0) out.push(it.price > 0
+        ? it.name + " x " + it.qty + " at " + money(show(it.price)) + " = " + money(show(it.qty * it.price))
+        : it.name + " x " + it.qty + ", price to confirm");
+    });
+    return out;
+  }
+  function waMsg(kind) {
+    var lines = ["PPR Logistics", kind === "placed" ? "An order has been placed." :
+      kind === "status" ? "Order update: " + STAGES[stageIx(D.status)][1] + "." : "The order was changed."];
+    if (kind !== "status") {
+      lines.push("");
+      orderLines().forEach(function (l) { lines.push(l); });
+      lines.push("Shipping " + money(show(D.shipUsd)));
+      lines.push("Total " + money(show(sums().total), CUR));
+    }
+    lines.push("", location.href.split("#")[0]);
+    return lines.join("\n");
+  }
+  function waCard() {
+    if (!WA || !D || !D.wa) return "";
+    var href = "https://wa.me/" + encodeURIComponent(D.wa) + "?text=" + encodeURIComponent(waMsg(WA));
+    var title = WA === "placed" ? "Order placed. Send the WhatsApp so PPR knows." :
+      WA === "status" ? "Status changed. Send the WhatsApp so PPR knows." : "Order changed. Send the WhatsApp so PPR knows.";
+    return '<div class="wa" role="status"><p>' + esc(title) + '</p><div class="wa-row">' +
+      '<a class="wa-btn" id="waGo" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">Send on WhatsApp</a>' +
+      '<button type="button" class="wa-x" id="waX">Not now</button></div></div>';
+  }
+  function setWa(kind) { WA = kind; var box = $("waBox"); if (box) box.innerHTML = waCard(); }
+
+  /* ---------- saving ---------- */
   // Only what differs from the suggestion or the price list is saved, so the rest keeps
   // following the stock and the list. null puts one back to the suggestion.
   function payload() {
@@ -279,7 +406,8 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
       price[it.sku] = Math.abs(it.price - it.base) < 0.00005 ? null : Math.round(it.price * 10000) / 10000;
     });
     var ship = Math.abs(D.shipUsd - D.shipBase) < 0.00005 ? null : Math.round(D.shipUsd * 10000) / 10000;
-    return { labs: 1, action: "save", pass: AUTH ? AUTH.pass : "", qty: qty, price: price, shipUsd: ship };
+    var extra = D.extra.map(function (x) { return { id: x.id, sku: x.sku, name: x.name, qty: x.qty, price: Math.round(x.price * 10000) / 10000 }; });
+    return { labs: 1, action: "save", pass: AUTH ? AUTH.pass : "", qty: qty, price: price, shipUsd: ship, extra: extra, removed: D.removed };
   }
   function queueSave() { dirty = true; state("saving", "Saving"); clearTimeout(saveT); saveT = setTimeout(save, 700); }
   function save() {
@@ -287,51 +415,143 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     if (saving) { saveT = setTimeout(save, 400); return; }
     saving = true; dirty = false;
     post(payload()).then(function (j) {
-      if (j && j.ok) { if (!dirty) state("saved", "Saved"); }
-      else if (j && j.error === "signed_out") signOut("You've been signed out. Sign in again, then redo the last change.");
+      if (j && j.ok) {
+        if (!dirty) state("saved", "Saved");
+        remember();
+        if (D && D.status !== "draft") setWa(WA === "placed" ? "placed" : "change");
+      } else if (j && j.error === "signed_out") signOut("You've been signed out. Sign in again, then redo the last change.");
       else throw new Error("not saved");
     }).catch(function () { dirty = true; state("err", "Not saved, tap to retry"); })
       .then(function () { saving = false; });
   }
+  function setStatus(st) {
+    if (!D || st === D.status) { closeSheet(); return; }
+    var label = STAGES[stageIx(st)][1];
+    if (!confirm(st === "placed" && D.status === "draft" ? "Place this order?" : "Change the status to " + label + "?")) return;
+    state("saving", "Saving");
+    post({ labs: 1, action: "status", status: st, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
+      if (j && j.ok) {
+        D.status = j.status; D.history = j.history || D.history;
+        closeSheet(); render(); remember(); state("saved", "Saved");
+        setWa(st === "placed" ? "placed" : "status");
+      } else if (j && j.error === "signed_out") signOut("You've been signed out. Sign in again.");
+      else throw new Error("no");
+    }).catch(function () { state("err", "Not saved, tap to retry"); toast("Couldn't change the status, try again"); });
+  }
+  function newOrder() {
+    if (!confirm("Start a new order? The items and status on this one are cleared.")) return;
+    post({ labs: 1, action: "neworder", pass: AUTH ? AUTH.pass : "" }).then(function (j) {
+      if (j && j.error === "signed_out") return signOut("You've been signed out. Sign in again.");
+      if (!j || !j.ok) throw new Error("no");
+      WA = null; D = null; toast("New order started"); load(true);
+    }).catch(function () { toast("Couldn't start a new order, try again"); });
+  }
+  function reset() {
+    if (!confirm("Put the items, quantities, prices and shipping back to the suggestions?")) return;
+    clearTimeout(saveT); dirty = false; state("saving", "Saving");
+    post({ labs: 1, action: "save", reset: true, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
+      if (j && j.error === "signed_out") { signOut("You've been signed out. Sign in again."); return; }
+      if (!j || !j.ok) throw new Error("not reset");
+      toast("Reset to suggested"); D = null; load(true);
+    }).catch(function () { state("err", "Not saved, tap to retry"); });
+  }
 
-  function load() {
+  /* ---------- adding and removing ---------- */
+  function openSheet(html) {
+    $("sheet").innerHTML = '<button type="button" class="sheet-x" id="sheetX" aria-label="Close">&times;</button>' + html;
+    $("mask").classList.add("on");
+  }
+  function closeSheet() { var m = $("mask"); if (m) m.classList.remove("on"); var s = $("sheet"); if (s) s.innerHTML = ""; }
+  function openStatus() {
+    var ix = stageIx(D.status);
+    openSheet('<h2>Update status</h2><p class="sh-sub">Tap where the order is up to.</p><div class="opts">' +
+      STAGES.map(function (st, i) {
+        return '<button type="button" class="opt' + (i === ix ? " cur" : "") + '" data-st="' + st[0] + '">' +
+          '<span class="ck">' + (i <= ix ? "&#10003;" : "") + '</span><span class="ot">' + esc(st[1]) + '</span><span class="om">' + esc(whenFor(st[0])) + '</span></button>';
+      }).join("") + '</div>');
+  }
+  function inOrder(sku) {
+    var k = String(sku).toLowerCase();
+    return D.items.some(function (i) { return String(i.sku).toLowerCase() === k; }) ||
+      D.extra.some(function (x) { return x.sku && String(x.sku).toLowerCase() === k; });
+  }
+  function openAdd() {
+    openSheet('<h2>Add item</h2><div class="srch"><input id="addQ" type="text" placeholder="Search, or type a new item" autocomplete="off" autocapitalize="words" spellcheck="false" aria-label="Search or type a new item"></div><div class="opts" id="addList"></div>');
+    addSearch(); setTimeout(function () { var q = $("addQ"); if (q) q.focus(); }, 60);
+  }
+  function addMatches(q) {
+    var ql = q.toLowerCase();
+    return D.products.filter(function (p) { return !inOrder(p.sku) && (!ql || p.name.toLowerCase().indexOf(ql) >= 0); });
+  }
+  function addSearch() {
+    var q = $("addQ").value.trim(), ql = q.toLowerCase(), list = addMatches(q);
+    var html = list.map(function (p) {
+      return '<button type="button" class="opt" data-add="' + esc(p.sku) + '"><span class="ot">' + esc(p.name) + '</span>' +
+        '<span class="om">' + p.left + ' left' + (p.base ? ", " + money(show(p.base)) : "") + '</span></button>';
+    }).join("");
+    if (q && !D.products.some(function (p) { return p.name.toLowerCase() === ql; }))
+      html += '<button type="button" class="opt new" data-new="1"><span class="ot">Add ' + esc(q) + ' as a new item</span></button>';
+    $("addList").innerHTML = html || '<p class="empty">Everything is already on the order. Type a name to add something new.</p>';
+  }
+  function newId() { return "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function addProduct(sku) {
+    var p = null;
+    D.products.forEach(function (x) { if (String(x.sku) === String(sku)) p = x; });
+    if (!p) return;
+    var k = String(p.sku).toLowerCase(), ri = D.removed.map(function (x) { return String(x).toLowerCase(); }).indexOf(k);
+    if (ri >= 0 && p.left < (D.low || 15)) {
+      D.removed.splice(ri, 1);
+      D.items.push({ sku: p.sku, name: p.name, left: p.left, need: p.need, qty: p.need, price: p.base, base: p.base });
+      D.items.sort(function (a, b) { return a.left - b.left || a.name.localeCompare(b.name); });
+    } else D.extra.push({ id: newId(), sku: p.sku, name: p.name, left: p.left, qty: 10, price: p.base, base: p.base });
+    closeSheet(); render(); queueSave(); toast(p.name + " added");
+  }
+  function addNew(name) {
+    name = String(name).replace(/[<>"`]/g, "").replace(/\s+/g, " ").trim().slice(0, 60);
+    if (!name) return;
+    D.extra.push({ id: newId(), sku: "", name: name, left: null, qty: 10, price: 0, base: 0 });
+    closeSheet(); render(); queueSave(); toast(name + " added");
+  }
+  function removeRow(btn) {
+    var row = btn.closest(".item"), i = +row.dataset.i, gone;
+    if (row.dataset.k === "x") gone = D.extra.splice(i, 1)[0];
+    else { gone = D.items.splice(i, 1)[0]; if (gone) D.removed.push(String(gone.sku).toLowerCase()); }
+    render(); queueSave(); if (gone) toast(gone.name + " removed");
+  }
+
+  /* ---------- loading ---------- */
+  function load(fresh) {
     if (busy) return;
     if (!signedIn()) { signOut(AUTH ? OUT8 : ""); return; }
     if (dirty || saving) { save(); return; }
     busy = true; $("refresh").classList.add("spin");
-    if (!D) $("body").innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+    if (!D) {
+      var c = remembered();
+      if (c) { build(c); render(); state("", "Updating"); }
+      else $("body").innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+    }
     var ctrl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 25000);
-    post({ labs: 1, action: "list", pass: AUTH.pass }, ctrl ? ctrl.signal : undefined)
+    post({ labs: 1, action: "list", pass: AUTH.pass, fresh: !!fresh }, ctrl ? ctrl.signal : undefined)
       .then(function (d) {
         if (d && d.ok) {
-          D = { items: d.items || [], low: d.low, rate: d.rate || 1.4, shipUsd: +d.shipUsd || 0, shipBase: +d.shipBase || 0 };
-          lastLoad = Date.now(); render();
+          var ae = document.activeElement;
+          if (dirty || saving || (ae && ae.tagName === "INPUT" && $("body").contains(ae))) return;
+          build(d); lastLoad = Date.now(); render(); remember();
           state("", "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
         } else if (d && d.error === "signed_out") signOut("You've been signed out. Sign in again.");
         else throw new Error("bad answer");
       })
       .catch(function () {
         if (!AUTH) return;
-        if (D) toast("Couldn't refresh, showing the last order");
+        if (D) { toast("Couldn't refresh, showing the last order"); state("", ""); }
         else { state("", ""); note("bad", "Couldn't load the order", "Check your connection and tap refresh."); }
       })
       .then(function () { clearTimeout(timer); busy = false; $("refresh").classList.remove("spin"); });
   }
 
-  function orderText() {
-    var t = sums(), lines = ["PPR restock order"];
-    D.items.forEach(function (it) {
-      if (it.qty > 0) lines.push(it.price > 0
-        ? it.name + " x " + it.qty + " at " + money(show(it.price)) + " = " + money(show(it.qty * it.price))
-        : it.name + " x " + it.qty + ", price to confirm");
-    });
-    lines.push("Shipping " + money(show(t.ship)));
-    lines.push("Total " + money(show(t.total), CUR));
-    return lines.join("\n");
-  }
   function copy() {
-    var t = orderText();
+    var t = ["PPR restock order"].concat(orderLines(), ["Shipping " + money(show(D.shipUsd)), "Total " + money(show(sums().total), CUR)]).join("\n");
     function fallback() {
       var ta = document.createElement("textarea"); ta.value = t; ta.setAttribute("readonly", "");
       ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
@@ -341,43 +561,49 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(function () { toast("Order copied"); }, fallback);
     else fallback();
   }
-  function reset() {
-    if (!confirm("Put quantities, prices and shipping back to the suggestions?")) return;
-    clearTimeout(saveT); dirty = false; state("saving", "Saving");
-    post({ labs: 1, action: "save", reset: true, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
-      if (j && j.error === "signed_out") { signOut("You've been signed out. Sign in again."); return; }
-      if (!j || !j.ok) throw new Error("not reset");
-      toast("Reset to suggested"); D = null; load();
-    }).catch(function () { state("err", "Not saved, tap to retry"); });
-  }
 
-  // one set of listeners for the whole page
+  /* ---------- one set of listeners for the whole page ---------- */
   document.addEventListener("submit", function (e) {
     if (e.target.id !== "signin") return;
     e.preventDefault(); signIn($("pw").value);
   });
   document.addEventListener("click", function (e) {
+    if (e.target.id === "mask") return closeSheet();
+    var a = e.target.closest("a");
+    if (a && a.id === "waGo") { setTimeout(function () { setWa(null); }, 300); return; }
     var b = e.target.closest("button"); if (!b) return;
-    if (b.id === "refresh") return load();
-    if (b.id === "signout") return signOut("You're signed out.");
-    if (b.id === "state") { if (b.classList.contains("err")) save(); return; }
-    if (b.id === "copy") return copy();
-    if (b.id === "reset") return reset();
+    var id = b.id;
+    if (id === "refresh") return load(true);
+    if (id === "signout") return signOut("You're signed out.");
+    if (id === "state") { if (b.classList.contains("err")) save(); return; }
+    if (id === "copy") return copy();
+    if (id === "reset") return reset();
+    if (id === "place") return setStatus("placed");
+    if (id === "chg") return openStatus();
+    if (id === "neworder") return newOrder();
+    if (id === "waX") return setWa(null);
+    if (id === "addBtn") return openAdd();
+    if (id === "sheetX") return closeSheet();
+    if (b.dataset.st) return setStatus(b.dataset.st);
+    if (b.dataset.add) return addProduct(b.dataset.add);
+    if (b.dataset["new"]) return addNew($("addQ").value);
     if (b.dataset.cur) {
       CUR = b.dataset.cur; try { localStorage.setItem("pprlog.cur", CUR); } catch (err) {}
       return render();
     }
     var act = b.dataset.act; if (!act || !D) return;
-    var row = b.closest(".item"), it = D.items[+row.dataset.i];
+    if (act === "remove") return removeRow(b);
+    var it = itemOf(b); if (!it) return;
     it.qty = act === "plus" ? it.qty + 10 : Math.max(0, it.qty - 10);
-    row.querySelector('[data-f="qty"]').value = it.qty;
+    b.closest(".item").querySelector('[data-f="qty"]').value = it.qty;
     totals(); queueSave();
   });
   document.addEventListener("input", function (e) {
+    if (e.target.id === "addQ") return addSearch();
     var f = e.target.dataset && e.target.dataset.f; if (!f || !D) return;
     if (f === "ship") D.shipUsd = toUsd(num(e.target.value));
     else {
-      var it = D.items[+e.target.closest(".item").dataset.i];
+      var it = itemOf(e.target); if (!it) return;
       if (f === "qty") it.qty = Math.round(num(e.target.value));
       if (f === "price") it.price = toUsd(num(e.target.value));
     }
@@ -385,20 +611,26 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   });
   document.addEventListener("change", function (e) {
     var f = e.target.dataset && e.target.dataset.f; if (!f || !D) return;
-    if (f === "ship") e.target.value = fix(D.shipUsd);
-    else {
-      var it = D.items[+e.target.closest(".item").dataset.i];
-      e.target.value = f === "qty" ? it.qty : (it.price > 0 ? fix(it.price) : "");
+    if (f === "ship") { e.target.value = fix(D.shipUsd); return; }
+    var it = itemOf(e.target); if (!it) return;
+    e.target.value = f === "qty" ? it.qty : (it.price > 0 ? fix(it.price) : "");
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") return closeSheet();
+    if (e.key === "Enter" && e.target.id === "addQ") {
+      e.preventDefault();
+      var q = e.target.value.trim(), m = addMatches(q);
+      if (m.length === 1) addProduct(m[0].sku); else if (q && !m.length) addNew(q);
     }
   });
   // Phones pause timers in the background, so check the 8 hours again whenever the page comes back.
   document.addEventListener("visibilitychange", function () {
     if (document.hidden) return;
     if (AUTH && !signedIn()) return signOut(OUT8);
-    if (signedIn() && !dirty && !saving && Date.now() - lastLoad > 120000) load();
+    if (signedIn() && !dirty && !saving && Date.now() - lastLoad > 60000) load(false);
   });
-  window.__log = { orderText: orderText, payload: payload, sums: function () { return sums(); } };
-  if (signedIn()) { document.body.classList.remove("out"); armExpiry(); load(); }
+  window.__log = { waMsg: function (k) { return waMsg(k); }, payload: payload, sums: function () { return sums(); } };
+  if (signedIn()) { document.body.classList.remove("out"); armExpiry(); load(false); }
   else signOut(AUTH ? OUT8 : "");
 })();
 </script>
