@@ -102,16 +102,30 @@ input:focus{outline:none}
   opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
 .toast.on{opacity:1}
 :focus-visible{outline:2px solid var(--peri);outline-offset:2px}
+.tools{display:flex;gap:8px}
+body.out .tools,body.out .state{visibility:hidden}
+.si-text{color:var(--ink2);font-size:15px;margin:0 2px 12px}
+.si-note{background:var(--peri-tint);color:var(--peri);border-radius:12px;padding:10px 14px;font-size:15px;margin:0 0 14px}
+.si-row{display:flex;align-items:center;gap:12px;padding:0 16px;min-height:52px}
+.si-row .cap{font-size:17px;flex:none}
+.si-row input{flex:1;min-width:0;border:0;background:transparent;height:52px;font-size:17px;text-align:right}
+.si-err{color:var(--blush);font-size:15px;min-height:20px;margin:10px 4px 0}
+.cta:disabled{opacity:.6}
 @media (prefers-reduced-motion:reduce){.icon.spin svg,.skel{animation:none}.toast{transition:none}}
 </style>
 </head>
-<body>
+<body class="out">
 <main class="page">
   <div class="top">
     <button class="state" id="state" type="button" aria-live="polite"></button>
-    <button class="icon" id="refresh" type="button" aria-label="Refresh" title="Refresh">
-      <svg viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M20.5 3.5V9H15"/></svg>
-    </button>
+    <div class="tools">
+      <button class="icon" id="refresh" type="button" aria-label="Refresh" title="Refresh">
+        <svg viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M20.5 3.5V9H15"/></svg>
+      </button>
+      <button class="icon" id="signout" type="button" aria-label="Sign out" title="Sign out">
+        <svg viewBox="0 0 24 24"><rect x="4.5" y="11" width="15" height="10" rx="2.5"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></svg>
+      </button>
+    </div>
   </div>
   <h1>PPR Logistics</h1>
   <p class="sub" id="sub">Restock order</p>
@@ -123,16 +137,18 @@ input:focus{outline:none}
 if (window.top !== window.self) { try { window.top.location = window.self.location; } catch (e) { document.documentElement.innerHTML = ""; } }
 
 /* PPR Logistics. The restock order shared with the labs: what is under 15, how many to order,
-   the price per vial and shipping. Anyone with the link can change quantities, prices and
-   shipping, and it saves for everyone. Money is kept in USD and shown in USD or AUD. */
+   the price per vial and shipping. It needs the password to open, and signs itself out after
+   8 hours. The password is not in this page; the script checks it and hands back a pass that
+   runs out. Money is kept in USD and shown in USD or AUD. */
 (function () {
   var EP = "https://script.google.com/macros/s/AKfycby6GS7W7o7sFKceSUAxrYW6QHKvDyj8D9lljgDYtN3j_cqAEmg6gSj-kh0Oj5xrf_Dr7A/exec";
-  var KEY = "", D = null, CUR = "usd", busy = false, lastLoad = 0, saveT = null, saving = false, dirty = false, toastT = null;
+  var OUT8 = "You were signed out after 8 hours. Sign in again.";
+  var AUTH = null, D = null, CUR = "usd", busy = false, lastLoad = 0, saveT = null, saving = false, dirty = false, toastT = null, outT = null;
   try { CUR = localStorage.getItem("pprlog.cur") === "aud" ? "aud" : "usd"; } catch (e) {}
+  try { AUTH = JSON.parse(localStorage.getItem("pprlog.auth") || "null"); } catch (e) { AUTH = null; }
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
-  function readKey() { KEY = (location.hash.match(/[#&]k=([A-Za-z0-9]+)/) || [])[1] || ""; }
   function rate() { return (D && D.rate) || 1.4; }
   function show(usd) { return CUR === "aud" ? usd * rate() : usd; }
   function toUsd(v) { return CUR === "aud" ? v / rate() : v; }
@@ -149,7 +165,56 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
       : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></svg>';
     $("body").innerHTML = '<div class="msg ' + kind + '">' + icon + '<h2>' + esc(title) + '</h2><p>' + esc(text) + '</p></div>';
   }
+  function post(body, signal) {
+    return fetch(EP, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body), signal: signal })
+      .then(function (r) { return r.json(); });
+  }
 
+  /* ---------- signing in and out ---------- */
+  function signedIn() { return !!(AUTH && AUTH.pass && AUTH.exp > Date.now()); }
+  function armExpiry() {
+    clearTimeout(outT);
+    if (signedIn()) outT = setTimeout(function () { signOut(OUT8); }, Math.min(AUTH.exp - Date.now() + 500, 2147000000));
+  }
+  function signOut(msg) {
+    AUTH = null; D = null; lastLoad = 0; dirty = false; clearTimeout(saveT); clearTimeout(outT);
+    try { localStorage.removeItem("pprlog.auth"); } catch (e) {}
+    showSignIn(msg || "");
+  }
+  function showSignIn(msg) {
+    document.body.classList.add("out"); state("", "");
+    $("sub").textContent = "Restock order";
+    $("body").innerHTML =
+      (msg ? '<p class="si-note">' + esc(msg) + '</p>' : '') +
+      '<form id="signin" novalidate>' +
+        '<p class="si-text">Enter the password to see the order.</p>' +
+        '<div class="group"><label class="si-row"><span class="cap">Password</span>' +
+          '<input id="pw" type="password" autocomplete="current-password" autocapitalize="off" spellcheck="false"></label></div>' +
+        '<p class="si-err" id="siErr" role="alert"></p>' +
+        '<button class="cta" type="submit" id="siBtn">Sign in</button>' +
+      '</form>';
+    setTimeout(function () { var i = $("pw"); if (i) i.focus(); }, 50);
+  }
+  function signIn(pw) {
+    var btn = $("siBtn"), err = $("siErr");
+    if (!pw) { err.textContent = "Type the password first."; return; }
+    btn.disabled = true; btn.textContent = "Signing in"; err.textContent = "";
+    post({ labs: 1, action: "login", pw: pw }).then(function (j) {
+      if (j && j.ok && j.pass) {
+        AUTH = { pass: j.pass, exp: +j.exp };
+        try { localStorage.setItem("pprlog.auth", JSON.stringify(AUTH)); } catch (e) {}
+        document.body.classList.remove("out"); armExpiry(); load();
+        return;
+      }
+      var e = j && j.error;
+      err.textContent = e === "wrong_password" ? "That password isn't right." :
+        e === "locked" ? "Too many tries. Wait 10 minutes, then try again." :
+        e === "no_password" ? "Sign in isn't set up yet." : "Couldn't sign in. Try again.";
+    }).catch(function () { if ($("siErr")) $("siErr").textContent = "No connection. Check it and try again."; })
+      .then(function () { var b = $("siBtn"); if (b) { b.disabled = false; b.textContent = "Sign in"; } });
+  }
+
+  /* ---------- the order ---------- */
   function sums() {
     var sub = 0, vials = 0, prods = 0;
     D.items.forEach(function (it) { if (it.qty > 0) { sub += it.qty * it.price; vials += it.qty; prods++; } });
@@ -214,19 +279,16 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
       price[it.sku] = Math.abs(it.price - it.base) < 0.00005 ? null : Math.round(it.price * 10000) / 10000;
     });
     var ship = Math.abs(D.shipUsd - D.shipBase) < 0.00005 ? null : Math.round(D.shipUsd * 10000) / 10000;
-    return { labs: 1, lk: KEY, qty: qty, price: price, shipUsd: ship };
-  }
-  function post(body) {
-    return fetch(EP, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) })
-      .then(function (r) { return r.json(); });
+    return { labs: 1, action: "save", pass: AUTH ? AUTH.pass : "", qty: qty, price: price, shipUsd: ship };
   }
   function queueSave() { dirty = true; state("saving", "Saving"); clearTimeout(saveT); saveT = setTimeout(save, 700); }
   function save() {
+    if (!signedIn()) { signOut(OUT8); return; }
     if (saving) { saveT = setTimeout(save, 400); return; }
     saving = true; dirty = false;
     post(payload()).then(function (j) {
       if (j && j.ok) { if (!dirty) state("saved", "Saved"); }
-      else if (j && j.error === "unauthorized") state("err", "Link stopped working");
+      else if (j && j.error === "signed_out") signOut("You've been signed out. Sign in again, then redo the last change.");
       else throw new Error("not saved");
     }).catch(function () { dirty = true; state("err", "Not saved, tap to retry"); })
       .then(function () { saving = false; });
@@ -234,26 +296,23 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
 
   function load() {
     if (busy) return;
-    readKey();
-    if (!KEY) { state("", ""); note("bad", "This link isn't complete", "Ask for the full link and open that instead."); return; }
+    if (!signedIn()) { signOut(AUTH ? OUT8 : ""); return; }
     if (dirty || saving) { save(); return; }
     busy = true; $("refresh").classList.add("spin");
     if (!D) $("body").innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
     var ctrl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 25000);
-    fetch(EP + "?labs=1&lk=" + encodeURIComponent(KEY), ctrl ? { signal: ctrl.signal } : {})
-      .then(function (r) { return r.json(); })
+    post({ labs: 1, action: "list", pass: AUTH.pass }, ctrl ? ctrl.signal : undefined)
       .then(function (d) {
         if (d && d.ok) {
           D = { items: d.items || [], low: d.low, rate: d.rate || 1.4, shipUsd: +d.shipUsd || 0, shipBase: +d.shipBase || 0 };
           lastLoad = Date.now(); render();
           state("", "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
-        } else if (d && d.error === "unauthorized") {
-          D = null; lastLoad = 0; state("", "");
-          note("bad", "This link has stopped working", "Ask for a new one.");
-        } else throw new Error("bad answer");
+        } else if (d && d.error === "signed_out") signOut("You've been signed out. Sign in again.");
+        else throw new Error("bad answer");
       })
       .catch(function () {
+        if (!AUTH) return;
         if (D) toast("Couldn't refresh, showing the last order");
         else { state("", ""); note("bad", "Couldn't load the order", "Check your connection and tap refresh."); }
       })
@@ -285,16 +344,22 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   function reset() {
     if (!confirm("Put quantities, prices and shipping back to the suggestions?")) return;
     clearTimeout(saveT); dirty = false; state("saving", "Saving");
-    post({ labs: 1, lk: KEY, reset: true }).then(function (j) {
+    post({ labs: 1, action: "save", reset: true, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
+      if (j && j.error === "signed_out") { signOut("You've been signed out. Sign in again."); return; }
       if (!j || !j.ok) throw new Error("not reset");
       toast("Reset to suggested"); D = null; load();
     }).catch(function () { state("err", "Not saved, tap to retry"); });
   }
 
   // one set of listeners for the whole page
+  document.addEventListener("submit", function (e) {
+    if (e.target.id !== "signin") return;
+    e.preventDefault(); signIn($("pw").value);
+  });
   document.addEventListener("click", function (e) {
     var b = e.target.closest("button"); if (!b) return;
     if (b.id === "refresh") return load();
+    if (b.id === "signout") return signOut("You're signed out.");
     if (b.id === "state") { if (b.classList.contains("err")) save(); return; }
     if (b.id === "copy") return copy();
     if (b.id === "reset") return reset();
@@ -326,12 +391,15 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
       e.target.value = f === "qty" ? it.qty : (it.price > 0 ? fix(it.price) : "");
     }
   });
-  window.addEventListener("hashchange", function () { D = null; load(); });
+  // Phones pause timers in the background, so check the 8 hours again whenever the page comes back.
   document.addEventListener("visibilitychange", function () {
-    if (!document.hidden && !dirty && !saving && Date.now() - lastLoad > 120000) load();
+    if (document.hidden) return;
+    if (AUTH && !signedIn()) return signOut(OUT8);
+    if (signedIn() && !dirty && !saving && Date.now() - lastLoad > 120000) load();
   });
   window.__log = { orderText: orderText, payload: payload, sums: function () { return sums(); } };
-  load();
+  if (signedIn()) { document.body.classList.remove("out"); armExpiry(); load(); }
+  else signOut(AUTH ? OUT8 : "");
 })();
 </script>
 </body>
