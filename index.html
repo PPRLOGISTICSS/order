@@ -273,8 +273,8 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   /* ---------- the order ---------- */
   function build(d) {
     D = {
-      items: (d.items || []).map(function (i) { return { sku: i.sku, name: i.name, left: i.left, need: +i.need || 0, qty: +i.qty || 0, price: +i.price || 0, base: +i.base || 0 }; }),
-      extra: (d.extra || []).map(function (x) { return { id: x.id, sku: x.sku || "", name: x.name, left: x.left == null ? null : +x.left, qty: +x.qty || 0, price: +x.price || 0, base: +x.base || 0 }; }),
+      items: (d.items || []).map(function (i) { return { sku: i.sku, name: i.name, left: i.left, need: +i.need || 0, qty: +i.qty || 0, price: +i.price || 0, base: +i.base || 0, est: !!i.est }; }),
+      extra: (d.extra || []).map(function (x) { return { id: x.id, sku: x.sku || "", name: x.name, left: x.left == null ? null : +x.left, qty: +x.qty || 0, price: +x.price || 0, base: +x.base || 0, est: !!x.est }; }),
       removed: (d.removed || []).slice(), products: d.products || [], status: d.status || "draft", history: d.history || [],
       wa: d.wa || "", low: d.low || 15, rate: d.rate || 1.4, shipUsd: +d.shipUsd || 0, shipBase: +d.shipBase || 0
     };
@@ -293,6 +293,9 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     all().forEach(function (it) { if (it.qty > 0) { sub += it.qty * it.price; vials += it.qty; prods++; } });
     return { sub: sub, ship: D.shipUsd, total: sub + D.shipUsd, vials: vials, prods: prods };
   }
+  // A price that came from a backup list, and nobody has changed, is shown as an estimate.
+  function isEst(it) { return !!it.est && it.price > 0 && Math.abs(it.price - it.base) < 0.00005; }
+  function capText(it) { return isEst(it) ? "Price per vial, estimate" : "Price per vial"; }
   function itemOf(el) {
     var row = el.closest(".item"); if (!row) return null;
     return (row.dataset.k === "x" ? D.extra : D.items)[+row.dataset.i] || null;
@@ -310,7 +313,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
           '<button type="button" data-act="minus" aria-label="10 fewer">&minus;</button>' +
           '<input data-f="qty" inputmode="numeric" value="' + it.qty + '" aria-label="Quantity of ' + esc(it.name) + '">' +
           '<button type="button" data-act="plus" aria-label="10 more">+</button></span></label>' +
-        '<label class="fld"><span class="cap">Price per vial</span><span class="money"><b>$</b>' +
+        '<label class="fld"><span class="cap" data-pcap>' + capText(it) + '</span><span class="money"><b>$</b>' +
           '<input data-f="price" inputmode="decimal" value="' + (it.price > 0 ? fix(it.price) : "") + '" placeholder="Add" aria-label="Price per vial of ' + esc(it.name) + '"></span></label>' +
         '<span class="line" data-line>' + money(show(it.qty * it.price)) + '</span>' +
       '</div></div>';
@@ -368,7 +371,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     var out = [];
     all().forEach(function (it) {
       if (it.qty > 0) out.push(it.price > 0
-        ? it.name + " x " + it.qty + " at " + money(show(it.price)) + " = " + money(show(it.qty * it.price))
+        ? it.name + " x " + it.qty + " at " + money(show(it.price)) + " = " + money(show(it.qty * it.price)) + (isEst(it) ? ", price estimated" : "")
         : it.name + " x " + it.qty + ", price to confirm");
     });
     return out;
@@ -501,9 +504,9 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     var k = String(p.sku).toLowerCase(), ri = D.removed.map(function (x) { return String(x).toLowerCase(); }).indexOf(k);
     if (ri >= 0 && p.left < (D.low || 15)) {
       D.removed.splice(ri, 1);
-      D.items.push({ sku: p.sku, name: p.name, left: p.left, need: p.need, qty: p.need, price: p.base, base: p.base });
+      D.items.push({ sku: p.sku, name: p.name, left: p.left, need: p.need, qty: p.need, price: p.base, base: p.base, est: !!p.est });
       D.items.sort(function (a, b) { return a.left - b.left || a.name.localeCompare(b.name); });
-    } else D.extra.push({ id: newId(), sku: p.sku, name: p.name, left: p.left, qty: 10, price: p.base, base: p.base });
+    } else D.extra.push({ id: newId(), sku: p.sku, name: p.name, left: p.left, qty: 10, price: p.base, base: p.base, est: !!p.est });
     closeSheet(); render(); queueSave(); toast(p.name + " added");
   }
   function addNew(name) {
@@ -614,6 +617,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     if (f === "ship") { e.target.value = fix(D.shipUsd); return; }
     var it = itemOf(e.target); if (!it) return;
     e.target.value = f === "qty" ? it.qty : (it.price > 0 ? fix(it.price) : "");
+    var cap = e.target.closest(".item").querySelector("[data-pcap]"); if (cap) cap.textContent = capText(it);
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") return closeSheet();
