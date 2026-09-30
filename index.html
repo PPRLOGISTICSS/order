@@ -144,6 +144,7 @@ input:focus{outline:none}
 .opt.cur .ot{font-weight:700}
 .opt.new .ot{color:var(--peri)}
 .srch{margin:10px 0 12px}
+.sheet h2.ask{font-size:20px;line-height:1.3;margin:6px 44px 4px 0}
 .srch input{width:100%;height:44px;border:0;border-radius:12px;background:#e6e8f1;padding:0 14px;font-size:17px}
 
 body.out .tools,body.out .state{visibility:hidden}
@@ -151,6 +152,7 @@ body.out .tools,body.out .state{visibility:hidden}
 .si-note{background:var(--peri-tint);color:var(--peri);border-radius:12px;padding:10px 14px;font-size:15px;margin:0 0 14px}
 .si-row{display:flex;align-items:center;gap:12px;padding:0 16px;min-height:52px}
 .si-row .cap{font-size:17px;flex:none}
+.si-row + .si-row{border-top:.5px solid var(--line)}
 .si-row input{flex:1;min-width:0;border:0;background:transparent;height:52px;font-size:17px;text-align:right}
 .si-err{color:var(--blush);font-size:15px;min-height:20px;margin:10px 4px 0}
 .cta:disabled{opacity:.6}
@@ -192,9 +194,20 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     ["payreq", "Payment requested"], ["paid", "Payment made"], ["ordered", "Ordered"],
     ["making", "Being made"], ["sent", "Sent"], ["delivered", "Delivered"]];
   var AUTH = null, D = null, CUR = "usd", WA = null, busy = false, lastLoad = 0, saveT = null, saving = false,
-    dirty = false, toastT = null, outT = null;
+    dirty = false, toastT = null, outT = null, ASK = null;
   try { CUR = localStorage.getItem("pprlog.cur") === "aud" ? "aud" : "usd"; } catch (e) {}
   try { AUTH = JSON.parse(localStorage.getItem("pprlog.auth") || "null"); } catch (e) { AUTH = null; }
+  // Who is using it: the kind of device, and an ID that stays with this browser.
+  var DID = "", DEV = devName(), VISITED = false;
+  try { localStorage.removeItem("pprlog.who"); } catch (e) {}
+  try { DID = localStorage.getItem("pprlog.did") || ""; if (!/^[A-Z0-9]{6}$/.test(DID)) { DID = rand6(); localStorage.setItem("pprlog.did", DID); } } catch (e) { DID = rand6(); }
+  function rand6() { var c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", s = ""; for (var i = 0; i < 6; i++) s += c.charAt(Math.floor(Math.random() * c.length)); return s; }
+  function devName() {
+    var u = navigator.userAgent || "";
+    var os = /iPhone/.test(u) ? "iPhone" : /iPad/.test(u) ? "iPad" : /Android/.test(u) ? "Android" : /Mac OS X/.test(u) ? "Mac" : /Windows/.test(u) ? "Windows" : /Linux/.test(u) ? "Linux" : "Other";
+    var br = /Edg\//.test(u) ? "Edge" : /CriOS|Chrome\//.test(u) ? "Chrome" : /FxiOS|Firefox\//.test(u) ? "Firefox" : /Safari\//.test(u) ? "Safari" : "Browser";
+    return os + ", " + br;
+  }
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -216,6 +229,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     $("body").innerHTML = '<div class="msg ' + kind + '">' + icon + '<h2>' + esc(title) + '</h2><p>' + esc(text) + '</p></div>';
   }
   function post(body, signal) {
+    body.dev = DEV; body.did = DID;
     return fetch(EP, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body), signal: signal })
       .then(function (r) { return r.json(); });
   }
@@ -232,7 +246,8 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     clearTimeout(outT);
     if (signedIn()) outT = setTimeout(function () { signOut(OUT8); }, Math.min(AUTH.exp - Date.now() + 500, 2147000000));
   }
-  function signOut(msg) {
+  function signOut(msg, manual) {
+    if (manual && AUTH) post({ labs: 1, action: "bye", pass: AUTH.pass }).catch(function () {});
     AUTH = null; D = null; WA = null; lastLoad = 0; dirty = false; clearTimeout(saveT); clearTimeout(outT); closeSheet();
     try { localStorage.removeItem("pprlog.auth"); localStorage.removeItem("pprlog.last"); } catch (e) {}
     showSignIn(msg || "");
@@ -250,6 +265,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
         '<button class="cta" type="submit" id="siBtn">Sign in</button>' +
       '</form>';
     setTimeout(function () { var i = $("pw"); if (i) i.focus(); }, 50);
+    if (!VISITED) { VISITED = true; post({ labs: 1, action: "visit" }).catch(function () {}); }
   }
   function signIn(pw) {
     var btn = $("siBtn"), err = $("siErr");
@@ -410,7 +426,9 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     });
     var ship = Math.abs(D.shipUsd - D.shipBase) < 0.00005 ? null : Math.round(D.shipUsd * 10000) / 10000;
     var extra = D.extra.map(function (x) { return { id: x.id, sku: x.sku, name: x.name, qty: x.qty, price: Math.round(x.price * 10000) / 10000 }; });
-    return { labs: 1, action: "save", pass: AUTH ? AUTH.pass : "", qty: qty, price: price, shipUsd: ship, extra: extra, removed: D.removed };
+    var t = sums();
+    return { labs: 1, action: "save", pass: AUTH ? AUTH.pass : "", qty: qty, price: price, shipUsd: ship, extra: extra, removed: D.removed,
+      sum: t.prods + (t.prods === 1 ? " product, " : " products, ") + t.vials + " vials, " + money(t.total) + " USD" };
   }
   function queueSave() { dirty = true; state("saving", "Saving"); clearTimeout(saveT); saveT = setTimeout(save, 700); }
   function save() {
@@ -429,8 +447,9 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   }
   function setStatus(st) {
     if (!D || st === D.status) { closeSheet(); return; }
-    var label = STAGES[stageIx(st)][1];
-    if (!confirm(st === "placed" && D.status === "draft" ? "Place this order?" : "Change the status to " + label + "?")) return;
+    var label = STAGES[stageIx(st)][1], placing = st === "placed" && D.status === "draft";
+    ask(placing ? "Place this order?" : "Change the status to " + label + "?", placing ? "Place order" : "Change status").then(function (yes) {
+    if (!yes) return;
     state("saving", "Saving");
     post({ labs: 1, action: "status", status: st, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
       if (j && j.ok) {
@@ -440,23 +459,28 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
       } else if (j && j.error === "signed_out") signOut("You've been signed out. Sign in again.");
       else throw new Error("no");
     }).catch(function () { state("err", "Not saved, tap to retry"); toast("Couldn't change the status, try again"); });
+    });
   }
   function newOrder() {
-    if (!confirm("Start a new order? The items and status on this one are cleared.")) return;
+    ask("Start a new order? The items and status on this one are cleared.", "Start new order").then(function (yes) {
+    if (!yes) return;
     post({ labs: 1, action: "neworder", pass: AUTH ? AUTH.pass : "" }).then(function (j) {
       if (j && j.error === "signed_out") return signOut("You've been signed out. Sign in again.");
       if (!j || !j.ok) throw new Error("no");
       WA = null; D = null; toast("New order started"); load(true);
     }).catch(function () { toast("Couldn't start a new order, try again"); });
+    });
   }
   function reset() {
-    if (!confirm("Put the items, quantities, prices and shipping back to the suggestions?")) return;
+    ask("Put the items, quantities, prices and shipping back to the suggestions?", "Reset").then(function (yes) {
+    if (!yes) return;
     clearTimeout(saveT); dirty = false; state("saving", "Saving");
     post({ labs: 1, action: "save", reset: true, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
       if (j && j.error === "signed_out") { signOut("You've been signed out. Sign in again."); return; }
       if (!j || !j.ok) throw new Error("not reset");
       toast("Reset to suggested"); D = null; load(true);
     }).catch(function () { state("err", "Not saved, tap to retry"); });
+    });
   }
 
   /* ---------- adding and removing ---------- */
@@ -464,7 +488,20 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     $("sheet").innerHTML = '<button type="button" class="sheet-x" id="sheetX" aria-label="Close">&times;</button>' + html;
     $("mask").classList.add("on");
   }
-  function closeSheet() { var m = $("mask"); if (m) m.classList.remove("on"); var s = $("sheet"); if (s) s.innerHTML = ""; }
+  function closeSheet() {
+    var m = $("mask"); if (m) m.classList.remove("on"); var s = $("sheet"); if (s) s.innerHTML = "";
+    if (ASK) { var r = ASK; ASK = null; r(false); }
+  }
+  // Asks inside the page instead of a browser pop up, which browsers let people block.
+  function ask(msg, yes) {
+    return new Promise(function (res) {
+      if (ASK) { var old = ASK; ASK = null; old(false); }
+      openSheet('<h2 class="ask">' + esc(msg) + '</h2><button class="cta" id="askYes" type="button">' + esc(yes) + '</button>' +
+        '<button class="ghost" id="askNo" type="button">Cancel</button>');
+      ASK = res;
+    });
+  }
+  function answer(v) { var r = ASK; ASK = null; closeSheet(); if (r) r(v); }
   function openStatus() {
     var ix = stageIx(D.status);
     openSheet('<h2>Update status</h2><p class="sh-sub">Tap where the order is up to.</p><div class="opts">' +
@@ -577,7 +614,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     var b = e.target.closest("button"); if (!b) return;
     var id = b.id;
     if (id === "refresh") return load(true);
-    if (id === "signout") return signOut("You're signed out.");
+    if (id === "signout") return signOut("You're signed out.", true);
     if (id === "state") { if (b.classList.contains("err")) save(); return; }
     if (id === "copy") return copy();
     if (id === "reset") return reset();
@@ -587,6 +624,8 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     if (id === "waX") return setWa(null);
     if (id === "addBtn") return openAdd();
     if (id === "sheetX") return closeSheet();
+    if (id === "askYes") return answer(true);
+    if (id === "askNo") return answer(false);
     if (b.dataset.st) return setStatus(b.dataset.st);
     if (b.dataset.add) return addProduct(b.dataset.add);
     if (b.dataset["new"]) return addNew($("addQ").value);
