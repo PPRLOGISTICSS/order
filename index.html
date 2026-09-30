@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#f4f5fa">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src https://script.google.com https://*.googleusercontent.com; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<title>PPR Logistics</title>
+<style>
+:root{
+  --canvas:#f4f5fa; --card:#fff; --ink:#1d1d1f; --ink2:#6e6e73; --ink3:#a1a1a8; --line:rgba(60,60,67,.11);
+  --peri:#5d6cf0; --peri-tint:#eceefe; --field:#f1f2f8;
+  --mint:#2e9e74; --mint-tint:#e4f5ee;
+  --apricot:#c7772a; --apricot-tint:#fdf0e1;
+  --blush:#c9504d; --blush-tint:#fce9e8;
+  --lav:#efebfd; --lav-ink:#4b3fb8;
+  --r:16px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--canvas);color:var(--ink);
+  font:17px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
+button,input{font:inherit;color:inherit}
+.page{max-width:600px;margin:0 auto;
+  padding:calc(12px + env(safe-area-inset-top,0px)) 16px calc(32px + env(safe-area-inset-bottom,0px))}
+
+/* header */
+.top{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:38px}
+.state{font-size:13px;font-weight:600;border-radius:999px;padding:5px 11px;border:0;background:transparent;color:var(--ink3)}
+.state.saved{background:var(--mint-tint);color:var(--mint)}
+.state.saving{background:var(--peri-tint);color:var(--peri)}
+.state.err{background:var(--blush-tint);color:var(--blush);cursor:pointer}
+.icon{width:38px;height:38px;border-radius:50%;border:0;background:var(--card);color:var(--peri);
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;box-shadow:0 1px 2px rgba(29,29,31,.06)}
+.icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.icon.spin svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+h1{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  font-size:34px;line-height:1.08;font-weight:700;letter-spacing:.3px;margin:10px 0 4px}
+.sub{color:var(--ink2);font-size:15px;margin:0 0 16px}
+
+/* currency switch */
+.seg{display:flex;background:#e6e8f1;border-radius:11px;padding:2px;margin:0 0 6px}
+.seg button{flex:1;border:0;background:transparent;border-radius:9px;min-height:36px;font-size:15px;font-weight:600;color:var(--ink2);cursor:pointer}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(29,29,31,.12)}
+.rate{font-size:13px;color:var(--ink3);margin:0 4px 18px}
+
+/* order list, Apple inset grouped style */
+.group{background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 2px rgba(29,29,31,.04)}
+.item{padding:14px 16px;position:relative}
+.item + .item::before,.ship::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.nm{font-weight:600;font-size:17px}
+.pill{flex:none;font-size:13px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--field);color:var(--ink2)}
+.pill.low{background:var(--apricot-tint);color:var(--apricot)}
+.pill.out{background:var(--blush-tint);color:var(--blush)}
+.ctrls{display:flex;align-items:flex-end;gap:10px;margin-top:10px;flex-wrap:wrap}
+.fld{display:flex;flex-direction:column;gap:4px}
+.fld .cap{font-size:12px;color:var(--ink3);padding-left:2px}
+.step,.money{color:var(--ink)}
+.step{display:flex;align-items:center;background:var(--field);border-radius:11px;height:40px}
+.step button{width:38px;height:40px;border:0;background:transparent;color:var(--peri);font-size:22px;line-height:1;cursor:pointer;border-radius:11px}
+.step button:active{background:var(--peri-tint)}
+.step input{width:48px;height:40px;border:0;background:transparent;text-align:center;font-weight:600;font-variant-numeric:tabular-nums;font-size:17px}
+.money{display:flex;align-items:center;background:var(--field);border-radius:11px;height:40px;padding:0 10px}
+.money b{color:var(--ink3);font-weight:500;margin-right:2px}
+.money input{width:74px;height:40px;border:0;background:transparent;font-variant-numeric:tabular-nums;font-size:17px}
+.money input::placeholder{color:var(--peri);opacity:.8}
+.line{margin-left:auto;text-align:right;font-weight:600;font-variant-numeric:tabular-nums;font-size:17px;padding-bottom:9px}
+input:focus{outline:none}
+.step:focus-within,.money:focus-within{box-shadow:0 0 0 2px var(--peri)}
+.ship{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;position:relative}
+.ship .nm{font-weight:500}
+.ship small{display:block;font-size:13px;color:var(--ink3)}
+
+/* total, the one standout piece */
+.total{background:var(--lav);border-radius:var(--r);padding:18px 18px 16px;margin-top:16px}
+.total .lbl{font-size:15px;color:var(--lav-ink);font-weight:600}
+.total .big{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
+  font-size:40px;font-weight:700;letter-spacing:.2px;font-variant-numeric:tabular-nums;line-height:1.1;margin:2px 0 4px;color:var(--ink)}
+.total .alt{font-size:15px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.total .rows{margin-top:12px;border-top:.5px solid rgba(75,63,184,.15);padding-top:10px}
+.total .row{display:flex;justify-content:space-between;font-size:15px;color:var(--ink2);padding:2px 0;font-variant-numeric:tabular-nums}
+
+.cta{display:block;width:100%;height:52px;margin-top:16px;border:0;border-radius:14px;background:var(--peri);color:#fff;font-size:17px;font-weight:600;cursor:pointer}
+.cta:active{opacity:.88}
+.ghost{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--peri);font-size:15px;font-weight:500;cursor:pointer;padding:8px 12px}
+
+.msg{background:var(--card);border-radius:var(--r);padding:30px 22px;text-align:center}
+.msg svg{width:44px;height:44px;margin-bottom:8px;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.msg h2{font-size:19px;margin:0 0 6px}
+.msg p{margin:0;color:var(--ink2);font-size:15px}
+.msg.ok svg{stroke:var(--mint)}
+.msg.bad svg{stroke:var(--apricot)}
+.skel{height:92px;border-radius:var(--r);background:var(--card);margin-bottom:10px;animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.8}50%{opacity:.45}}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
+  background:rgba(29,29,31,.9);color:#fff;padding:10px 16px;border-radius:999px;font-size:15px;
+  opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+.toast.on{opacity:1}
+:focus-visible{outline:2px solid var(--peri);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.icon.spin svg,.skel{animation:none}.toast{transition:none}}
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="top">
+    <button class="state" id="state" type="button" aria-live="polite"></button>
+    <button class="icon" id="refresh" type="button" aria-label="Refresh" title="Refresh">
+      <svg viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M20.5 3.5V9H15"/></svg>
+    </button>
+  </div>
+  <h1>PPR Logistics</h1>
+  <p class="sub" id="sub">Restock order</p>
+  <div id="body"></div>
+</main>
+<div class="toast" id="toast" role="status"></div>
+<script>
+// Never run inside another site's page.
+if (window.top !== window.self) { try { window.top.location = window.self.location; } catch (e) { document.documentElement.innerHTML = ""; } }
+
+/* PPR Logistics. The restock order shared with the labs: what is under 15, how many to order,
+   the price per vial and shipping. Anyone with the link can change quantities, prices and
+   shipping, and it saves for everyone. Money is kept in USD and shown in USD or AUD. */
+(function () {
+  var EP = "https://script.google.com/macros/s/AKfycby6GS7W7o7sFKceSUAxrYW6QHKvDyj8D9lljgDYtN3j_cqAEmg6gSj-kh0Oj5xrf_Dr7A/exec";
+  var KEY = "", D = null, CUR = "usd", busy = false, lastLoad = 0, saveT = null, saving = false, dirty = false, toastT = null;
+  try { CUR = localStorage.getItem("pprlog.cur") === "aud" ? "aud" : "usd"; } catch (e) {}
+
+  function $(id) { return document.getElementById(id); }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+  function readKey() { KEY = (location.hash.match(/[#&]k=([A-Za-z0-9]+)/) || [])[1] || ""; }
+  function rate() { return (D && D.rate) || 1.4; }
+  function show(usd) { return CUR === "aud" ? usd * rate() : usd; }
+  function toUsd(v) { return CUR === "aud" ? v / rate() : v; }
+  function money(v, cur) {
+    var n = (Math.round(v * 100) / 100).toLocaleString("en-AU", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return "$" + n + (cur ? " " + cur.toUpperCase() : "");
+  }
+  function num(s) { var v = parseFloat(String(s == null ? "" : s).replace(/[^0-9.]/g, "")); return isFinite(v) ? v : 0; }
+  function toast(t) { var el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(function () { el.classList.remove("on"); }, 2200); }
+  function state(kind, text) { var el = $("state"); el.className = "state" + (kind ? " " + kind : ""); el.textContent = text || ""; }
+  function note(kind, title, text) {
+    var icon = kind === "ok"
+      ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>'
+      : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></svg>';
+    $("body").innerHTML = '<div class="msg ' + kind + '">' + icon + '<h2>' + esc(title) + '</h2><p>' + esc(text) + '</p></div>';
+  }
+
+  function sums() {
+    var sub = 0, vials = 0, prods = 0;
+    D.items.forEach(function (it) { if (it.qty > 0) { sub += it.qty * it.price; vials += it.qty; prods++; } });
+    return { sub: sub, ship: D.shipUsd, total: sub + D.shipUsd, vials: vials, prods: prods };
+  }
+  function fix(v) { return (Math.round(show(v) * 100) / 100).toFixed(2); }
+
+  function render() {
+    var low = D.low || 15;
+    $("sub").textContent = "Restock order for anything under " + low + " in stock";
+    if (!D.items.length) { note("ok", "All stocked up", "Nothing is under " + low + " right now."); return; }
+    var rows = D.items.map(function (it, i) {
+      var pc = it.left <= 0 ? " out" : it.left < 5 ? " low" : "", pt = it.left <= 0 ? "Out of stock" : it.left + " left";
+      return '<div class="item" data-i="' + i + '">' +
+        '<div class="head"><span class="nm">' + esc(it.name) + '</span><span class="pill' + pc + '">' + pt + '</span></div>' +
+        '<div class="ctrls">' +
+          '<label class="fld"><span class="cap">Qty</span><span class="step">' +
+            '<button type="button" data-act="minus" aria-label="10 fewer">&minus;</button>' +
+            '<input data-f="qty" inputmode="numeric" value="' + it.qty + '" aria-label="Quantity of ' + esc(it.name) + '">' +
+            '<button type="button" data-act="plus" aria-label="10 more">+</button></span></label>' +
+          '<label class="fld"><span class="cap">Price per vial</span><span class="money"><b>$</b>' +
+            '<input data-f="price" inputmode="decimal" value="' + (it.price > 0 ? fix(it.price) : "") + '" placeholder="Add" aria-label="Price per vial of ' + esc(it.name) + '"></span></label>' +
+          '<span class="line" data-line>' + money(show(it.qty * it.price)) + '</span>' +
+        '</div></div>';
+    }).join("");
+    $("body").innerHTML =
+      '<div class="seg" role="group" aria-label="Currency">' +
+        '<button type="button" data-cur="usd" class="' + (CUR === "usd" ? "on" : "") + '">USD</button>' +
+        '<button type="button" data-cur="aud" class="' + (CUR === "aud" ? "on" : "") + '">AUD</button></div>' +
+      '<p class="rate">1 USD is ' + rate().toFixed(2) + ' AUD</p>' +
+      '<div class="group">' + rows +
+        '<div class="ship"><div><span class="nm">Shipping</span><small>For the whole order</small></div>' +
+          '<span class="money"><b>$</b><input data-f="ship" inputmode="decimal" value="' + fix(D.shipUsd) + '" aria-label="Shipping"></span></div>' +
+      '</div>' +
+      '<div class="total" aria-live="polite"><div class="lbl">Total</div><div class="big" id="tBig"></div><div class="alt" id="tAlt"></div>' +
+        '<div class="rows"><div class="row"><span>Products</span><span id="tSub"></span></div>' +
+        '<div class="row"><span>Shipping</span><span id="tShip"></span></div>' +
+        '<div class="row"><span id="tCount"></span><span></span></div></div></div>' +
+      '<button class="cta" id="copy" type="button">Copy order</button>' +
+      '<button class="ghost" id="reset" type="button">Reset to suggested</button>';
+    totals();
+  }
+  function totals() {
+    var t = sums(), other = CUR === "aud" ? "usd" : "aud";
+    $("tBig").textContent = money(show(t.total), CUR);
+    $("tAlt").textContent = "About " + money(other === "aud" ? t.total * rate() : t.total, other);
+    $("tSub").textContent = money(show(t.sub));
+    $("tShip").textContent = money(show(t.ship));
+    $("tCount").textContent = t.prods + (t.prods === 1 ? " product, " : " products, ") + t.vials + " vials";
+    D.items.forEach(function (it, i) {
+      var el = document.querySelector('.item[data-i="' + i + '"] [data-line]');
+      if (el) el.textContent = money(show(it.qty * it.price));
+    });
+  }
+
+  // Only what differs from the suggestion or the price list is saved, so the rest keeps
+  // following the stock and the list. null puts one back to the suggestion.
+  function payload() {
+    var qty = {}, price = {};
+    D.items.forEach(function (it) {
+      qty[it.sku] = it.qty === it.need ? null : it.qty;
+      price[it.sku] = Math.abs(it.price - it.base) < 0.00005 ? null : Math.round(it.price * 10000) / 10000;
+    });
+    var ship = Math.abs(D.shipUsd - D.shipBase) < 0.00005 ? null : Math.round(D.shipUsd * 10000) / 10000;
+    return { labs: 1, lk: KEY, qty: qty, price: price, shipUsd: ship };
+  }
+  function post(body) {
+    return fetch(EP, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); });
+  }
+  function queueSave() { dirty = true; state("saving", "Saving"); clearTimeout(saveT); saveT = setTimeout(save, 700); }
+  function save() {
+    if (saving) { saveT = setTimeout(save, 400); return; }
+    saving = true; dirty = false;
+    post(payload()).then(function (j) {
+      if (j && j.ok) { if (!dirty) state("saved", "Saved"); }
+      else if (j && j.error === "unauthorized") state("err", "Link stopped working");
+      else throw new Error("not saved");
+    }).catch(function () { dirty = true; state("err", "Not saved, tap to retry"); })
+      .then(function () { saving = false; });
+  }
+
+  function load() {
+    if (busy) return;
+    readKey();
+    if (!KEY) { state("", ""); note("bad", "This link isn't complete", "Ask for the full link and open that instead."); return; }
+    if (dirty || saving) { save(); return; }
+    busy = true; $("refresh").classList.add("spin");
+    if (!D) $("body").innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 25000);
+    fetch(EP + "?labs=1&lk=" + encodeURIComponent(KEY), ctrl ? { signal: ctrl.signal } : {})
+      .then(function (r) { return r.json(); })
+      .then(function (d) {
+        if (d && d.ok) {
+          D = { items: d.items || [], low: d.low, rate: d.rate || 1.4, shipUsd: +d.shipUsd || 0, shipBase: +d.shipBase || 0 };
+          lastLoad = Date.now(); render();
+          state("", "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
+        } else if (d && d.error === "unauthorized") {
+          D = null; lastLoad = 0; state("", "");
+          note("bad", "This link has stopped working", "Ask for a new one.");
+        } else throw new Error("bad answer");
+      })
+      .catch(function () {
+        if (D) toast("Couldn't refresh, showing the last order");
+        else { state("", ""); note("bad", "Couldn't load the order", "Check your connection and tap refresh."); }
+      })
+      .then(function () { clearTimeout(timer); busy = false; $("refresh").classList.remove("spin"); });
+  }
+
+  function orderText() {
+    var t = sums(), lines = ["PPR restock order"];
+    D.items.forEach(function (it) {
+      if (it.qty > 0) lines.push(it.price > 0
+        ? it.name + " x " + it.qty + " at " + money(show(it.price)) + " = " + money(show(it.qty * it.price))
+        : it.name + " x " + it.qty + ", price to confirm");
+    });
+    lines.push("Shipping " + money(show(t.ship)));
+    lines.push("Total " + money(show(t.total), CUR));
+    return lines.join("\n");
+  }
+  function copy() {
+    var t = orderText();
+    function fallback() {
+      var ta = document.createElement("textarea"); ta.value = t; ta.setAttribute("readonly", "");
+      ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
+      var ok = false; try { ok = document.execCommand("copy"); } catch (e) {}
+      document.body.removeChild(ta); toast(ok ? "Order copied" : "Couldn't copy, select it instead");
+    }
+    if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(t).then(function () { toast("Order copied"); }, fallback);
+    else fallback();
+  }
+  function reset() {
+    if (!confirm("Put quantities, prices and shipping back to the suggestions?")) return;
+    clearTimeout(saveT); dirty = false; state("saving", "Saving");
+    post({ labs: 1, lk: KEY, reset: true }).then(function (j) {
+      if (!j || !j.ok) throw new Error("not reset");
+      toast("Reset to suggested"); D = null; load();
+    }).catch(function () { state("err", "Not saved, tap to retry"); });
+  }
+
+  // one set of listeners for the whole page
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.id === "refresh") return load();
+    if (b.id === "state") { if (b.classList.contains("err")) save(); return; }
+    if (b.id === "copy") return copy();
+    if (b.id === "reset") return reset();
+    if (b.dataset.cur) {
+      CUR = b.dataset.cur; try { localStorage.setItem("pprlog.cur", CUR); } catch (err) {}
+      return render();
+    }
+    var act = b.dataset.act; if (!act || !D) return;
+    var row = b.closest(".item"), it = D.items[+row.dataset.i];
+    it.qty = act === "plus" ? it.qty + 10 : Math.max(0, it.qty - 10);
+    row.querySelector('[data-f="qty"]').value = it.qty;
+    totals(); queueSave();
+  });
+  document.addEventListener("input", function (e) {
+    var f = e.target.dataset && e.target.dataset.f; if (!f || !D) return;
+    if (f === "ship") D.shipUsd = toUsd(num(e.target.value));
+    else {
+      var it = D.items[+e.target.closest(".item").dataset.i];
+      if (f === "qty") it.qty = Math.round(num(e.target.value));
+      if (f === "price") it.price = toUsd(num(e.target.value));
+    }
+    totals(); queueSave();
+  });
+  document.addEventListener("change", function (e) {
+    var f = e.target.dataset && e.target.dataset.f; if (!f || !D) return;
+    if (f === "ship") e.target.value = fix(D.shipUsd);
+    else {
+      var it = D.items[+e.target.closest(".item").dataset.i];
+      e.target.value = f === "qty" ? it.qty : (it.price > 0 ? fix(it.price) : "");
+    }
+  });
+  window.addEventListener("hashchange", function () { D = null; load(); });
+  document.addEventListener("visibilitychange", function () {
+    if (!document.hidden && !dirty && !saving && Date.now() - lastLoad > 120000) load();
+  });
+  window.__log = { orderText: orderText, payload: payload, sums: function () { return sums(); } };
+  load();
+})();
+</script>
+</body>
+</html>
