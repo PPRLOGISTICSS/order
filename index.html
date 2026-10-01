@@ -156,6 +156,42 @@ body.out .tools,body.out .state{visibility:hidden}
 .si-row input{flex:1;min-width:0;border:0;background:transparent;height:52px;font-size:17px;text-align:right}
 .si-err{color:var(--blush);font-size:15px;min-height:20px;margin:10px 4px 0}
 .cta:disabled{opacity:.6}
+/* save for later, saved orders, compare */
+.acts3{display:flex;gap:8px;margin-top:14px}
+.acts3 .tint{flex:1;min-width:0;padding:0 6px;font-size:15px;min-height:44px}
+.tint.wide{display:block;width:100%;margin-top:10px;min-height:50px;font-size:17px}
+.ghost.danger{color:var(--blush)}
+.opt.sv .ot{display:flex;flex-direction:column;gap:2px;min-width:0}
+.opt.sv .ot b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sv-t{font-weight:600;font-variant-numeric:tabular-nums;flex:none}
+.sv-line{display:flex;align-items:baseline;gap:10px;padding:12px 16px;position:relative}
+.sv-line + .sv-line::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
+.sv-line .nm{flex:1;min-width:0;font-size:16px}
+.sv-q{color:var(--ink2);font-size:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.sv-v{font-weight:600;font-variant-numeric:tabular-nums;min-width:82px;text-align:right;white-space:nowrap}
+.pick{display:flex;align-items:center;gap:10px;background:var(--card);border-radius:12px;padding:0 12px;margin:0 0 8px;min-height:48px;position:relative}
+.pick::after{content:"";position:absolute;right:16px;top:50%;width:7px;height:7px;border-right:2px solid var(--ink3);border-bottom:2px solid var(--ink3);transform:translateY(-70%) rotate(45deg);pointer-events:none}
+.ab{flex:none;width:24px;height:24px;border-radius:50%;background:var(--peri-tint);color:var(--peri);font-weight:700;font-size:13px;display:inline-flex;align-items:center;justify-content:center}
+.pick select{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:16px;height:46px;color:var(--ink);-webkit-appearance:none;appearance:none;padding-right:26px;cursor:pointer}
+.cmp{margin-top:12px}
+.cmp-cols{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 16px 0}
+.cmp-row{padding:12px 16px;position:relative}
+.cmp-row + .cmp-row::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
+.cmp-nm{font-weight:600;font-size:16px;margin-bottom:6px}
+.cmp-cells{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.cmp-c{background:var(--field);border-radius:10px;padding:8px 10px;min-width:0}
+.cmp-c.win{background:var(--mint-tint)}
+.cmp-c .q{display:block;font-size:13px;color:var(--ink2);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cmp-c .v{display:block;font-weight:600;font-variant-numeric:tabular-nums}
+.cmp-c.none .v{color:var(--ink3);font-weight:500;font-size:15px}
+.cmp-d{font-size:13px;color:var(--ink2);margin-top:6px}
+.cmp-d.good{color:var(--mint);font-weight:600}
+.cmp-tot .cmp-tr{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;font-size:15px;color:var(--ink2);padding:3px 0;font-variant-numeric:tabular-nums}
+.cmp-tot .cmp-tr span + span{text-align:right}
+.cmp-tot .cmp-tr.th span{font-weight:700;color:var(--lav-ink)}
+.cmp-tot .cmp-tr.tot{color:var(--ink);font-weight:700;font-size:17px;border-top:.5px solid rgba(75,63,184,.15);margin-top:6px;padding-top:8px}
+.cmp-v{font-size:21px;font-weight:700;margin-top:12px;color:var(--ink)}
+.cmp-note{font-size:14px;color:var(--ink2);margin:6px 0 0}
 @media (prefers-reduced-motion:reduce){.icon.spin svg,.skel{animation:none}.toast{transition:none}}
 </style>
 </head>
@@ -194,7 +230,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     ["payreq", "Payment requested"], ["paid", "Payment made"], ["ordered", "Ordered"],
     ["making", "Being made"], ["sent", "Sent"], ["delivered", "Delivered"]];
   var AUTH = null, D = null, CUR = "usd", WA = null, busy = false, lastLoad = 0, saveT = null, saving = false,
-    dirty = false, toastT = null, outT = null, ASK = null;
+    dirty = false, toastT = null, outT = null, ASK = null, SAVES = null, CMP = { a: "cur", b: "" };
   try { CUR = localStorage.getItem("pprlog.cur") === "aud" ? "aud" : "usd"; } catch (e) {}
   try { AUTH = JSON.parse(localStorage.getItem("pprlog.auth") || "null"); } catch (e) { AUTH = null; }
   // Who is using it: the kind of device, and an ID that stays with this browser.
@@ -248,7 +284,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   }
   function signOut(msg, manual) {
     if (manual && AUTH) post({ labs: 1, action: "bye", pass: AUTH.pass }).catch(function () {});
-    AUTH = null; D = null; WA = null; lastLoad = 0; dirty = false; clearTimeout(saveT); clearTimeout(outT); closeSheet();
+    AUTH = null; D = null; WA = null; SAVES = null; lastLoad = 0; dirty = false; clearTimeout(saveT); clearTimeout(outT); closeSheet();
     try { localStorage.removeItem("pprlog.auth"); localStorage.removeItem("pprlog.last"); } catch (e) {}
     showSignIn(msg || "");
   }
@@ -365,6 +401,8 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
         '<div class="rows"><div class="row"><span>Products</span><span id="tSub"></span></div>' +
         '<div class="row"><span>Shipping</span><span id="tShip"></span></div>' +
         '<div class="row"><span id="tCount"></span><span></span></div></div></div>' +
+      '<div class="acts3"><button class="tint" id="saveFor" type="button">Save for later</button>' +
+        '<button class="tint" id="savedBtn" type="button">Saved</button><button class="tint" id="cmpBtn" type="button">Compare</button></div>' +
       '<button class="cta" id="copy" type="button">Copy order</button>' +
       '<button class="ghost" id="reset" type="button">Reset to suggested</button>';
     totals();
@@ -559,6 +597,172 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     render(); queueSave(); if (gone) toast(gone.name + " removed");
   }
 
+  /* ---------- saved orders and compare ----------
+     A saved order is a copy of the order as it was, kept on the script so every device sees it.
+     Compare puts any two side by side: this order as it is now, or any saved one. Money is USD
+     underneath and shown in whichever currency is picked. */
+  function curLines() {
+    return all().filter(function (it) { return it.qty > 0; }).map(function (it) { return { sku: it.sku || "", name: it.name, qty: it.qty, price: it.price }; });
+  }
+  function srcOf(key) {
+    if (key === "cur") return D ? { label: "This order", lines: curLines(), ship: D.shipUsd } : null;
+    var r = null; (SAVES || []).forEach(function (x) { if (x.id === key) r = x; });
+    return r ? { label: r.label, lines: r.lines || [], ship: +r.shipUsd || 0, at: r.at } : null;
+  }
+  function sumOf(src) {
+    var sub = 0, vials = 0; src.lines.forEach(function (l) { sub += l.qty * l.price; vials += l.qty; });
+    return { sub: sub, vials: vials, total: sub + src.ship, prods: src.lines.length };
+  }
+  function countText(t) { return t.prods + (t.prods === 1 ? " product, " : " products, ") + t.vials + " vials"; }
+  function fmtDay(t) { var d = new Date(t); return isNaN(d) ? "" : d.toLocaleString([], { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }); }
+  function failed(j, what) {
+    if (j && j.error === "signed_out") { signOut("You've been signed out. Sign in again."); return true; }
+    if (!j || !j.ok) { toast(what); return true; }
+    return false;
+  }
+  function withSaves(title, then) {
+    openSheet('<h2>' + esc(title) + '</h2><p class="sh-sub">Loading</p>');
+    post({ labs: 1, action: "saves", pass: AUTH ? AUTH.pass : "" }).then(function (j) {
+      if (failed(j, "Couldn't load saved orders, try again")) return;
+      SAVES = j.saves || []; then();
+    }).catch(function () { toast("Couldn't load saved orders, try again"); });
+  }
+  function openSaveFor() {
+    if (!D || !sums().prods) return toast("Add something to the order first");
+    var d = new Date(), def = "Order " + d.getDate() + " " + d.toLocaleString("en-AU", { month: "short" });
+    openSheet('<h2>Save for later</h2><p class="sh-sub">Keeps a copy of this order as it is now, with its items, prices and shipping. ' +
+      'Anyone with the password can see saved orders.</p>' +
+      '<div class="group"><label class="si-row"><span class="cap">Name</span><input id="svName" maxlength="40" autocomplete="off" value="' + esc(def) + '"></label></div>' +
+      '<button class="cta" id="svGo" type="button">Save</button><button class="ghost" data-x="1" type="button">Cancel</button>');
+    setTimeout(function () { var i = $("svName"); if (i) { i.focus(); i.select(); } }, 60);
+  }
+  function doSaveFor() {
+    var btn = $("svGo"); if (!btn || btn.disabled) return;
+    btn.disabled = true; btn.textContent = "Saving";
+    post({ labs: 1, action: "saveas", pass: AUTH ? AUTH.pass : "", label: $("svName").value, lines: curLines(), shipUsd: Math.round(D.shipUsd * 10000) / 10000 })
+      .then(function (j) {
+        if (failed(j, "Couldn't save it, try again")) { var b = $("svGo"); if (b) { b.disabled = false; b.textContent = "Save"; } return; }
+        SAVES = j.saves || SAVES; closeSheet(); toast("Saved as " + j.label);
+      }).catch(function () { var b = $("svGo"); if (b) { b.disabled = false; b.textContent = "Save"; } toast("Couldn't save it, try again"); });
+  }
+  function drawSaved() {
+    var list = (SAVES || []).map(function (x) {
+      var t = sumOf(srcOf(x.id));
+      return '<button type="button" class="opt sv" data-sv="' + esc(x.id) + '"><span class="ot"><b>' + esc(x.label) + '</b>' +
+        '<span class="om">' + esc(fmtDay(x.at)) + ', ' + countText(t) + '</span></span><span class="sv-t">' + money(show(t.total)) + '</span></button>';
+    }).join("");
+    openSheet('<h2>Saved orders</h2><p class="sh-sub">' + (list ? "Tap one to see it, compare it or use it." : "") + '</p>' +
+      (list ? '<div class="opts">' + list + '</div>' : '<p class="empty">Nothing saved yet. Tap Save for later under the total to keep a copy of this order.</p>'));
+  }
+  function openSaved() { withSaves("Saved orders", drawSaved); }
+  function openSavedOne(id) {
+    var s = srcOf(id); if (!s) return drawSaved();
+    var t = sumOf(s);
+    openSheet('<h2>' + esc(s.label) + '</h2><p class="sh-sub">Saved ' + esc(fmtDay(s.at)) + '</p>' +
+      '<div class="group">' + s.lines.map(function (l) {
+        return '<div class="sv-line"><span class="nm">' + esc(l.name) + '</span><span class="sv-q">' + l.qty + ' x ' + money(show(l.price)) + '</span>' +
+          '<span class="sv-v">' + money(show(l.qty * l.price)) + '</span></div>';
+      }).join("") + '<div class="sv-line"><span class="nm">Shipping</span><span class="sv-v">' + money(show(s.ship)) + '</span></div></div>' +
+      '<div class="total"><div class="lbl">Total</div><div class="big">' + money(show(t.total), CUR) + '</div><div class="alt">' + countText(t) + '</div></div>' +
+      '<button class="cta" type="button" data-cmpwith="' + esc(id) + '">Compare with this order</button>' +
+      '<button class="tint wide" type="button" data-use="' + esc(id) + '">Make this the current order</button>' +
+      '<button class="ghost danger" type="button" data-del="' + esc(id) + '">Delete</button>');
+  }
+  function useSave(id) {
+    var s = srcOf(id); if (!s) return;
+    ask("Make " + s.label + " the current order? What's on the order now is replaced, and the status goes back to Not placed yet.", "Make it current").then(function (yes) {
+      if (!yes) return;
+      // Nothing waiting to save may land on top of the swap, so drop it and let any save finish first.
+      clearTimeout(saveT); dirty = false;
+      (function go() {
+        if (saving) return setTimeout(go, 150);
+        state("saving", "Saving");
+        post({ labs: 1, action: "usesave", id: id, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
+          if (failed(j, "Couldn't switch orders, try again")) { state("", ""); return; }
+          // Drop the device copy of the old order so it can't flash up, then fetch the new one once nothing else is loading.
+          try { localStorage.removeItem("pprlog.last"); } catch (e) {}
+          WA = null; D = null; toast(s.label + " is now the current order");
+          (function fetchNew() { if (busy) return setTimeout(fetchNew, 150); load(true); })();
+        }).catch(function () { state("", ""); toast("Couldn't switch orders, try again"); });
+      })();
+    });
+  }
+  function delSave(id) {
+    var s = srcOf(id); if (!s) return;
+    ask("Delete " + s.label + "? This can't be undone.", "Delete").then(function (yes) {
+      if (!yes) return;
+      post({ labs: 1, action: "delsave", id: id, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
+        if (failed(j, "Couldn't delete it, try again")) return;
+        SAVES = j.saves || []; if (CMP.b === id) CMP.b = ""; if (CMP.a === id) CMP.a = "cur";
+        toast("Deleted"); drawSaved();
+      }).catch(function () { toast("Couldn't delete it, try again"); });
+    });
+  }
+  function openCompare(a, b) {
+    withSaves("Compare", function () {
+      if (!SAVES.length) {
+        openSheet('<h2>Compare</h2><p class="sh-sub">Save an order for later first. Then you can put it side by side with this one, or with another saved order.</p>' +
+          '<button class="cta" id="saveFor" type="button">Save this order for later</button>');
+        return;
+      }
+      CMP.a = a || CMP.a || "cur"; CMP.b = b || CMP.b || SAVES[0].id;
+      if (!srcOf(CMP.a)) CMP.a = "cur";
+      if (!srcOf(CMP.b)) CMP.b = SAVES[0].id;
+      drawCompare();
+    });
+  }
+  function optList(sel) {
+    return '<option value="cur"' + (sel === "cur" ? " selected" : "") + '>This order</option>' + SAVES.map(function (x) {
+      return '<option value="' + esc(x.id) + '"' + (sel === x.id ? " selected" : "") + '>' + esc(x.label) + '</option>';
+    }).join("");
+  }
+  // One row per product, matched by its code, or by name for anything typed in.
+  function keyOf(l) { return l.sku ? "s:" + String(l.sku).toLowerCase() : "n:" + String(l.name).toLowerCase().replace(/[^a-z0-9+]/g, ""); }
+  function merged(src) {
+    var m = {}, keys = [];
+    src.lines.forEach(function (l) { var k = keyOf(l); if (!m[k]) { m[k] = { name: l.name, qty: 0, val: 0 }; keys.push(k); } m[k].qty += l.qty; m[k].val += l.qty * l.price; });
+    return { m: m, keys: keys };
+  }
+  function cell(x, win) {
+    if (!x) return '<div class="cmp-c none"><span class="q">&nbsp;</span><span class="v">Not in it</span></div>';
+    var each = x.qty ? x.val / x.qty : 0;
+    return '<div class="cmp-c' + (win ? " win" : "") + '"><span class="q">' + x.qty + ' x ' + money(show(each)) + '</span><span class="v">' + money(show(x.val)) + '</span></div>';
+  }
+  function drawCompare() {
+    var A = srcOf(CMP.a), B = srcOf(CMP.b);
+    if (!A || !B) { closeSheet(); return toast("Give it a second, the order is still loading"); }
+    var ma = merged(A), mb = merged(B), keys = ma.keys.slice(), unlike = false;
+    mb.keys.forEach(function (k) { if (keys.indexOf(k) < 0) keys.push(k); });
+    var rows = keys.map(function (k) {
+      var a = ma.m[k], b = mb.m[k], note = "", good = false, wa = false, wb = false;
+      if (a && b) {
+        var d = b.val - a.val;
+        if (Math.abs(d) < 0.005) note = "Same";
+        else { good = true; if (d < 0) { wb = true; note = "B is " + money(show(-d)) + " less"; } else { wa = true; note = "A is " + money(show(d)) + " less"; } }
+        if (a.qty !== b.qty) { note += ", different amounts"; unlike = true; }
+      } else { unlike = true; note = a ? "Only in A" : "Only in B"; }
+      return '<div class="cmp-row"><div class="cmp-nm">' + esc((a || b).name) + '</div><div class="cmp-cells">' + cell(a, wa) + cell(b, wb) + '</div>' +
+        '<div class="cmp-d' + (good ? " good" : "") + '">' + esc(note) + '</div></div>';
+    }).join("");
+    var ta = sumOf(A), tb = sumOf(B), diff = tb.total - ta.total;
+    if (Math.abs(A.ship - B.ship) >= 0.005 && !keys.length) unlike = true;
+    var verdict = Math.abs(diff) < 0.005 ? "Both come to the same" : (diff < 0 ? "B is " + money(show(-diff), CUR) + " cheaper" : "A is " + money(show(diff), CUR) + " cheaper");
+    var y = $("sheet").scrollTop;
+    openSheet('<h2>Compare</h2>' +
+      '<label class="pick"><span class="ab">A</span><select id="cmpA" aria-label="Order A">' + optList(CMP.a) + '</select></label>' +
+      '<label class="pick"><span class="ab">B</span><select id="cmpB" aria-label="Order B">' + optList(CMP.b) + '</select></label>' +
+      (CMP.a === CMP.b ? '<p class="sh-sub">Pick two different orders to compare.</p>' : '') +
+      '<div class="total cmp-tot"><div class="cmp-tr th"><span></span><span>A</span><span>B</span></div>' +
+        '<div class="cmp-tr"><span>Products</span><span>' + money(show(ta.sub)) + '</span><span>' + money(show(tb.sub)) + '</span></div>' +
+        '<div class="cmp-tr"><span>Shipping</span><span>' + money(show(A.ship)) + '</span><span>' + money(show(B.ship)) + '</span></div>' +
+        '<div class="cmp-tr tot"><span>Total</span><span>' + money(show(ta.total)) + '</span><span>' + money(show(tb.total)) + '</span></div>' +
+        '<div class="cmp-v">' + esc(verdict) + '</div>' +
+        (unlike ? '<p class="cmp-note">They don\'t have exactly the same items and amounts, so check the lines below.</p>' : '') + '</div>' +
+      '<div class="group cmp"><div class="cmp-cols"><span class="ab">A</span><span class="ab">B</span></div>' +
+        (rows || '<div class="empty">Neither order has anything on it.</div>') + '</div>');
+    $("sheet").scrollTop = y;
+  }
+
   /* ---------- loading ---------- */
   function load(fresh) {
     if (busy) return;
@@ -623,7 +827,15 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     if (id === "neworder") return newOrder();
     if (id === "waX") return setWa(null);
     if (id === "addBtn") return openAdd();
-    if (id === "sheetX") return closeSheet();
+    if (id === "sheetX" || b.dataset.x) return closeSheet();
+    if (id === "saveFor") return openSaveFor();
+    if (id === "svGo") return doSaveFor();
+    if (id === "savedBtn") return openSaved();
+    if (id === "cmpBtn") return openCompare();
+    if (b.dataset.sv) return openSavedOne(b.dataset.sv);
+    if (b.dataset.cmpwith) return openCompare("cur", b.dataset.cmpwith);
+    if (b.dataset.use) return useSave(b.dataset.use);
+    if (b.dataset.del) return delSave(b.dataset.del);
     if (id === "askYes") return answer(true);
     if (id === "askNo") return answer(false);
     if (b.dataset.st) return setStatus(b.dataset.st);
@@ -652,6 +864,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     totals(); queueSave();
   });
   document.addEventListener("change", function (e) {
+    if (e.target.id === "cmpA" || e.target.id === "cmpB") { CMP[e.target.id === "cmpA" ? "a" : "b"] = e.target.value; return drawCompare(); }
     var f = e.target.dataset && e.target.dataset.f; if (!f || !D) return;
     if (f === "ship") { e.target.value = fix(D.shipUsd); return; }
     var it = itemOf(e.target); if (!it) return;
@@ -660,6 +873,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") return closeSheet();
+    if (e.key === "Enter" && e.target.id === "svName") { e.preventDefault(); return doSaveFor(); }
     if (e.key === "Enter" && e.target.id === "addQ") {
       e.preventDefault();
       var q = e.target.value.trim(), m = addMatches(q);
@@ -672,7 +886,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     if (AUTH && !signedIn()) return signOut(OUT8);
     if (signedIn() && !dirty && !saving && Date.now() - lastLoad > 60000) load(false);
   });
-  window.__log = { waMsg: function (k) { return waMsg(k); }, payload: payload, sums: function () { return sums(); } };
+  window.__log = { waMsg: function (k) { return waMsg(k); }, payload: payload, sums: function () { return sums(); }, saves: function () { return SAVES; } };
   if (signedIn()) { document.body.classList.remove("out"); armExpiry(); load(false); }
   else signOut(AUTH ? OUT8 : "");
 })();
