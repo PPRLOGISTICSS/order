@@ -622,13 +622,14 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
       if (j && j.ok && j.pass) {
         AUTH = { pass: j.pass, exp: +j.exp };
         try { localStorage.setItem("pprlog.auth", JSON.stringify(AUTH)); } catch (e) {}
+        if (j.data && j.data.ok) { build(j.data); lastLoad = Date.now(); FRESH = true; }   // the script can send the order back with the pass
         enter();
         return { ok: true };
       }
       return { ok: false, error: j && j.error };
     });
   }
-  var IN = false;
+  var IN = false, FRESH = false;
   function enter() { if (IN) return; IN = true; document.body.classList.remove("out"); Vw.on(); armExpiry(); load(false); }
 
   /* ---------- the order ---------- */
@@ -1076,6 +1077,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   function load(fresh) {
     if (busy) return;
     if (!signedIn()) { signOut(AUTH ? OUT8 : ""); return; }
+    if (FRESH && D) { FRESH = false; render(); remember(); state("", "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })); return; }
     if (dirty || saving) { save(); return; }
     busy = true; $("refresh").classList.add("spin");
     if (!D) {
