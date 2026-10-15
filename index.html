@@ -7,8 +7,8 @@
 <meta name="referrer" content="no-referrer">
 <meta name="color-scheme" content="light">
 <meta name="theme-color" content="#f4f5fa">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src https://script.google.com https://*.googleusercontent.com; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; font-src data:; base-uri 'none'; form-action 'none'">
-<title>PPR Logistics</title>
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; connect-src https://script.google.com https://*.googleusercontent.com; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data: blob:; base-uri 'none'; form-action 'none'">
+<title>PPR Order</title>
 <style>
 :root{
   --canvas:#f4f5fa; --card:#fff; --ink:#1d1d1f; --ink2:#6e6e73; --ink3:#a1a1a8; --line:rgba(60,60,67,.11);
@@ -23,7 +23,7 @@
 html,body{margin:0;background:var(--canvas);color:var(--ink);
   font:17px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;
   -webkit-font-smoothing:antialiased;-webkit-text-size-adjust:100%}
-button,input{font:inherit;color:inherit}
+button,input,textarea{font:inherit;color:inherit}
 .page{max-width:600px;margin:0 auto;
   padding:calc(12px + env(safe-area-inset-top,0px)) 16px calc(32px + env(safe-area-inset-bottom,0px))}
 
@@ -33,6 +33,7 @@ button,input{font:inherit;color:inherit}
 .state.saved{background:var(--mint-tint);color:var(--mint)}
 .state.saving{background:var(--peri-tint);color:var(--peri)}
 .state.err{background:var(--blush-tint);color:var(--blush);cursor:pointer}
+.tools{display:flex;gap:8px}
 .icon{width:38px;height:38px;border-radius:50%;border:0;background:var(--card);color:var(--peri);
   display:inline-flex;align-items:center;justify-content:center;cursor:pointer;flex:none;box-shadow:0 1px 2px rgba(29,29,31,.06)}
 .icon svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -47,6 +48,7 @@ h1{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue
 .seg button{flex:1;border:0;background:transparent;border-radius:9px;min-height:36px;font-size:15px;font-weight:600;color:var(--ink2);cursor:pointer}
 .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(29,29,31,.12)}
 .rate{font-size:13px;color:var(--ink3);margin:0 4px 18px}
+.rate-b{border:0;background:transparent;padding:0;font:inherit;font-weight:600;color:var(--peri);cursor:pointer;font-variant-numeric:tabular-nums}
 
 /* order list, Apple inset grouped style */
 .group{background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 2px rgba(29,29,31,.04)}
@@ -55,8 +57,6 @@ h1{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue
 .head{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .nm{font-weight:600;font-size:17px}
 .pill{flex:none;font-size:13px;font-weight:600;border-radius:999px;padding:3px 10px;background:var(--field);color:var(--ink2)}
-.pill.low{background:var(--apricot-tint);color:var(--apricot)}
-.pill.out{background:var(--blush-tint);color:var(--blush)}
 .ctrls{display:flex;align-items:flex-end;gap:10px;margin-top:10px;flex-wrap:wrap}
 .fld{display:flex;flex-direction:column;gap:4px}
 .fld .cap{font-size:12px;color:var(--ink3);padding-left:2px}
@@ -87,6 +87,7 @@ input:focus{outline:none}
 
 .cta{display:block;width:100%;height:52px;margin-top:16px;border:0;border-radius:14px;background:var(--peri);color:#fff;font-size:17px;font-weight:600;cursor:pointer}
 .cta:active{opacity:.88}
+.cta:disabled{opacity:.6}
 .ghost{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--peri);font-size:15px;font-weight:500;cursor:pointer;padding:8px 12px}
 
 .msg{background:var(--card);border-radius:var(--r);padding:30px 22px;text-align:center}
@@ -97,12 +98,101 @@ input:focus{outline:none}
 .msg.bad svg{stroke:var(--apricot)}
 .skel{height:92px;border-radius:var(--r);background:var(--card);margin-bottom:10px;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.8}50%{opacity:.45}}
+
+/* packaging and designs */
+.group.pk,.group.dz{margin-top:16px}
+.group.dz{margin-top:22px}
+.pk-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;position:relative}
+.pk-head .nm{font-weight:600}
+.pk-head small{display:block;font-size:13px;color:var(--ink3)}
+.group .empty{position:relative}
+.pk-head + .item::before,.pk-head + .opt::before,.pk-head + .empty::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
+.sw{flex:none;position:relative;width:51px;height:31px;border-radius:999px;border:0;padding:0;background:#e3e4ea;cursor:pointer;transition:background .2s}
+.sw span{position:absolute;top:2px;left:2px;width:27px;height:27px;border-radius:50%;background:#fff;box-shadow:0 2px 5px rgba(0,0,0,.18);transition:transform .2s}
+.sw.on{background:var(--mint)}
+.sw.on span{transform:translateX(20px)}
+button.pill{border:0;cursor:pointer;font-family:inherit}
+.opt.fl .ot{display:flex;flex-direction:column;gap:2px;min-width:0}
+.fnm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fth{flex:none;width:44px;height:44px;border-radius:9px;object-fit:cover;background:var(--field)}
+.fth.ext{display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;letter-spacing:.3px;color:var(--peri);background:var(--peri-tint)}
+.fth.ext.big{width:96px;height:96px;border-radius:20px;font-size:20px}
+.opt.fl.up{opacity:.6;cursor:default}
+.pv{display:flex;align-items:center;justify-content:center;min-height:160px;background:var(--card);border-radius:var(--r);padding:12px;margin:4px 0 0}
+.pv img{display:block;max-width:100%;max-height:55vh;border-radius:10px}
+.pv-wait{color:var(--ink3);font-size:15px}
+.cta.lnk{display:flex;align-items:center;justify-content:center;text-decoration:none}
+.cta.lnk.off{opacity:.5;pointer-events:none}
+
+/* USD and AUD switch on the totals */
+.tot-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mini{flex:none;display:inline-flex;background:rgba(75,63,184,.10);border-radius:10px;padding:2px}
+.mini button{border:0;background:transparent;border-radius:8px;min-height:32px;padding:0 12px;font-size:13px;font-weight:600;color:var(--lav-ink);cursor:pointer}
+.mini button.on{background:#fff;color:var(--ink);box-shadow:0 1px 2px rgba(29,29,31,.12)}
+.total.pf .mini{background:rgba(46,158,116,.13)}
+.total.pf .mini button{color:var(--mint)}
+.total.pf.neg .mini{background:rgba(201,80,77,.12)}
+.total.pf.neg .mini button{color:var(--blush)}
+.total.pf .mini button.on{color:var(--ink)}
+.rate.under{margin:-8px 4px 16px}
+
+/* design notes */
+.nt-l{font-size:13px;color:var(--ink3);margin:16px 16px 6px}
+.group.nt textarea{display:block;width:100%;min-height:110px;border:0;background:transparent;padding:12px 16px;font-size:17px;line-height:1.35;resize:vertical;color:var(--ink)}
+.group.nt textarea::placeholder{color:var(--ink3)}
+.group.nt textarea:focus{outline:none}
+.group.nt:focus-within{box-shadow:0 0 0 2px var(--peri)}
+
+/* prices people can see but not change */
+.money.ro{background:transparent;padding:0 2px;min-width:74px}
+.money.ro b{color:var(--ink);font-weight:400;margin:0}
+.money.ro span{font-size:17px;font-variant-numeric:tabular-nums}
+.money.ro.tbc{color:var(--ink3);font-size:15px}
+.vnote{background:var(--peri-tint);color:var(--lav-ink);border-radius:12px;padding:10px 14px;font-size:15px;margin:0 0 14px}
+
+/* the hidden profit view */
+h1{-webkit-user-select:none;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.seg.tabs{margin:0 0 14px}
+.total.pf{background:var(--mint-tint);margin:0 0 16px}
+.total.pf .lbl{color:var(--mint)}
+.total.pf .rows{border-top-color:rgba(46,158,116,.18)}
+.total.pf.neg{background:var(--blush-tint)}
+.total.pf.neg .lbl{color:var(--blush)}
+.money .suf{margin:0 0 0 2px}
+.line.pl{display:flex;flex-direction:column;align-items:flex-end;gap:2px;padding-bottom:4px;color:var(--mint)}
+.line.pl small{font-size:12px;font-weight:400;color:var(--ink3)}
+.line.pl .neg{color:var(--blush)}
+.opt.ap{cursor:default}
+.opt.ap .ot{display:flex;flex-direction:column;gap:2px;min-width:0}
+.money input[data-markup],.money input[data-pmarkup]{width:58px;text-align:right}
+.pk-head.mk + .pk-head.mk::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
+.opt.ap .money{flex:none}
+.opt.ap .money input{width:70px}
+.si.pc{margin:6px auto 4px}
+.code-in{-webkit-text-security:disc;letter-spacing:12px}
+.code-in::placeholder{letter-spacing:normal}
+
+/* sign in, centred and plain */
+body.out .top,body.out h1,body.out .sub{display:none}
+body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center}
+.si{width:100%;max-width:340px;margin:0 auto 8vh;text-align:center}
+.si-ic{width:64px;height:64px;border-radius:18px;background:var(--peri);color:#fff;display:inline-flex;align-items:center;justify-content:center;
+  margin-bottom:14px;box-shadow:0 6px 18px rgba(93,108,240,.28)}
+.si-ic svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.si h2{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;font-size:28px;font-weight:700;letter-spacing:.2px;margin:0 0 22px}
+.si-pw{display:block;width:100%;height:54px;border:0;border-radius:14px;background:var(--card);box-shadow:0 1px 2px rgba(29,29,31,.06);
+  text-align:center;font-size:22px;letter-spacing:4px;padding:0 16px}
+.si-pw::placeholder{letter-spacing:normal;font-size:17px;color:var(--ink3)}
+.si-pw:focus{box-shadow:0 0 0 2px var(--peri)}
+.si-err{color:var(--blush);font-size:15px;min-height:22px;margin:10px 0 2px}
+.si .cta{margin-top:6px}
+
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
   background:rgba(29,29,31,.9);color:#fff;padding:10px 16px;border-radius:999px;font-size:15px;
-  opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap}
+  opacity:0;transition:opacity .2s;pointer-events:none;white-space:nowrap;z-index:30}
 .toast.on{opacity:1}
+.mask.on ~ .toast{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
 :focus-visible{outline:2px solid var(--peri);outline-offset:2px}
-.tools{display:flex;gap:8px}
 /* status */
 .stat{background:var(--card);border-radius:var(--r);padding:16px;margin:0 0 14px;box-shadow:0 1px 2px rgba(29,29,31,.04)}
 .stat-lbl{font-size:13px;color:var(--ink3)}
@@ -120,10 +210,17 @@ input:focus{outline:none}
 .wa-row{display:flex;gap:10px;align-items:center}
 .wa-btn{flex:1;display:flex;align-items:center;justify-content:center;height:44px;border-radius:12px;background:#1f8a5f;color:#fff;font-weight:600;text-decoration:none}
 .wa-x{border:0;background:transparent;color:#1d5c3f;font-size:15px;cursor:pointer;padding:8px}
+.sheet .wa-sh{text-align:center;padding:6px 0 0}
+.wa-ic{width:64px;height:64px;border-radius:50%;background:var(--mint-tint);color:var(--mint);display:inline-flex;align-items:center;justify-content:center;margin:4px 0 12px}
+.wa-ic svg{width:32px;height:32px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.sheet .wa-sh h2{font-size:24px;margin:0 0 6px}
+.sheet .wa-sh .sh-sub{margin:0 8px 18px}
+.cta.wa-cta{display:flex;align-items:center;justify-content:center;text-decoration:none;background:#1f8a5f}
 /* add and remove */
 .hr{display:flex;align-items:center;gap:8px;flex:none}
 .x{width:28px;height:28px;border-radius:50%;border:0;background:var(--field);color:var(--ink3);font-size:18px;line-height:1;cursor:pointer}
 .pill.add{background:var(--peri-tint);color:var(--peri)}
+.pill.mem{background:var(--mint-tint);color:var(--mint)}
 .addrow{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--peri);font-size:17px;font-weight:500;padding:14px 16px;cursor:pointer;position:relative}
 .addrow::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
 .empty{padding:16px;color:var(--ink2);font-size:15px}
@@ -131,14 +228,14 @@ input:focus{outline:none}
 .mask{position:fixed;inset:0;background:rgba(29,29,31,.28);display:none;align-items:flex-end;justify-content:center;z-index:20}
 .mask.on{display:flex}
 .sheet{position:relative;background:var(--canvas);width:100%;max-width:600px;max-height:86vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px))}
-@media (min-width:700px){.mask{align-items:center}.sheet{border-radius:20px}}
+@media (min-width:700px){.mask{align-items:center}.sheet{border-radius:20px}.mask.on ~ .toast{bottom:calc(7vh + 96px)}}
 .sheet h2{font-size:22px;margin:4px 0 4px}
 .sh-sub{color:var(--ink2);font-size:15px;margin:0 0 12px}
 .sheet-x{position:absolute;right:14px;top:14px;width:32px;height:32px;border-radius:50%;border:0;background:#e6e8f1;color:var(--ink2);font-size:20px;cursor:pointer}
 .opts{background:var(--card);border-radius:var(--r);overflow:hidden}
 .opt{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:transparent;padding:13px 16px;font-size:17px;cursor:pointer;position:relative}
 .opt + .opt::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
-.opt .ck{width:18px;color:var(--mint);font-weight:700}
+.opt .ck{width:18px;flex:none;color:var(--mint);font-weight:700}
 .opt .ot{flex:1}
 .opt .om{font-size:13px;color:var(--ink3)}
 .opt.cur .ot{font-weight:700}
@@ -146,53 +243,24 @@ input:focus{outline:none}
 .srch{margin:10px 0 12px}
 .sheet h2.ask{font-size:20px;line-height:1.3;margin:6px 44px 4px 0}
 .srch input{width:100%;height:44px;border:0;border-radius:12px;background:#e6e8f1;padding:0 14px;font-size:17px}
+/* picking from the price list */
+.sheet.picker{padding-bottom:0}
+.srch.stick{position:sticky;top:-18px;z-index:2;background:var(--canvas);margin:0 -16px 2px;padding:12px 16px 10px}
+.opt.pl .ck{width:22px;height:22px;border-radius:50%;border:1.5px solid #c7c7cc;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1;color:#fff}
+.opt.pl.on .ck{background:var(--mint);border-color:var(--mint)}
+.opt.pl .ot{display:flex;flex-direction:column;gap:2px;min-width:0}
+.opt.pl .om{line-height:1.3}
+.opt.pl .pr{flex:none;font-size:15px;color:var(--ink2);font-variant-numeric:tabular-nums}
+.opt.pl.on .ot > span:first-child{font-weight:600}
+.donebar{position:sticky;bottom:0;z-index:2;margin:0 -16px;padding:14px 16px calc(16px + env(safe-area-inset-bottom,0px));
+  background:linear-gradient(to bottom,rgba(244,245,250,0),var(--canvas) 16px)}
+.donebar .cta{margin-top:0}
 
-body.out .tools,body.out .state{visibility:hidden}
 .si-row{display:flex;align-items:center;gap:12px;padding:0 16px;min-height:52px}
 .si-row .cap{font-size:17px;flex:none}
 .si-row + .si-row{border-top:.5px solid var(--line)}
 .si-row input{flex:1;min-width:0;border:0;background:transparent;height:52px;font-size:17px;text-align:right}
 .si-row input::placeholder{color:var(--ink3)}
-.cta:disabled{opacity:.6}
-.gate{--g-bg:var(--canvas);--g-txt:var(--ink);--g-dim:var(--ink2);--g-ter:var(--ink3);--g-field:var(--card);--g-field-shadow:0 1px 2px rgba(29,29,31,.06);--g-accent:var(--peri);--g-bad:var(--blush);--g-good:var(--mint);--g-icon:linear-gradient(180deg,#7583f4,#4d5ce4);--g-icon-shadow:0 8px 22px rgba(93,108,240,.28)}
-/* sign in: one card in the middle of the screen, like unlocking a phone */
-.gate{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;overflow:auto;
-  padding:calc(24px + env(safe-area-inset-top,0px)) 24px calc(24px + env(safe-area-inset-bottom,0px));
-  background:var(--g-bg);color:var(--g-txt);text-align:center;
-  font:17px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Helvetica Neue",Arial,sans-serif;-webkit-font-smoothing:antialiased;
-  transition:opacity .22s ease}
-.gate.hide{display:none}
-.gate.off{opacity:0;pointer-events:none}
-.gate-in{width:100%;max-width:300px;animation:gate-in .4s ease-out both}
-@keyframes gate-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
-.gate-icon{width:74px;height:74px;border-radius:21px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center;background:var(--g-icon);box-shadow:var(--g-icon-shadow)}
-.gate-icon svg{width:36px;height:36px;stroke:#fff;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.gate h1{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;font-size:26px;line-height:1.2;font-weight:700;letter-spacing:-.02em;margin:0 0 24px;color:var(--g-txt)}
-.gate .g{display:none}
-.gate[data-mode="face"] .g-face,.gate[data-mode="pw"] .g-pw,.gate[data-mode="offer"] .g-offer,.gate[data-mode="finish"] .g-finish,.gate[data-mode="settings"] .g-settings{display:block}
-.gate-hid{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
-.gate-field{display:flex;align-items:center;background:var(--g-field);box-shadow:var(--g-field-shadow);border-radius:12px;height:50px;padding:0 6px 0 16px;text-align:left}
-.gate-field input{flex:1;min-width:0;height:50px;border:0;background:transparent;font:inherit;color:inherit;outline:none;padding:0;box-shadow:none;-webkit-appearance:none;appearance:none}
-.gate-field input::placeholder{color:var(--g-ter)}
-.gate-field:focus-within{box-shadow:0 0 0 3px color-mix(in srgb,var(--g-accent) 32%,transparent)}
-.gate-field input:focus,.gate-field input:focus-visible,.gate-eye:focus{outline:none!important;box-shadow:none}
-.gate-eye{flex:none;border:0;background:transparent;color:var(--g-accent);font:inherit;font-size:15px;font-weight:600;padding:8px 10px;cursor:pointer}
-.gate-btn{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;height:50px;margin-top:12px;border:0;border-radius:12px;background:var(--g-accent);color:#fff;font:inherit;font-size:17px;font-weight:600;cursor:pointer;-webkit-appearance:none;appearance:none}
-.gate-btn svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-.gate-btn svg:empty{display:none}
-.gate-btn:active{opacity:.85}
-.gate.busy .gate-btn,.gate-btn:disabled{opacity:.55;pointer-events:none}
-.gate-link{display:block;margin:12px auto 0;border:0;background:transparent;color:var(--g-accent);font:inherit;font-size:16px;font-weight:500;padding:8px 12px;cursor:pointer;-webkit-appearance:none;appearance:none}
-.gate-link.red{color:var(--g-bad)}
-.gate-link[hidden]{display:none}
-.gate-note{min-height:22px;font-size:15px;line-height:1.4;color:var(--g-dim);margin:14px 4px 0}
-.gate-note.bad{color:var(--g-bad)}
-.gate-note.good{color:var(--g-good)}
-.gate .gate-btn:focus-visible,.gate .gate-link:focus-visible{outline:2px solid var(--g-accent);outline-offset:2px}
-@font-face{font-family:"UIAlt";src:url(data:font/woff;base64,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) format("woff");font-weight:100 900}
-body.vw :not(.gate,.gate *){font-family:"UIAlt",sans-serif!important}
-#tA,#tB{cursor:default;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
-@media (prefers-reduced-motion:reduce){.gate-in{animation:none}.gate{transition:none}}
 /* save for later, saved orders, compare */
 .acts3{display:flex;gap:8px;margin-top:14px}
 .acts3 .tint{flex:1;min-width:0;padding:0 6px;font-size:15px;min-height:44px}
@@ -229,14 +297,14 @@ body.vw :not(.gate,.gate *){font-family:"UIAlt",sans-serif!important}
 .cmp-tot .cmp-tr.tot{color:var(--ink);font-weight:700;font-size:17px;border-top:.5px solid rgba(75,63,184,.15);margin-top:6px;padding-top:8px}
 .cmp-v{font-size:21px;font-weight:700;margin-top:12px;color:var(--ink)}
 .cmp-note{font-size:14px;color:var(--ink2);margin:6px 0 0}
-@media (prefers-reduced-motion:reduce){.icon.spin svg,.skel{animation:none}.toast{transition:none}}
+@media (prefers-reduced-motion:reduce){.icon.spin svg,.skel{animation:none}.toast,.sw,.sw span{transition:none}}
 </style>
 </head>
 <body class="out">
 <main class="page">
   <div class="top">
     <button class="state" id="state" type="button" aria-live="polite"></button>
-    <div class="tools">
+    <div class="tools" id="tools">
       <button class="icon" id="refresh" type="button" aria-label="Refresh" title="Refresh">
         <svg viewBox="0 0 24 24"><path d="M20.5 12a8.5 8.5 0 1 1-2.5-6"/><path d="M20.5 3.5V9H15"/></svg>
       </button>
@@ -245,328 +313,193 @@ body.vw :not(.gate,.gate *){font-family:"UIAlt",sans-serif!important}
       </button>
     </div>
   </div>
-  <h1><span id="tA">PPR</span> <span id="tB">Logistics</span></h1>
-  <p class="sub" id="sub">Restock order</p>
+  <h1>PPR Logistics</h1>
+  <p class="sub" id="sub">Order from the 12 May 2026 price list</p>
   <div id="body"></div>
 </main>
-<div class="gate hide" id="gate" data-mode="pw" aria-label="Sign in">
-  <div class="gate-in">
-    <div class="gate-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 3.5 20 7.5v9l-8 4-8-4v-9z"/><path d="M4 7.5l8 4 8-4M12 11.5v9"/></svg></div>
-    <h1 id="gateTitle">PPR Logistics</h1>
-    <div class="g g-face">
-      <button class="gate-btn" id="gateFace" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"></svg><span>Sign in</span></button>
-      <button class="gate-link" id="gatePw" type="button">Use password</button>
-    </div>
-    <form class="g g-pw" id="signin" autocomplete="on" action="#" novalidate>
-      <input class="gate-hid" type="text" name="username" autocomplete="username" value="PPR logistics" tabindex="-1" aria-hidden="true">
-      <div class="gate-field"><input id="pw" type="password" name="password" autocomplete="current-password" placeholder="Password" enterkeyhint="go" autocapitalize="off" spellcheck="false" aria-label="Password"><button type="button" class="gate-eye" id="pwEye">Show</button></div>
-      <button class="gate-btn" type="submit" id="siBtn"><span>Sign in</span></button>
-      <button class="gate-link" id="gateBack" type="button" hidden>Use Face ID</button>
-    </form>
-    <div class="g g-offer">
-      <button class="gate-btn" id="offerOn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"></svg><span>Turn on</span></button>
-      <button class="gate-link" id="offerNo" type="button">Not now</button>
-    </div>
-    <div class="g g-finish">
-      <button class="gate-btn" id="finishBtn" type="button"><span>Finish</span></button>
-      <button class="gate-link" id="finishNo" type="button">Not now</button>
-    </div>
-    <p class="gate-note" id="gateNote" role="status"></p>
-  </div>
-</div>
 <div class="mask" id="mask"><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Order options"></div></div>
 <div class="toast" id="toast" role="status"></div>
-<script>
-window.Vw = (function () {
-  var armed = 0, away = 0;
-  function on() { document.body.classList.add("vw"); }
-  function off() { document.body.classList.remove("vw"); }
-  function wire() {
-    var a = document.getElementById("tA"), b = document.getElementById("tB");
-    if (!a || !b) return;
-    a.addEventListener("click", function () { armed = Date.now(); });
-    b.addEventListener("click", function () { if (Date.now() - armed < 3000) document.body.classList.toggle("vw"); armed = 0; });
-  }
-  document.addEventListener("visibilitychange", function () {
-    if (document.hidden) { away = Date.now(); return; }
-    if (away && Date.now() - away > 5 * 60000) on();
-    away = 0;
-  });
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", wire); else wire();
-  return { on: on, off: off };
-})();
-/* Face ID sign in. A passkey made on this device holds a key that unlocks the password kept
-   here, encrypted. The password then goes to the script exactly as if it was typed, so the
-   script and the 8 hour pass work the same as before. Nothing new is kept on the server. */
-window.PK = (function () {
-  var cfg = { store: "pk", id: "app", name: "App" };
-  var enc = new TextEncoder(), dec = new TextDecoder(), pending = null;
-  function b64(buf) { var b = new Uint8Array(buf), s = ""; for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
-  function unb64(s) { s = String(s).replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; var bin = atob(s), b = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i); return b; }
-  function rnd(n) { var b = new Uint8Array(n); crypto.getRandomValues(b); return b; }
-  function err(code) { var e = new Error(code); e.code = code; return e; }
-  function ok() { return !!(window.PublicKeyCredential && window.crypto && crypto.subtle && window.isSecureContext && location.hostname); }
-  function read() { try { var j = JSON.parse(localStorage.getItem(cfg.store) || "null"); return j && j.id && j.ct && j.iv && j.salt ? j : null; } catch (e) { return null; } }
-  function ready() { return ok() && !!read(); }
-  function forget() { pending = null; try { localStorage.removeItem(cfg.store); } catch (e) {} }
-  function declined() { try { return +localStorage.getItem(cfg.store + ".no") > Date.now() - 30 * 86400000; } catch (e) { return false; } }
-  function decline() { pending = null; try { localStorage.setItem(cfg.store + ".no", String(Date.now())); } catch (e) {} }
-  function device() {
-    var u = navigator.userAgent || "", mac = /Mac/.test(navigator.platform || "") || /Mac OS X/.test(u);
-    if (/iPhone|iPod/.test(u)) return "iPhone";
-    if (/iPad/.test(u) || (mac && navigator.maxTouchPoints > 1)) return "iPad";
-    if (mac) return "Mac";
-    if (/Android/.test(u)) return "Android";
-    if (/Windows/.test(u)) return "Windows";
-    return "device";
-  }
-  /* What to call it on screen. iPhones say Face ID, Macs Touch ID, Windows has Hello. */
-  function bio() {
-    var d = device();
-    if (d === "iPhone" || d === "iPad") return "Face ID";
-    if (d === "Mac") return "Touch ID";
-    if (d === "Windows") return "Windows Hello";
-    return "fingerprint or face";
-  }
-  /* Can this browser do it at all. The answer is a guess until the first try. */
-  function canOffer(force) {
-    if (!ok() || declined() || (read() && !force)) return Promise.resolve(false);
-    try { localStorage.setItem("__pk", "1"); localStorage.removeItem("__pk"); } catch (e) { return Promise.resolve(false); }
-    var caps = PublicKeyCredential.getClientCapabilities ? PublicKeyCredential.getClientCapabilities() : Promise.resolve(null);
-    return caps.then(function (c) {
-      if (c && (c["extension:prf"] === false || c.userVerifyingPlatformAuthenticator === false)) return false;
-      if (c && c.userVerifyingPlatformAuthenticator === true) return true;
-      return PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable ? PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable() : false;
-    }).catch(function () { return false; });
-  }
-  function keyFrom(prf) { return crypto.subtle.importKey("raw", prf, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]); }
-  function prfOf(cred) { var r = cred.getClientExtensionResults(); return r && r.prf && r.prf.results && r.prf.results.first ? r.prf.results.first : null; }
-  function seal(prf, pw, id, salt) {
-    var iv = rnd(12);
-    return keyFrom(prf).then(function (k) { return crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, k, enc.encode(pw)); })
-      .then(function (ct) {
-        localStorage.setItem(cfg.store, JSON.stringify({ id: b64(id), salt: b64(salt), iv: b64(iv), ct: b64(ct), t: Date.now() }));
-        try { localStorage.removeItem(cfg.store + ".no"); } catch (e) {}
-        pending = null;
-      });
-  }
-  function ask(id, salt) {
-    return navigator.credentials.get({ publicKey: {
-      challenge: rnd(32), rpId: location.hostname, userVerification: "required", timeout: 120000,
-      allowCredentials: [{ type: "public-key", id: id, transports: ["internal", "hybrid"] }],
-      extensions: { prf: { eval: { first: salt } } }
-    } });
-  }
-  /* First time: make the passkey, then lock the password with it. */
-  function enrol(pw) {
-    if (!ok()) return Promise.reject(err("unsupported"));
-    var salt = rnd(32), name = cfg.name + " " + device();
-    return navigator.credentials.create({ publicKey: {
-      rp: { name: cfg.name, id: location.hostname },
-      user: { id: rnd(16), name: name, displayName: name },
-      challenge: rnd(32), timeout: 120000,
-      pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
-      authenticatorSelection: { authenticatorAttachment: "platform", residentKey: "required", userVerification: "required" },
-      attestation: "none",
-      extensions: { prf: { eval: { first: salt } } }
-    } }).then(function (cred) {
-      var r = cred.getClientExtensionResults() || {};
-      if (!r.prf || r.prf.enabled === false) { decline(); throw err("noprf"); }
-      var prf = prfOf(cred);
-      if (prf) return seal(prf, pw, cred.rawId, salt);
-      // Some phones only hand the key over on a sign in, so do one straight away. Safari
-      // wants a fresh tap for that, which the page asks for if this is refused.
-      pending = { id: cred.rawId, salt: salt, pw: pw };
-      return finish();
-    });
-  }
-  function finish() {
-    if (!pending) return Promise.reject(err("nothing"));
-    var p = pending;
-    return ask(p.id, p.salt).then(function (cred) {
-      var prf = prfOf(cred);
-      if (!prf) { decline(); throw err("noprf"); }
-      return seal(prf, p.pw, p.id, p.salt);
-    });
-  }
-  /* Every time after: the passkey unlocks the password. */
-  function unlock() {
-    var s = read(); if (!s) return Promise.reject(err("none"));
-    return ask(unb64(s.id), unb64(s.salt)).then(function (cred) {
-      var prf = prfOf(cred); if (!prf) throw err("noprf");
-      return keyFrom(prf).then(function (k) { return crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(s.iv) }, k, unb64(s.ct)); })
-        .then(function (pt) { return dec.decode(pt); }, function () { throw err("broken"); });
-    });
-  }
-  /* Sort a failure into something the page can act on. */
-  function why(e, tapped) {
-    var c = e && (e.code || e.name) || "";
-    if (c === "NotAllowedError" || c === "AbortError" || c === "TimeoutError") return tapped ? "cancel" : "notap";
-    if (c === "cancel" || c === "notap" || c === "noprf" || c === "broken" || c === "none" || c === "nothing") return c;
-    if (c === "InvalidStateError") return "cancel";
-    return "unsupported";
-  }
-  return { setup: function (c) { cfg = c; }, ok: ok, ready: ready, canOffer: canOffer, enrol: enrol, finish: finish, unlock: unlock,
-    forget: forget, decline: decline, needsTap: function () { return !!pending; }, bio: bio, device: device, why: why };
-})();
-
-/* The sign in screen. One card in the middle of the screen. With a passkey on this device it
-   is a single tap, otherwise it is the password once, then an offer to switch to Face ID. */
-window.Gate = (function () {
-  var el, cb = {}, busy = false, held = "", was = false, title = "", mode = "";
-  var FACE = '<path d="M4 8.5V6.5A2.5 2.5 0 0 1 6.5 4h2M15.5 4h2A2.5 2.5 0 0 1 20 6.5v2M20 15.5v2a2.5 2.5 0 0 1-2.5 2.5h-2M8.5 20h-2A2.5 2.5 0 0 1 4 17.5v-2"/><path d="M9 9.3v1.4M15 9.3v1.4M8.7 14.2c.8 1.1 2 1.7 3.3 1.7s2.5-.6 3.3-1.7"/>';
-  var PRINT = '<path d="M6 8.2A6.8 6.8 0 0 1 18.8 11c0 2.6-.3 5.1-1 7.4"/><path d="M8.4 9.6A4.3 4.3 0 0 1 16.3 11c0 3.4-.5 6.3-1.5 8.8"/><path d="M10.6 11.1a1.4 1.4 0 0 1 2.8 0c0 3.6-.7 6.7-2 9.4"/><path d="M12 13.9c0 2.4-.5 4.6-1.5 6.8"/><path d="M5.4 11c0 2.6-.2 4.9-.8 7"/>';
-  function $(id) { return document.getElementById(id); }
-  function msg(e) {
-    return e === "wrong_password" ? "That password isn't right." : e === "locked" ? "Too many tries. Wait 10 minutes." :
-      e === "no_password" ? "Sign in isn't set up yet." : e === "net" ? "No connection. Check it and try again." : "Couldn't sign in. Try again.";
-  }
-  function note(t, kind) { var n = $("gateNote"); if (!n) return; n.textContent = t || ""; n.className = "gate-note" + (kind ? " " + kind : ""); }
-  function set(m) {
-    mode = m; el.setAttribute("data-mode", m);
-    $("gateTitle").textContent = m === "offer" ? "Use " + PK.bio() + " next time?" : m === "finish" ? "One more step" : m === "settings" ? "Signed in" : title;
-    if (m === "pw") focusPw();
-  }
-  function focusPw() {
-    if (!(window.matchMedia && matchMedia("(hover:hover) and (pointer:fine)").matches)) return;
-    setTimeout(function () { var i = $("pw"); if (i && mode === "pw") i.focus(); }, 60);
-  }
-  function setBusy(on, id, txt) {
-    busy = on; el.classList.toggle("busy", on);
-    var b = id && $(id), s = b && (b.querySelector("span") || b);
-    if (s) { if (on) { s.dataset.was = s.textContent; s.textContent = txt; } else if (s.dataset.was) { s.textContent = s.dataset.was; delete s.dataset.was; } }
-  }
-  function glyphs() {
-    var apple = /iPhone|iPad|Mac/.test(PK.device());
-    var svgs = el.querySelectorAll(".gate-btn svg");
-    for (var i = 0; i < svgs.length; i++) svgs[i].innerHTML = apple ? FACE : PRINT;
-    var back = $("gateBack"); if (back) back.textContent = "Use " + PK.bio();
-    var off = $("setFaceOff"); if (off) off.textContent = "Turn off " + PK.bio() + " on this device";
-  }
-  /* Open the screen. msg is a reason, like being signed out after 8 hours. */
-  function show(m) {
-    el.classList.remove("hide", "off");
-    was = PK.ready();
-    var back = $("gateBack"); if (back) back.hidden = !was;
-    note(m || "", m ? "bad" : "");
-    var pwIn = $("pw"); if (pwIn) pwIn.value = "";
-    if (was) { set("face"); face(false); }
-    else { set("pw"); if (!m && cb.storeBlocked && cb.storeBlocked()) note("Private tab. You'll have to sign in again next time."); }
-  }
-  function hide() { el.classList.add("off"); setTimeout(function () { el.classList.add("hide"); el.classList.remove("off"); }, 240); }
-  function enter() { held = ""; hide(); cb.enter(); }
-  /* Password typed in. */
-  function submit() {
-    if (busy) return;
-    var pw = $("pw").value;
-    if (!pw) { note("Type the password.", "bad"); focusPw(); return; }
-    note(""); setBusy(true, "siBtn", "Signing in");
-    cb.login(pw).then(function (r) {
-      if (r && r.ok) { $("pw").value = ""; after(pw); }
-      else note(msg(r && r.error), "bad");
-    }).catch(function () { note(msg("net"), "bad"); }).then(function () { setBusy(false, "siBtn"); });
-  }
-  /* Signed in with the password: offer the switch, unless this device already has it. */
-  function after(pw) {
-    PK.canOffer(was).then(function (can) {
-      if (can) { held = pw; set("offer"); note(""); }
-      else enter();
-    });
-  }
-  /* The passkey unlocks the password, which signs in like normal. */
-  function face(tapped) {
-    if (busy) return;
-    note(""); setBusy(true, "gateFace", "Signing in");
-    PK.unlock().then(function (pw) {
-      return cb.login(pw).then(function (r) {
-        if (r && r.ok) return enter();
-        if (r && r.error === "wrong_password") { PK.forget(); was = false; $("gateBack").hidden = true; set("pw"); note("The password has changed. Type it once.", "bad"); return; }
-        note(msg(r && r.error), "bad");
-      }, function () { note(msg("net"), "bad"); });
-    }).catch(function (e) {
-      var w = PK.why(e, tapped);
-      if (w === "cancel" || w === "notap") return;
-      PK.forget(); was = false; $("gateBack").hidden = true; set("pw");
-    }).then(function () { setBusy(false, "gateFace"); });
-  }
-  function offerOn() {
-    if (busy || !held) return;
-    note(""); setBusy(true, "offerOn", "Setting up");
-    PK.enrol(held).then(function () { done(true); }).catch(function (e) {
-      if (PK.needsTap()) { set("finish"); return; }
-      if (PK.why(e, true) === "cancel") PK.decline();
-      done(false);
-    }).then(function () { setBusy(false, "offerOn"); });
-  }
-  function finish() {
-    if (busy) return;
-    note(""); setBusy(true, "finishBtn", "Finishing");
-    PK.finish().then(function () { done(true); }).catch(function (e) {
-      if (PK.why(e, true) === "cancel") note("Didn't finish. Tap Finish to try again.", "bad");
-      else done(false);
-    }).then(function () { setBusy(false, "finishBtn"); });
-  }
-  function done(on) { if (on && cb.toast) cb.toast(PK.bio() + " is on"); enter(); }
-  function skip() { PK.decline(); enter(); }
-  /* The settings view, for pages with one: sign out, or turn the passkey off here. */
-  function settings() {
-    el.classList.remove("hide", "off"); set("settings");
-    var off = $("setFaceOff"); if (off) off.hidden = !PK.ready();
-    note("Signed in on this device.", "good");
-  }
-  function wire() {
-    var f = $("signin"); if (f) f.addEventListener("submit", function (e) { e.preventDefault(); submit(); });
-    on("pwEye", function (b) { var k = $("pw"), s = k.type === "password"; k.type = s ? "text" : "password"; b.textContent = s ? "Hide" : "Show"; k.focus(); });
-    on("gateFace", function () { face(true); });
-    on("gatePw", function () { set("pw"); note(""); });
-    on("gateBack", function () { set("face"); face(true); });
-    on("offerOn", offerOn); on("offerNo", skip);
-    on("finishBtn", finish); on("finishNo", skip);
-    on("setDone", function () { hide(); });
-    on("setOut", function () { if (cb.signOut) cb.signOut(); });
-    on("setFaceOff", function (b) { PK.forget(); b.hidden = true; note(PK.bio() + " is off on this device.", "good"); });
-  }
-  function on(id, fn) { var b = $(id); if (b) b.addEventListener("click", function () { fn(b); }); }
-  return {
-    init: function (o) { cb = o; el = $("gate"); title = $("gateTitle").textContent; glyphs(); wire(); },
-    show: show, hide: hide, settings: settings, note: note, busy: function () { return busy; }
-  };
-})();
-</script>
 <script>
 // Never run inside another site's page.
 if (window.top !== window.self) { try { window.top.location = window.self.location; } catch (e) { document.documentElement.innerHTML = ""; } }
 
-/* PPR Logistics. The restock order shared with the labs. It needs the password to open and
-   signs itself out after 8 hours. The password, the order and the WhatsApp number are never in
-   this file; they come from the script after sign in. Money is kept in USD and shown in USD or
-   AUD. The last order is kept on this device so the page shows straight away, then it checks
-   for anything newer. */
+/* PPR Logistics order. People pick from the price list, set the amounts, add packaging and designs,
+   and see everything at PPR's prices. No supplier prices are in this file, and the script only ever
+   sends PPR's prices. Everything syncs, so every device sees the same order within about 10 seconds.
+   It needs the password to open and signs itself out after 8 hours. Money is kept in USD and shown in
+   USD or AUD; packaging is priced in AUD. */
 (function () {
-  var EP = "https://script.google.com/macros/s/AKfycby6GS7W7o7sFKceSUAxrYW6QHKvDyj8D9lljgDYtN3j_cqAEmg6gSj-kh0Oj5xrf_Dr7A/exec";
-  var OUT8 = "";
+  // The Google script link.
+  var EP = "https://script.google.com/macros/s/AKfycbwkfpbVjmepHpUEARAxJ0aF2AWNndlN5WhBbHwsrDQPbUxHsmVdQ13ZpHgyi9JTYwv5KA/exec";
+  var LIVE = /^https:\/\/script\.google\.com\/(a\/macros\/[\w.-]+|macros)\/s\/[\w-]+\/exec$/.test(EP);
+  var RATE0 = 1.43, POLL = 10000, MAXUP = 15 * 1024 * 1024;
+  // The 12 May 2026 price list: part number, name, more detail, vials in the box, other words to find it by.
+  // The prices aren't here. They're kept on the Google script.
+  var LIST = [
+    ["SM5", "Semaglutide 5mg", "", 10],
+    ["SM10", "Semaglutide 10mg", "", 10],
+    ["SM15", "Semaglutide 15mg", "", 10],
+    ["SM20", "Semaglutide 20mg", "", 10],
+    ["SM30", "Semaglutide 30mg", "", 10],
+    ["TR5", "Tirzepatide 5mg", "", 10],
+    ["TR10", "Tirzepatide 10mg", "", 10],
+    ["TR15", "Tirzepatide 15mg", "", 10],
+    ["TR20", "Tirzepatide 20mg", "", 10],
+    ["TR30", "Tirzepatide 30mg", "", 10],
+    ["TR40", "Tirzepatide 40mg", "", 10],
+    ["TR50", "Tirzepatide 50mg", "", 10],
+    ["TR60", "Tirzepatide 60mg", "", 10],
+    ["RT5", "Retatrutide 5mg", "", 10],
+    ["RT10", "Retatrutide 10mg", "", 10],
+    ["RT15", "Retatrutide 15mg", "", 10],
+    ["RT20", "Retatrutide 20mg", "", 10],
+    ["RT30", "Retatrutide 30mg", "", 10],
+    ["RT60", "Retatrutide 60mg", "", 10],
+    ["H10", "HGH 10IU", "", 10],
+    ["H15", "HGH 15IU", "", 10],
+    ["H24", "HGH 24IU", "", 10],
+    ["H36", "HGH 36IU", "", 10],
+    ["BPC5", "BPC 157 5mg", "", 10],
+    ["BPC10", "BPC 157 10mg", "", 10],
+    ["TB5", "TB500 5mg", "", 10],
+    ["TB10", "TB500 10mg", "", 10],
+    ["BB10", "BPC 5mg + TB 5mg", "", 10, "bpc157 tb500"],
+    ["BB20", "BPC 10mg + TB 10mg", "", 10, "bpc157 tb500"],
+    ["2S5", "SS-31 5mg", "", 10],
+    ["2S10", "SS-31 10mg", "", 10],
+    ["2S50", "SS-31 50mg", "", 10],
+    ["SL332", "SLU-PP-332 5mg", "", 10],
+    ["CND5", "CJC-1295 no DAC 5mg", "", 10],
+    ["CND10", "CJC-1295 no DAC 10mg", "", 10],
+    ["CP10", "CJC-1295 no DAC 5mg + IPA 5mg", "", 10, "ipamorelin"],
+    ["CD2", "CJC-1295 with DAC 2mg", "", 10],
+    ["CD5", "CJC-1295 with DAC 5mg", "", 10],
+    ["AOD5", "AOD9604 5mg", "", 10, "5AD"],
+    ["AOD10", "AOD9604 10mg", "", 10, "10AD"],
+    ["IGF-01", "IGF-1 LR3 0.1mg", "", 10],
+    ["IGF-1", "IGF-1 LR3 1mg", "", 10],
+    ["MS5", "MOTS-c 5mg", "", 10],
+    ["MS10", "MOTS-c 10mg", "", 10],
+    ["MS40", "MOTS-c 40mg", "", 10],
+    ["MT1", "MT-1 10mg", "", 10, "melanotan"],
+    ["MT2", "MT-2 10mg", "Melanotan 2 Acetate", 10],
+    ["ET10", "Epithalon 10mg", "", 10],
+    ["ET50", "Epithalon 50mg", "", 10],
+    ["G25", "GHRP-2 Acetate 5mg", "", 10],
+    ["G210", "GHRP-2 Acetate 10mg", "", 10],
+    ["G65", "GHRP-6 Acetate 5mg", "", 10],
+    ["G610", "GHRP-6 Acetate 10mg", "", 10],
+    ["PT41", "PT-141 10mg", "", 10],
+    ["SK5", "Selank 5mg", "", 10],
+    ["SK10", "Selank 10mg", "", 10],
+    ["XA5", "Semax 5mg", "", 10],
+    ["XA10", "Semax 10mg", "", 10],
+    ["TSM5", "Tesamorelin 5mg", "", 10],
+    ["TSM10", "Tesamorelin 10mg", "", 10],
+    ["SMO5", "Sermorelin Acetate 5mg", "", 10],
+    ["SMO10", "Sermorelin Acetate 10mg", "", 10],
+    ["TA5", "Thymosin Alpha-1 5mg", "", 10],
+    ["TA10", "Thymosin Alpha-1 10mg", "", 10],
+    ["IP5", "Ipamorelin 5mg", "", 10],
+    ["IP10", "Ipamorelin 10mg", "", 10],
+    ["MAZ5", "Mazdutide 5mg", "", 10],
+    ["MAZ10", "Mazdutide 10mg", "", 10],
+    ["CGL5", "Cagrilintide 5mg", "", 10],
+    ["CGL10", "Cagrilintide 10mg", "", 10],
+    ["SUR2", "Survodutide 2mg", "", 10],
+    ["SUR5", "Survodutide 5mg", "", 10],
+    ["SUR10", "Survodutide 10mg", "", 10],
+    ["NJ500", "NAD+ 500mg", "", 10],
+    ["NJ1000", "NAD+ 1000mg", "", 10],
+    ["CU50", "GHK-Cu 50mg", "", 10],
+    ["CU100", "GHK-Cu 100mg", "", 10],
+    ["GLOW70", "GLOW 70mg", "BPC 157 10mg + GHK-Cu 50mg + TB500 10mg", 10],
+    ["KLOW80", "KLOW 80mg", "BPC 157 10mg + GHK-Cu 50mg + TB500 10mg + KPV 10mg", 10],
+    ["KP5", "KPV 5mg", "", 10],
+    ["KP10", "KPV 10mg", "", 10],
+    ["VP5", "VIP 5mg", "", 10],
+    ["VP10", "VIP 10mg", "", 10],
+    ["KS5", "Kisspeptin-10 5mg", "", 10],
+    ["KS10", "Kisspeptin-10 10mg", "", 10],
+    ["DS5", "DSIP 5mg", "", 10],
+    ["DS10", "DSIP 10mg", "", 10],
+    ["OT5", "Oxytocin Acetate 5mg", "", 10],
+    ["OT10", "Oxytocin Acetate 10mg", "", 10],
+    ["HX2", "Hexarelin Acetate 2mg", "", 10],
+    ["HX5", "Hexarelin Acetate 5mg", "", 10],
+    ["AP2", "Adipotide 2mg", "", 10],
+    ["AP5", "Adipotide 5mg", "", 10],
+    ["FMP2", "PEG MGF 2mg", "", 10],
+    ["G10K", "HCG 10000IU", "", 10],
+    ["G5K", "HCG 5000IU", "", 10],
+    ["G2K", "HCG 2000IU", "", 10],
+    ["IGD", "IGF-DES 2mg", "", 10],
+    ["LL375", "LL37 5mg", "", 10],
+    ["LC600", "L Carnitine 600mg", "", 10],
+    ["LC1200", "L Carnitine 1200mg", "", 10],
+    ["LC216", "LC216 216mg", "Red", 10, "carnitine"],
+    ["LC526", "LC526 526mg", "", 10, "carnitine"],
+    ["TY10", "Thymalin 10mg", "", 10],
+    ["GT600", "Glutathione 600mg", "", 10],
+    ["GT1500", "Glutathione 1500mg", "", 10, "GTT"],
+    ["GND2", "Gonadorelin 2mg", "", 10],
+    ["GND5", "Gonadorelin 5mg", "", 10],
+    ["MT10", "Melatonin 10mg", "", 10],
+    ["5AM", "5-Amino-1MQ 5mg", "", 10],
+    ["10AM", "5-Amino-1MQ 10mg", "", 10],
+    ["50AM", "5-Amino-1MQ 50mg", "", 10],
+    ["G75", "HMG 75IU", "", 10],
+    ["NP810", "Snap-8 10mg", "", 10],
+    ["RA10", "Ara-290 10mg", "", 10],
+    ["CS10", "Cagrilintide 5mg + Semaglutide 5mg", "", 10],
+    ["FM2", "MGF 2mg", "", 10],
+    ["AE1", "ACE-031 1mg", "", 10],
+    ["AR50", "AICAR 50mg", "", 10],
+    ["XT100", "Botulinum toxin 100IU", "", 1, "botox"],
+    ["ADM5", "Ad max 5mg", "", 10, "adamax"],
+    ["ADM10", "Ad max 10mg", "", 10, "adamax"],
+    ["FOX10", "FOXO4-DRI 10mg", "", 10, "fox04"],
+    ["PIN5", "Pinealon 5mg", "", 10],
+    ["PIN10", "Pinealon 10mg", "", 10],
+    ["Bac3", "Bac water 3ml", "", 10, "bacteriostatic"],
+    ["Bac10", "Bac water 10ml", "", 10, "bacteriostatic"],
+    ["", "AA water 10ml", "Acetic acid solution 1%", 10],
+    ["Lipo-C", "Lc120 10ml", "", 10],
+    ["", "Lemon bottle 10ml", "", 10],
+    ["", "B12 injection 10ml", "1mg/ml", 10]
+  ];
   var STAGES = [["draft", "Not placed yet"], ["placed", "Order placed"], ["looking", "Being looked at"],
     ["payreq", "Payment requested"], ["paid", "Payment made"], ["ordered", "Ordered"],
     ["making", "Being made"], ["sent", "Sent"], ["delivered", "Delivered"]];
-  var AUTH = null, D = null, CUR = "usd", WA = null, busy = false, lastLoad = 0, saveT = null, saving = false,
-    dirty = false, toastT = null, outT = null, ASK = null, SAVES = null, CMP = { a: "cur", b: "" };
-  try { CUR = localStorage.getItem("pprlog.cur") === "aud" ? "aud" : "usd"; } catch (e) {}
-  try { AUTH = JSON.parse(localStorage.getItem("pprlog.auth") || "null"); } catch (e) { AUTH = null; }
-  // Who is using it: the kind of device, and an ID that stays with this browser.
-  var DID = "", DEV = devName(), VISITED = false;
-  try { localStorage.removeItem("pprlog.who"); } catch (e) {}
-  try { DID = localStorage.getItem("pprlog.did") || ""; if (!/^[A-Z0-9]{6}$/.test(DID)) { DID = rand6(); localStorage.setItem("pprlog.did", DID); } } catch (e) { DID = rand6(); }
-  function rand6() { var c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789", s = ""; for (var i = 0; i < 6; i++) s += c.charAt(Math.floor(Math.random() * c.length)); return s; }
-  function devName() {
-    var u = navigator.userAgent || "";
-    var os = /iPhone/.test(u) ? "iPhone" : /iPad/.test(u) ? "iPad" : /Android/.test(u) ? "Android" : /Mac OS X/.test(u) ? "Mac" : /Windows/.test(u) ? "Windows" : /Linux/.test(u) ? "Linux" : "Other";
-    var br = /Edg\//.test(u) ? "Edge" : /CriOS|Chrome\//.test(u) ? "Chrome" : /FxiOS|Firefox\//.test(u) ? "Firefox" : /Safari\//.test(u) ? "Safari" : "Browser";
-    return os + ", " + br;
-  }
+  var K = { auth: "pprorder.auth", last: "pprorder.last", cur: "pprorder.cur", q: "pprorder.q", wa: "pprorder.wa" };
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
-  function rate() { return (D && D.rate) || 1.4; }
+  function norm(s) { return String(s == null ? "" : s).toLowerCase().replace(/[^a-z0-9+]/g, ""); }
+  function slug(s) { return String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, ""); }
+  function newId() { return "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
+  function r4(v) { return Math.round(v * 10000) / 10000; }
+  function clip(s, n) { return String(s == null ? "" : s).replace(/[<>"`]/g, "").replace(/\s+/g, " ").trim().slice(0, n); }
+
+  function ownerOp(o) { return !!o && (o.t === "price" || o.t === "pprice" || o.t === "ship"); }
+  var P = LIST.map(function (r) {
+    return { k: r[0] || slug(r[1]), sku: r[0], name: r[1], note: r[2], box: r[3], hay: norm([r[1], r[0], r[2], r[4] || ""].join(" ")) };
+  });
+  var PK = {}; P.forEach(function (p) { PK[p.k] = p; });
+
+  var AUTH = null, SRV = null, D = null, V = -1, CUR = "usd", RATE = RATE0, WA = null, SAVES = null,
+    SCAT = {}, PRS = { box: 0, label: 0, ship: 0 }, PRC = null, OTOK = null, PROFIT = null,
+    FILES = null, FV = -1, UPS = [], VIEWURL = "", filesBusy = false,
+    Q = [], INF = null, sendErr = false, NEEDR = false, busy = false,
+    NOTES = "", WA_HIDE = false, VIEW = "order", LAST_ACT = Date.now(), IDLE_LOCK = 5 * 60000, PQ = [], PINF = null, psendT = null, PBUSY = false, TAPS = [],
+    sendT = null, pollT = null, outT = null, toastT = null, rendT = null, ASK = null, CMP = { a: "cur", b: "" };
+  try { CUR = localStorage.getItem(K.cur) === "aud" ? "aud" : "usd"; } catch (e) {}
+  try { AUTH = JSON.parse(localStorage.getItem(K.auth) || "null"); } catch (e) { AUTH = null; }
+  WA = waStored();
+  // Changes that hadn't reached the script yet when the page was last closed go up again.
+  try { Q = (JSON.parse(localStorage.getItem(K.q) || "[]") || []).filter(function (o) { return o && typeof o.t === "string" && !ownerOp(o); }); } catch (e) { Q = []; }
+
+  function rate() { return RATE; }
   function show(usd) { return CUR === "aud" ? usd * rate() : usd; }
   function toUsd(v) { return CUR === "aud" ? v / rate() : v; }
   function money(v, cur) {
@@ -574,111 +507,356 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     return "$" + n + (cur ? " " + cur.toUpperCase() : "");
   }
   function num(s) { var v = parseFloat(String(s == null ? "" : s).replace(/[^0-9.]/g, "")); return isFinite(v) ? v : 0; }
+  function numTxt(v) { return String(Math.round(v * 100) / 100); }
   function fix(v) { return (Math.round(show(v) * 100) / 100).toFixed(2); }
   function toast(t) { var el = $("toast"); el.textContent = t; el.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(function () { el.classList.remove("on"); }, 2200); }
   function state(kind, text) { var el = $("state"); el.className = "state" + (kind ? " " + kind : ""); el.textContent = text || ""; }
+  function clock() { return new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
   function note(kind, title, text) {
     var icon = kind === "ok"
       ? '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>'
       : '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v5.5"/><path d="M12 16.5h.01"/></svg>';
     $("body").innerHTML = '<div class="msg ' + kind + '">' + icon + '<h2>' + esc(title) + '</h2><p>' + esc(text) + '</p></div>';
   }
-  function post(body, signal) {
-    body.dev = DEV; body.did = DID;
-    return fetch(EP, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(body), signal: signal })
-      .then(function (r) { return r.json(); });
-  }
   function stageIx(s) { for (var i = 0; i < STAGES.length; i++) if (STAGES[i][0] === s) return i; return 0; }
+  function hasStage(s) { for (var i = 0; i < STAGES.length; i++) if (STAGES[i][0] === s) return true; return false; }
   function fmtTime(t) {
     var d = new Date(t); if (isNaN(d)) return "";
     return d.toLocaleString([], { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
   }
   function whenFor(s) { var t = ""; (D.history || []).forEach(function (h) { if (h.s === s) t = h.t; }); return t ? fmtTime(t) : ""; }
+  function vials(n) { return n + (n === 1 ? " vial" : " vials"); }
+  // Once the code is in, every request carries the key the script gave for it. Big uploads get longer.
+  function post(body, keep, ms) {
+    if (OTOK && body.action !== "login") body.otok = OTOK;
+    var ctrl = window.AbortController && !keep ? new AbortController() : null;
+    var timer = ctrl ? setTimeout(function () { ctrl.abort(); }, ms || 25000) : null;
+    return fetch(EP, { method: "POST", redirect: "follow", headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(body), signal: ctrl ? ctrl.signal : undefined, keepalive: !!keep })
+      .then(function (r) { return r.json(); })
+      .then(function (j) { clearTimeout(timer); return j; }, function (e) { clearTimeout(timer); throw e; });
+  }
 
-  /* ---------- signing in and out ---------- */
+  /* ---------- signing in and out ----------
+     The phone saves the number password the first time and fills it in with Face ID after that. */
   function signedIn() { return !!(AUTH && AUTH.pass && AUTH.exp > Date.now()); }
   function armExpiry() {
     clearTimeout(outT);
-    if (signedIn()) outT = setTimeout(function () { signOut(OUT8); }, Math.min(AUTH.exp - Date.now() + 500, 2147000000));
+    if (signedIn()) outT = setTimeout(function () { signOut(); }, Math.min(AUTH.exp - Date.now() + 500, 2147000000));
   }
-  function signOut(msg, manual) {
-    if (manual && AUTH) post({ labs: 1, action: "bye", pass: AUTH.pass }).catch(function () {});
-    IN = false;
-    AUTH = null; D = null; WA = null; SAVES = null; lastLoad = 0; dirty = false; clearTimeout(saveT); clearTimeout(outT); closeSheet();
-    try { localStorage.removeItem("pprlog.auth"); localStorage.removeItem("pprlog.last"); } catch (e) {}
-    showSignIn(msg || "");
+  function signOut(manual) {
+    if (manual && AUTH) post({ action: "bye", pass: AUTH.pass }).catch(function () {});
+    // Signing out on purpose drops anything unsaved. Running out of time keeps it to send after the next sign in.
+    if (manual) { Q = []; INF = null; saveQ(); waStore(null); }
+    AUTH = null; SRV = null; D = null; V = -1; WA = null; SAVES = null; NEEDR = false; FILES = null; FV = -1;
+    OTOK = null; PROFIT = null; PRC = null; VIEW = "order"; PQ = []; PINF = null; clearTimeout(psendT);
+    clearTimeout(sendT); clearTimeout(pollT); clearTimeout(outT); closeSheet();
+    try { localStorage.removeItem(K.auth); localStorage.removeItem(K.last); } catch (e) {}
+    showSignIn("");
   }
   function showSignIn(msg) {
     document.body.classList.add("out"); state("", "");
-    $("sub").textContent = "Restock order";
-    $("body").innerHTML = "";
-    Gate.show(msg || "");
-    if (!VISITED) { VISITED = true; post({ labs: 1, action: "visit" }).catch(function () {}); }
+    $("body").innerHTML =
+      '<form id="signin" class="si" novalidate autocomplete="on" action="#">' +
+        '<div class="si-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8.5 11V7.5a3.5 3.5 0 0 1 7 0V11"/></svg></div>' +
+        '<h2>PPR Logistics</h2>' +
+        // A name for the phone to save the password under, kept out of sight.
+        '<input type="text" name="username" autocomplete="username" value="PPR order" tabindex="-1" aria-hidden="true" style="display:none">' +
+        '<input class="si-pw" id="pw" name="password" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="Password" aria-label="Password">' +
+        '<p class="si-err" id="siErr" role="alert">' + esc(msg) + '</p>' +
+        '<button class="cta" type="submit" id="siBtn">Sign in</button>' +
+      '</form>';
+    setTimeout(function () { var i = $("pw"); if (i) i.focus(); }, 50);
   }
-  /* The password goes to the script once and an 8 hour pass comes back. Typed or unlocked
-     with Face ID, it is the same call. */
-  function login(pw) {
-    return post({ labs: 1, action: "login", pw: pw }).then(function (j) {
+  function signIn(pw) {
+    var btn = $("siBtn"), err = $("siErr");
+    if (!pw) { err.textContent = "Type the password first."; return; }
+    btn.disabled = true; btn.textContent = "Signing in"; err.textContent = "";
+    post({ action: "login", pw: pw }).then(function (j) {
       if (j && j.ok && j.pass) {
-        AUTH = { pass: j.pass, exp: +j.exp };
-        try { localStorage.setItem("pprlog.auth", JSON.stringify(AUTH)); } catch (e) {}
-        if (j.data && j.data.ok) { build(j.data); lastLoad = Date.now(); FRESH = true; }   // the script can send the order back with the pass
-        enter();
-        return { ok: true };
+        AUTH = { pass: j.pass, exp: +j.exp }; WA = waStored(); WA_HIDE = false;
+        try { localStorage.setItem(K.auth, JSON.stringify(AUTH)); } catch (e) {}
+        document.body.classList.remove("out"); armExpiry(); load(false);
+        if (Q.length) send();
+        return;
       }
-      return { ok: false, error: j && j.error };
+      var e = j && j.error;
+      if ($("siErr")) $("siErr").textContent = e === "wrong_password" ? "That password isn't right." :
+        e === "locked" ? "Too many tries. Wait 10 minutes, then try again." :
+        e === "no_password" ? "Sign in isn't set up yet." : "Couldn't sign in. Try again.";
+    }).catch(function () { if ($("siErr")) $("siErr").textContent = "No connection. Check it and try again."; })
+      .then(function () { var b = $("siBtn"); if (b) { b.disabled = false; b.textContent = "Sign in"; } });
+  }
+
+  /* ---------- prices ----------
+     Everyone gets your price per vial from the script. On a device with the code it's worked out here
+     from the cost and your markup, so a change shows straight away. "cost" is what you pay the
+     supplier, "sell" is what people ordering pay. */
+  function owner() { return !!(OTOK && PROFIT && PRC); }
+  function kindNow() { return VIEW === "cost" && owner() ? "cost" : "sell"; }
+  function mk() { return PROFIT && +PROFIT.markup >= 0 ? +PROFIT.markup : 0; }
+  function pmk() { return PROFIT && +PROFIT.pmarkup >= 0 ? +PROFIT.pmarkup : 0; }
+  function skey(it) { return it.k || "n:" + norm(it.name); }
+  function hasSell(k) { return !!(PROFIT && PROFIT.sell && +PROFIT.sell[k] > 0); }
+  function sellOf(it) {
+    if (!owner()) return +it.sell || 0;
+    var k = skey(it);
+    return hasSell(k) ? PROFIT.sell[k] / rate() : (+it.price || 0) * (1 + mk() / 100);
+  }
+  function catCost(p) { return owner() && +PROFIT.cat[p.k] > 0 ? +PROFIT.cat[p.k] : 0; }
+  function catSell(p) { if (!owner()) return +SCAT[p.k] || 0; return hasSell(p.k) ? PROFIT.sell[p.k] / rate() : catCost(p) * (1 + mk() / 100); }
+  // The member list's price for how many of a product are on the order: 10 to 40, 50 to 90, 100 to 200, 300 plus.
+  function tierOf(m, q) { q = +q || 0; return q >= 300 ? m[5] : q >= 100 ? m[4] : q >= 50 ? m[3] : m[2]; }
+  function memberOf(it) { return owner() && !it.hand && it.k && PROFIT.member ? PROFIT.member[it.k] || null : null; }
+  // What it costs you at the amount on the order: the cheaper of the price list and the member list.
+  function costAt(it) { var c = +it.price || 0, m = memberOf(it); return m ? Math.min(c, tierOf(m, it.qty)) : c; }
+  // The code to order it with: the member list's code when that's where the cheaper price is.
+  function fromMember(it) { var m = memberOf(it); return !!m && tierOf(m, it.qty) < m[1]; }
+  function srcCode(it) { return fromMember(it) ? PROFIT.member[it.k][0] : it.sku; }
+  function unit(it, kind) { return kind === "cost" ? costAt(it) : sellOf(it); }
+  function catUnit(p, kind) { return kind === "cost" ? catCost(p) : catSell(p); }
+  // Packaging, in AUD: your cost, or what people pay with the packaging markup on top.
+  function packPrices(kind) {
+    if (!owner()) return PRS;
+    if (kind === "cost") return PRC;
+    var m = 1 + pmk() / 100;
+    return { box: PRC.box * m, label: PRC.label * m, ship: PRC.ship * m };
+  }
+
+  /* ---------- the order, as the script has it plus anything not sent yet ---------- */
+  function fresh() { return { items: [], shipUsd: 0, status: "draft", history: [], pack: { on: true, boxes: null, labels: null } }; }
+  function cnt(v) { return v == null || v === "" || !isFinite(+v) ? null : Math.max(0, Math.round(+v)); }
+  function cleanItem(it) {
+    if (!it || !it.name) return null;
+    var k = it.k && PK[it.k] ? String(it.k) : "";
+    return { id: String(it.id || newId()), k: k, sku: clip(it.sku, 20), name: clip(it.name, 80),
+      box: Math.max(1, Math.round(+it.box) || (k ? PK[k].box : 10)),
+      qty: Math.max(0, Math.round(+it.qty) || 0), sell: Math.max(0, +it.sell || 0), price: OTOK ? Math.max(0, +it.price || 0) : 0,
+      hand: OTOK ? !!it.hand : false };
+  }
+  function cleanOrder(o) {
+    if (!o || typeof o !== "object") return fresh();
+    var items = []; (Array.isArray(o.items) ? o.items : []).forEach(function (it) { var c = cleanItem(it); if (c) items.push(c); });
+    var pk = o.pack || {};
+    return { items: items, shipUsd: Math.max(0, +o.shipUsd || 0), status: hasStage(o.status) ? o.status : "draft",
+      history: (Array.isArray(o.history) ? o.history : []).filter(function (h) { return h && hasStage(h.s) && h.t; })
+        .map(function (h) { return { s: h.s, t: String(h.t) }; }),
+      pack: { on: pk.on !== false, boxes: cnt(pk.boxes), labels: cnt(pk.labels) } };
+  }
+  function cleanPrices(p) { p = p || {}; return { box: Math.max(0, +p.box || 0), label: Math.max(0, +p.label || 0), ship: Math.max(0, +p.ship || 0) }; }
+  function cleanMap(m) { var o = {}; Object.keys(m || {}).forEach(function (k) { if (+m[k] > 0) o[k] = +m[k]; }); return o; }
+  function cleanOwn(o) {
+    o = o || {};
+    var member = {};
+    Object.keys(o.member || {}).forEach(function (k) {
+      var m = o.member[k];
+      if (Array.isArray(m) && m.length === 6 && m.slice(1).every(function (v) { return +v > 0; })) member[k] = [String(m[0])].concat(m.slice(1).map(Number));
+    });
+    return { markup: Math.max(0, +o.markup || 0), pmarkup: Math.max(0, +o.pmarkup || 0), sell: cleanMap(o.sell), cat: cleanMap(o.cat), member: member };
+  }
+  function findIx(op) {
+    for (var i = 0; i < D.items.length; i++) if (D.items[i].id === op.id) return i;
+    if (op.k && op.t !== "del") for (var j = 0; j < D.items.length; j++) if (D.items[j].k === op.k) return j;
+    return -1;
+  }
+  // The same steps the script takes, done here straight away so the page never waits.
+  function applyLocal(op) {
+    if (!D || !op) return;
+    if (op.t === "notes") { NOTES = String(op.v == null ? "" : op.v); return; }
+    if (op.t === "pon") { D.pack.on = !!op.v; return; }
+    if (op.t === "pqty") { if (op.f === "boxes" || op.f === "labels") D.pack[op.f] = cnt(op.v); return; }
+    if (op.t === "add") {
+      var it = cleanItem(op.it); if (!it) return;
+      for (var i = 0; i < D.items.length; i++) if (D.items[i].id === it.id || (it.k && D.items[i].k === it.k)) return;
+      var p = PK[it.k];
+      it.sell = p ? catSell(p) : 0; it.price = p ? catCost(p) : 0;
+      D.items.push(it); return;
+    }
+    if (op.t === "ship") { if (owner()) D.shipUsd = Math.max(0, +op.v || 0); return; }
+    if (op.t === "pprice") { if (owner() && (op.f === "box" || op.f === "label" || op.f === "ship")) PRC[op.f] = Math.max(0, +op.v || 0); return; }
+    var ix = findIx(op); if (ix < 0) return;
+    if (op.t === "del") D.items.splice(ix, 1);
+    else if (op.t === "qty") D.items[ix].qty = Math.max(0, Math.round(+op.v) || 0);
+    else if (op.t === "price" && owner()) { D.items[ix].price = Math.max(0, +op.v || 0); D.items[ix].hand = true; }
+  }
+  function typing() { var ae = document.activeElement; return !!(ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA") && $("body").contains(ae)); }
+  // Take the script's copy of the order, then put back on top anything still on its way up.
+  function adopt(j, cached) {
+    if (!cached && SRV && +j.v < SRV.v) return false;
+    // The key for your prices ran out, or the code was changed: lock them away again.
+    if (j.ownerOut && OTOK) { lockProfit(); toast("Your prices locked again"); return false; }
+    // A reply to something sent before the code went in. The next one will have your prices.
+    if (OTOK && !j.own && !cached) return false;
+    SRV = { v: +j.v || 0, order: j.order, rate: j.rate, pack: j.pack, notes: j.notes, scat: j.scat };
+    NOTES = typeof j.notes === "string" ? j.notes : "";
+    V = SRV.v; RATE = +j.rate >= 0.5 && +j.rate <= 5 ? +j.rate : RATE0;
+    SCAT = cleanMap(j.scat); PRS = cleanPrices(j.pack);
+    if (OTOK && j.own) {
+      PROFIT = cleanOwn(j.own); PRC = cleanPrices(j.packCost);
+      (PINF || []).forEach(applyP); PQ.forEach(applyP);
+    }
+    D = cleanOrder(j.order);
+    (INF || []).forEach(applyLocal); Q.forEach(applyLocal);
+    waCheck();
+    if (!cached && !OTOK) remember();
+    if (typing()) { NEEDR = true; totals(); } else render();
+    if ($("addList")) addSearch();
+    if ($("apList")) apSearch();
+    if (!cached && j.fv != null && +j.fv !== FV) { FV = +j.fv; loadFiles(); }
+    return true;
+  }
+  // A copy of the order kept on this device so the page shows straight away next time. Never your costs.
+  function remember() { if (!SRV || !AUTH) return; try { localStorage.setItem(K.last, JSON.stringify({ exp: AUTH.exp, v: SRV.v, order: SRV.order, rate: SRV.rate, pack: SRV.pack, notes: SRV.notes, scat: SRV.scat })); } catch (e) {} }
+  function remembered() {
+    try { var c = JSON.parse(localStorage.getItem(K.last) || "null"); return c && AUTH && c.exp === AUTH.exp ? c : null; } catch (e) { return null; }
+  }
+  // Changes waiting to save are kept on the device in case the page closes. Price, shipping and packaging
+  // cost changes never are: they only count with the code, and the code never survives a reload anyway.
+  function saveQ() { try { localStorage.setItem(K.q, JSON.stringify((INF || []).concat(Q).filter(function (o) { return !ownerOp(o); }))); } catch (e) {} }
+
+  /* ---------- keeping in step with the script ---------- */
+  function load(manual) {
+    if (busy || !LIVE) return;
+    if (!signedIn()) { if (AUTH) signOut(); return; }
+    busy = true; if (manual) $("refresh").classList.add("spin");
+    if (!D) {
+      var c = remembered();
+      if (c) { adopt(c, true); state("", "Updating"); }
+      else $("body").innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
+    }
+    post({ action: "get", v: SRV ? SRV.v : -1, pass: AUTH.pass }).then(function (j) {
+      if (!AUTH) return;
+      if (j && j.ok) {
+        if (j.ownerOut && OTOK) { lockProfit(); return toast("Your prices locked again"); }
+        if (j.same) { if (manual || $("state").textContent === "Updating") state("", "Updated " + clock()); return; }
+        if (adopt(j)) state("", "Updated " + clock());
+      } else if (j && j.error === "signed_out") signOut();
+      else throw new Error("bad answer");
+    }).catch(function () {
+      if (!AUTH) return;
+      if (D) { if (manual) toast("Couldn't refresh, showing the last order"); if ($("state").textContent === "Updating") state("", ""); }
+      else { state("", ""); note("bad", "Couldn't load the order", "Check your connection and tap refresh."); }
+    }).then(function () { busy = false; var r = $("refresh"); if (r) r.classList.remove("spin"); tick(); });
+  }
+  // Checks the script every 10 seconds while the page is open on screen.
+  function tick() {
+    clearTimeout(pollT);
+    if (!signedIn() || document.hidden) return;
+    pollT = setTimeout(function () {
+      if (!signedIn()) return;
+      if (PQ.length && !PINF) sendP();
+      if (INF) return tick();
+      if (Q.length) { send(); return tick(); }
+      load(false);
+    }, POLL);
+  }
+  function queue(op) {
+    applyLocal(op);
+    // Only the latest qty, price, shipping, packaging or notes needs to go up.
+    if (/^(qty|price|ship|pon|pqty|pprice|notes)$/.test(op.t))
+      Q = Q.filter(function (x) { return !(x.t === op.t && x.id === op.id && x.f === op.f); });
+    Q.push(op); saveQ();
+    state("saving", "Saving");
+    clearTimeout(sendT); sendT = setTimeout(send, 600);
+  }
+  function send(keep) {
+    clearTimeout(sendT);
+    if (INF || !Q.length || !LIVE) return;
+    if (!signedIn()) { if (AUTH) signOut(); return; }
+    var batch = Q; INF = batch; Q = []; saveQ();
+    state("saving", "Saving");
+    post({ action: "ops", ops: batch, pass: AUTH.pass }, keep).then(function (j) {
+      if (j && j.ok) {
+        INF = null; sendErr = false; saveQ();
+        if (!AUTH) return;
+        adopt(j);
+        if (Q.length) { state("saving", "Saving"); sendT = setTimeout(send, 300); }
+        else state("saved", "Saved");
+        if (D && D.status !== "draft" && batch.some(function (o) { return o.t !== "notes"; })) setWa(WA === "placed" ? "placed" : "change");
+      } else if (j && j.error === "signed_out") { Q = batch.concat(Q); INF = null; saveQ(); signOut(); }
+      else throw new Error("not saved");
+    }).catch(function () {
+      if (INF === batch) { Q = batch.concat(Q); INF = null; saveQ(); }
+      sendErr = true;
+      if (AUTH) state("err", "Not saved, tap to retry");
     });
   }
-  var IN = false, FRESH = false;
-  function enter() { if (IN) return; IN = true; document.body.classList.remove("out"); Vw.on(); armExpiry(); load(false); }
-
-  /* ---------- the order ---------- */
-  function build(d) {
-    D = {
-      items: (d.items || []).map(function (i) { return { sku: i.sku, name: i.name, left: i.left, need: +i.need || 0, qty: +i.qty || 0, price: +i.price || 0, base: +i.base || 0, est: !!i.est }; }),
-      extra: (d.extra || []).map(function (x) { return { id: x.id, sku: x.sku || "", name: x.name, left: x.left == null ? null : +x.left, qty: +x.qty || 0, price: +x.price || 0, base: +x.base || 0, est: !!x.est }; }),
-      removed: (d.removed || []).slice(), products: d.products || [], status: d.status || "draft", history: d.history || [],
-      wa: d.wa || "", low: d.low || 15, rate: d.rate || 1.4, shipUsd: +d.shipUsd || 0, shipBase: +d.shipBase || 0
-    };
+  // Waits for anything still saving to land before doing something that needs the latest order.
+  function synced(fn, fail) {
+    var tries = 0;
+    if (Q.length && !INF) { sendErr = false; send(); }
+    (function wait() {
+      if (!AUTH) return fail && fail();
+      if (!INF && !Q.length) return fn();
+      if (!INF && sendErr) { if (fail) fail(); return toast("Couldn't save the last change, try again"); }
+      if (!INF) send();
+      if (++tries > 200) { if (fail) fail(); return toast("Still saving, try again"); }
+      setTimeout(wait, 150);
+    })();
   }
-  function snapshot() {
-    return { items: D.items, extra: D.extra, removed: D.removed, products: D.products, status: D.status, history: D.history,
-      wa: D.wa, low: D.low, rate: D.rate, shipUsd: D.shipUsd, shipBase: D.shipBase };
-  }
-  function remember() { if (!D || !AUTH) return; try { localStorage.setItem("pprlog.last", JSON.stringify({ exp: AUTH.exp, d: snapshot() })); } catch (e) {} }
-  function remembered() {
-    try { var c = JSON.parse(localStorage.getItem("pprlog.last") || "null"); return c && AUTH && c.exp === AUTH.exp ? c.d : null; } catch (e) { return null; }
-  }
-  function all() { return D.items.concat(D.extra); }
-  function sums() {
-    var sub = 0, vials = 0, prods = 0;
-    all().forEach(function (it) { if (it.qty > 0) { sub += it.qty * it.price; vials += it.qty; prods++; } });
-    return { sub: sub, ship: D.shipUsd, total: sub + D.shipUsd, vials: vials, prods: prods };
-  }
-  // A price that came from a backup list, and nobody has changed, is shown as an estimate.
-  function isEst(it) { return !!it.est && it.price > 0 && Math.abs(it.price - it.base) < 0.00005; }
-  function capText(it) { return isEst(it) ? "Price per vial, estimate" : "Price per vial"; }
-  function itemOf(el) {
-    var row = el.closest(".item"); if (!row) return null;
-    return (row.dataset.k === "x" ? D.extra : D.items)[+row.dataset.i] || null;
+  function failed(j, what) {
+    if (j && j.error === "signed_out") { signOut(); return true; }
+    if (j && j.ownerOut && OTOK) { lockProfit(); toast("Your prices locked again"); return true; }
+    if (!j || !j.ok) { toast(what); return true; }
+    return false;
   }
 
-  function rowHtml(it, kind, i) {
-    var pill;
-    if (it.left == null) pill = '<span class="pill add">Added</span>';
-    else pill = '<span class="pill' + (it.left <= 0 ? " out" : it.left < 5 ? " low" : "") + '">' + (it.left <= 0 ? "Out of stock" : it.left + " left") + '</span>';
-    return '<div class="item" data-k="' + kind + '" data-i="' + i + '">' +
+  /* ---------- the order on screen ---------- */
+  function sums(kind) {
+    kind = kind || kindNow();
+    var sub = 0, v = 0, prods = 0, pk = packNow(kind);
+    D.items.forEach(function (it) { if (it.qty > 0) { sub += it.qty * unit(it, kind); v += it.qty; prods++; } });
+    var pack = pk.on ? pk.aud / rate() : 0;
+    return { sub: sub, ship: D.shipUsd, pack: pack, packOn: pk.on, total: sub + D.shipUsd + pack, vials: v, prods: prods };
+  }
+  /* ---------- packaging ----------
+     Custom boxes and vial labels, priced in AUD. By default it's one box per box of vials on the
+     order and one label per vial; type a number in to set it by hand. Its shipping only counts once
+     there's at least one box or label. */
+  function autoBoxes() { var n = 0; D.items.forEach(function (it) { if (it.qty > 0) n += Math.ceil(it.qty / (it.box || 10)); }); return n; }
+  function autoLabels() { var n = 0; D.items.forEach(function (it) { if (it.qty > 0) n += it.qty; }); return n; }
+  function packNow(kind) {
+    var p = D.pack || { on: true, boxes: null, labels: null }, pr = packPrices(kind || kindNow());
+    var boxes = p.boxes == null ? autoBoxes() : p.boxes, labels = p.labels == null ? autoLabels() : p.labels;
+    var b = boxes * pr.box, l = labels * pr.label, s = boxes + labels > 0 ? pr.ship : 0;
+    return { on: !!p.on, boxes: boxes, labels: labels, boxAud: b, labelAud: l, shipAud: s, aud: b + l + s, pr: pr };
+  }
+  function showAud(aud) { return CUR === "aud" ? aud : aud / rate(); }
+  function toAud(v) { return CUR === "aud" ? v : v * rate(); }
+  // Small unit prices keep a third decimal so 15c doesn't turn into 10c in USD.
+  function unitNum(v) { var r = Math.round(v * 1000) / 1000; return r < 1 && Math.round(r * 100) !== r * 100 ? r.toFixed(3) : r.toFixed(2); }
+  function unitMoney(v) { return "$" + unitNum(v); }
+  function fixAud(aud) { return (Math.round(showAud(aud) * 100) / 100).toFixed(2); }
+  function byId(id) { for (var i = 0; i < D.items.length; i++) if (D.items[i].id === id) return D.items[i]; return null; }
+  function itemOf(el) { var row = el.closest(".item"); return row && D ? byId(row.dataset.id) : null; }
+  function onOrder(k) { for (var i = 0; i < D.items.length; i++) if (D.items[i].k === k) return i; return -1; }
+  // A price people can see but not change.
+  function roMoney(txt, attr) { return '<span class="money ro"' + (attr || "") + '><b>$</b><span>' + txt + '</span></span>'; }
+
+  function rowHtml(it, kind) {
+    // The part number, so the supplier knows exactly which one. Something typed in shows as Added.
+    var code = kind === "cost" ? srcCode(it) : it.sku;
+    var pill = !it.k ? '<span class="pill add">Added</span>' : code ? '<span class="pill' + (kind === "cost" && fromMember(it) ? " mem" : "") + '" data-code="1">' + esc(code) + '</span>' : '';
+    var step = it.box || 10, u = unit(it, kind);
+    var price = kind === "cost"
+      ? '<span class="money"><b>$</b><input data-f="price" inputmode="decimal" value="' + (u > 0 ? fix(u) : "") + '" placeholder="Add" aria-label="Cost per vial of ' + esc(it.name) + '"></span>'
+      : (u > 0 ? roMoney(fix(u), ' data-ro="1"') : '<span class="money ro tbc" data-ro="1">To confirm</span>');
+    return '<div class="item" data-id="' + esc(it.id) + '">' +
       '<div class="head"><span class="nm">' + esc(it.name) + '</span><span class="hr">' + pill +
         '<button type="button" class="x" data-act="remove" aria-label="Remove ' + esc(it.name) + '">&times;</button></span></div>' +
       '<div class="ctrls">' +
         '<label class="fld"><span class="cap">Qty</span><span class="step">' +
-          '<button type="button" data-act="minus" aria-label="10 fewer">&minus;</button>' +
+          '<button type="button" data-act="minus" aria-label="' + step + ' fewer">&minus;</button>' +
           '<input data-f="qty" inputmode="numeric" value="' + it.qty + '" aria-label="Quantity of ' + esc(it.name) + '">' +
-          '<button type="button" data-act="plus" aria-label="10 more">+</button></span></label>' +
-        '<label class="fld"><span class="cap" data-pcap>' + capText(it) + '</span><span class="money"><b>$</b>' +
-          '<input data-f="price" inputmode="decimal" value="' + (it.price > 0 ? fix(it.price) : "") + '" placeholder="Add" aria-label="Price per vial of ' + esc(it.name) + '"></span></label>' +
-        '<span class="line" data-line>' + money(show(it.qty * it.price)) + '</span>' +
+          '<button type="button" data-act="plus" aria-label="' + step + ' more">+</button></span></label>' +
+        '<label class="fld"><span class="cap">' + (kind === "cost" ? "Cost per vial" : "Price per vial") + '</span>' + price + '</label>' +
+        '<span class="line" data-line>' + money(show(it.qty * u)) + '</span>' +
       '</div></div>';
+  }
+  function shipRow(edit) {
+    return '<div class="ship"><div><span class="nm">Shipping</span><small>For the whole order</small></div>' +
+      (edit ? '<span class="money"><b>$</b><input data-f="ship" inputmode="decimal" value="' + fix(D.shipUsd) + '" aria-label="Shipping"></span>'
+            : roMoney(fix(D.shipUsd))) + '</div>';
   }
   function statusCard() {
     var ix = stageIx(D.status), when = whenFor(D.status), bars = "";
@@ -691,153 +869,243 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
       (when ? '<div class="stat-when">' + esc(when) + '</div>' : '') +
       '<div class="prog" aria-hidden="true">' + bars + '</div>' + acts + '</div>';
   }
+  function totalCard(title) {
+    return '<div class="total" aria-live="polite"><div class="tot-h"><div class="lbl">' + title + '</div>' + miniCur() + '</div><div class="big" id="tBig"></div><div class="alt" id="tAlt"></div>' +
+      '<div class="rows"><div class="row"><span>Products</span><span id="tSub"></span></div>' +
+      '<div class="row"><span>Shipping</span><span id="tShip"></span></div>' +
+      '<div class="row" id="tPackRow"><span>Packaging</span><span id="tPack"></span></div>' +
+      '<div class="row"><span id="tCount"></span><span></span></div></div></div>';
+  }
   function render() {
-    var low = D.low || 15;
-    $("sub").textContent = "Restock order for anything under " + low + " in stock";
-    var list = D.items.map(function (it, i) { return rowHtml(it, "i", i); }).join("") +
-      D.extra.map(function (x, i) { return rowHtml(x, "x", i); }).join("");
-    if (!list) list = '<div class="empty">Nothing on the order yet. Add an item, or it fills itself when stock drops under ' + low + '.</div>';
-    $("body").innerHTML = statusCard() + '<div id="waBox">' + waCard() + '</div>' +
-      '<div class="seg" role="group" aria-label="Currency">' +
-        '<button type="button" data-cur="usd" class="' + (CUR === "usd" ? "on" : "") + '">USD</button>' +
-        '<button type="button" data-cur="aud" class="' + (CUR === "aud" ? "on" : "") + '">AUD</button></div>' +
-      '<p class="rate">1 USD is ' + rate().toFixed(2) + ' AUD</p>' +
-      '<div class="group">' + list +
-        '<button type="button" class="addrow" id="addBtn">+ Add item</button>' +
-        '<div class="ship"><div><span class="nm">Shipping</span><small>For the whole order</small></div>' +
-          '<span class="money"><b>$</b><input data-f="ship" inputmode="decimal" value="' + fix(D.shipUsd) + '" aria-label="Shipping"></span></div>' +
-      '</div>' +
-      '<div class="total" aria-live="polite"><div class="lbl">Total</div><div class="big" id="tBig"></div><div class="alt" id="tAlt"></div>' +
-        '<div class="rows"><div class="row"><span>Products</span><span id="tSub"></span></div>' +
-        '<div class="row"><span>Shipping</span><span id="tShip"></span></div>' +
-        '<div class="row"><span id="tCount"></span><span></span></div></div></div>' +
+    if (!D) return;
+    NEEDR = false;
+    if (VIEW !== "order" && !owner()) VIEW = "order";
+    if (VIEW === "profit") { $("body").innerHTML = tabsHtml() + profitHtml(); profitTotals(); return; }
+    var kind = kindNow(), list = D.items.map(function (it) { return rowHtml(it, kind); }).join("");
+    if (!list) list = '<div class="empty">Nothing on the order yet. Add an item from the price list.</div>';
+    var group = '<div class="group">' + list + '<button type="button" class="addrow" id="addBtn">+ Add item</button>' + shipRow(kind === "cost") + '</div>';
+    if (kind === "cost") {
+      // Your cost view: what the supplier charges, for ordering from them. Only shows with the code.
+      $("body").innerHTML = tabsHtml() +
+        '<p class="vnote">Your cost prices, what the supplier charges. People ordering never see these.</p>' + curHtml() +
+        group + packHtml("cost") + totalCard("Cost to you") +
+        '<button class="cta" id="copy" type="button">Copy supplier order</button>';
+      return totals();
+    }
+    $("body").innerHTML = tabsHtml() + statusCard() + '<div id="waBox">' + waCard() + '</div>' + curHtml() +
+      group + packHtml("sell") + totalCard("Total") +
       '<div class="acts3"><button class="tint" id="saveFor" type="button">Save for later</button>' +
         '<button class="tint" id="savedBtn" type="button">Saved</button><button class="tint" id="cmpBtn" type="button">Compare</button></div>' +
       '<button class="cta" id="copy" type="button">Copy order</button>' +
-      '<button class="ghost" id="reset" type="button">Reset to suggested</button>';
+      '<button class="ghost" id="reset" type="button">Clear order</button>' +
+      '<div id="dzBox">' + filesHtml() + '</div>' +
+      '<p class="nt-l">Design notes, everyone sees these</p>' +
+      '<div class="group nt"><textarea id="notes" rows="4" maxlength="5000" placeholder="Sizes, colours, wording, what to change, anything for the printer" aria-label="Design notes">' + esc(NOTES) + '</textarea></div>';
     totals();
   }
+  function packTotals(kind) {
+    var p = packNow(kind), ae = document.activeElement;
+    ["boxes", "labels"].forEach(function (f) {
+      var auto = D.pack[f] == null, inp = document.querySelector('[data-pq="' + f + '"]'), ln = document.querySelector('[data-pline="' + f + '"]'), tg = document.querySelector('[data-ptag="' + f + '"]');
+      if (inp && inp !== ae) inp.value = p[f];
+      if (ln) ln.textContent = money(showAud(f === "boxes" ? p.boxAud : p.labelAud));
+      if (tg) tg.innerHTML = packTag(f, f === "boxes" ? "1 per box" : "1 per vial", auto);
+    });
+  }
+  function packRow(f, name, rule, pf, unitAud, qty, line, edit) {
+    var auto = D.pack[f] == null, step = f === "labels" ? 10 : 1;
+    return '<div class="item" data-prow="' + f + '">' +
+      '<div class="head"><span class="nm">' + name + '</span><span class="hr" data-ptag="' + f + '">' + packTag(f, rule, auto) + '</span></div>' +
+      '<div class="ctrls">' +
+        '<label class="fld"><span class="cap">Qty</span><span class="step">' +
+          '<button type="button" data-pact="minus" aria-label="' + step + ' fewer">&minus;</button>' +
+          '<input data-pq="' + f + '" inputmode="numeric" value="' + qty + '" aria-label="How many ' + name.toLowerCase() + '">' +
+          '<button type="button" data-pact="plus" aria-label="' + step + ' more">+</button></span></label>' +
+        '<label class="fld"><span class="cap">' + (edit ? "Cost each" : "Price each") + '</span>' +
+          (edit ? '<span class="money"><b>$</b><input data-pf="' + pf + '" inputmode="decimal" value="' + unitNum(showAud(unitAud)) + '" aria-label="Cost for each of the ' + name.toLowerCase() + '"></span>'
+                : roMoney(unitNum(showAud(unitAud)))) + '</label>' +
+        '<span class="line" data-pline="' + f + '">' + money(showAud(line)) + '</span>' +
+      '</div></div>';
+  }
+  function packTag(f, rule, auto) {
+    return auto ? '<span class="pill">' + rule + '</span>' : '<button type="button" class="pill add" data-pauto="' + f + '">Match order</button>';
+  }
+  function packHtml(kind) {
+    var p = packNow(kind), edit = kind === "cost";
+    var head = '<div class="pk-head"><div><span class="nm">Packaging</span><small>Custom boxes and vial labels, in AUD</small></div>' +
+      '<button type="button" class="sw' + (p.on ? " on" : "") + '" id="packOn" role="switch" aria-checked="' + p.on + '" aria-label="Add packaging to this quote"><span></span></button></div>';
+    if (!p.on) return '<div class="group pk">' + head + '<div class="empty pk-off">Not on this quote.</div></div>';
+    return '<div class="group pk">' + head +
+      packRow("boxes", "Custom boxes", "1 per box", "box", p.pr.box, p.boxes, p.boxAud, edit) +
+      packRow("labels", "Vial labels", "1 per vial", "label", p.pr.label, p.labels, p.labelAud, edit) +
+      '<div class="ship"><div><span class="nm">Packaging shipping</span><small>For the boxes and labels</small></div>' +
+        (edit ? '<span class="money"><b>$</b><input data-pf="ship" inputmode="decimal" value="' + fixAud(p.pr.ship) + '" aria-label="Packaging shipping cost"></span>'
+              : roMoney(fixAud(p.pr.ship))) + '</div></div>';
+  }
+  function curHtml() {
+    return '<div class="seg" role="group" aria-label="Currency">' +
+        '<button type="button" data-cur="usd" class="' + (CUR === "usd" ? "on" : "") + '">USD</button>' +
+        '<button type="button" data-cur="aud" class="' + (CUR === "aud" ? "on" : "") + '">AUD</button></div>' + rateHtml("");
+  }
+  // Only you can change the exchange rate.
+  function rateHtml(cls) {
+    var r = rate().toFixed(2);
+    return '<p class="rate' + (cls ? " " + cls : "") + '">1 USD is ' +
+      (owner() ? '<button type="button" class="rate-b" id="rateBtn" aria-label="Change the exchange rate, now ' + r + '">' + r + '</button>' : r) + ' AUD</p>';
+  }
+  function miniCur() {
+    return '<div class="mini" role="group" aria-label="Currency">' +
+      '<button type="button" data-cur="usd" class="' + (CUR === "usd" ? "on" : "") + '">USD</button>' +
+      '<button type="button" data-cur="aud" class="' + (CUR === "aud" ? "on" : "") + '">AUD</button></div>';
+  }
   function totals() {
-    var t = sums(), other = CUR === "aud" ? "usd" : "aud";
+    if (VIEW === "profit" && owner()) return profitTotals();
+    if (!D || !$("tBig")) return;
+    var kind = kindNow(), t = sums(kind), other = CUR === "aud" ? "usd" : "aud";
     $("tBig").textContent = money(show(t.total), CUR);
     $("tAlt").textContent = "About " + money(other === "aud" ? t.total * rate() : t.total, other);
     $("tSub").textContent = money(show(t.sub));
     $("tShip").textContent = money(show(t.ship));
+    $("tPackRow").style.display = t.packOn ? "" : "none";
+    $("tPack").textContent = money(show(t.pack));
     $("tCount").textContent = t.prods + (t.prods === 1 ? " product, " : " products, ") + t.vials + " vials";
-    Array.prototype.forEach.call(document.querySelectorAll(".item"), function (row) {
+    packTotals(kind);
+    Array.prototype.forEach.call(document.querySelectorAll(".item[data-id]"), function (row) {
       var it = itemOf(row), el = row.querySelector("[data-line]");
-      if (it && el) el.textContent = money(show(it.qty * it.price));
+      if (it && el) el.textContent = money(show(it.qty * unit(it, kind)));
+      if (it && kind === "cost") {
+        var pin = row.querySelector('[data-f="price"]'), pc = row.querySelector("[data-code]");
+        if (pin && pin !== document.activeElement) pin.value = costAt(it) > 0 ? fix(costAt(it)) : "";
+        if (pc && it.k) { pc.textContent = srcCode(it); pc.classList.toggle("mem", fromMember(it)); }
+      }
     });
   }
 
-  /* ---------- WhatsApp: a button with the message ready, the person just sends it ---------- */
-  function orderLines() {
-    var out = [];
-    all().forEach(function (it) {
-      if (it.qty > 0) out.push(it.price > 0
-        ? it.name + " x " + it.qty + " at " + money(show(it.price)) + " = " + money(show(it.qty * it.price)) + (isEst(it) ? ", price estimated" : "")
-        : it.name + " x " + it.qty + ", price to confirm");
-    });
+  /* ---------- WhatsApp ----------
+     Placing an order opens a screen with one button that opens WhatsApp to PPR on 0494 599 813 with
+     the whole order typed out, so it just needs sending. Until it's sent, a green reminder stays on the
+     page, even after a reload. Changes to a placed order prompt the same way. With the code open,
+     updates you send go to whoever you pick, since you'd be telling the person who ordered. */
+  var PPR_WA = "61494599813";
+  function orderLine(it, kind) {
+    var u = unit(it, kind), code = kind === "cost" ? srcCode(it) : it.sku, nm = (code ? code + " " : "") + it.name + " x " + vials(it.qty);
+    return u > 0 ? nm + " at " + money(show(u)) + " = " + money(show(it.qty * u)) : nm + ", price to confirm";
+  }
+  function orderLines(kind) {
+    var on = D.items.filter(function (it) { return it.qty > 0; });
+    if (kind !== "cost" || !on.some(fromMember)) return on.map(function (it) { return orderLine(it, kind); });
+    // Your supplier order, split by which list each one is cheaper from.
+    var list = on.filter(function (it) { return !fromMember(it); }), mem = on.filter(fromMember), out = [];
+    if (list.length) out = out.concat(["", "12 May price list"], list.map(function (it) { return orderLine(it, kind); }));
+    out = out.concat(["", "Member discount list"], mem.map(function (it) { return orderLine(it, kind); }), [""]);
+    return out;
+  }
+  function packLines(kind) {
+    var p = packNow(kind), out = [];
+    if (!p.on) return out;
+    if (p.boxes > 0) out.push("Custom boxes x " + p.boxes + " at " + unitMoney(showAud(p.pr.box)) + " = " + money(showAud(p.boxAud)));
+    if (p.labels > 0) out.push("Vial labels x " + p.labels + " at " + unitMoney(showAud(p.pr.label)) + " = " + money(showAud(p.labelAud)));
+    if (p.shipAud > 0) out.push("Packaging shipping " + money(showAud(p.shipAud)));
     return out;
   }
   function waMsg(kind) {
-    var lines = ["PPR Logistics", kind === "placed" ? "An order has been placed." :
+    var lines = ["PPR Logistics", kind === "placed" ? "New order placed." :
       kind === "status" ? "Order update: " + STAGES[stageIx(D.status)][1] + "." : "The order was changed."];
     if (kind !== "status") {
+      var t = sums("sell").total, other = CUR === "aud" ? "usd" : "aud";
       lines.push("");
-      orderLines().forEach(function (l) { lines.push(l); });
+      orderLines("sell").forEach(function (l) { lines.push(l); });
       lines.push("Shipping " + money(show(D.shipUsd)));
-      lines.push("Total " + money(show(sums().total), CUR));
+      packLines("sell").forEach(function (l) { lines.push(l); });
+      lines.push("Total " + money(show(t), CUR) + ", about " + money(other === "aud" ? t * rate() : t, other));
     }
-    lines.push("", location.href.split("#")[0]);
+    lines.push("", "Order: " + location.href.split("#")[0]);
     return lines.join("\n");
   }
+  function waNumber(kind) { return kind !== "placed" && owner() ? "" : PPR_WA; }
+  function waHref(kind) { return "https://wa.me/" + waNumber(kind) + "?text=" + encodeURIComponent(waMsg(kind)); }
+  function waStored() { try { var k = localStorage.getItem(K.wa); return /^(placed|change|status)$/.test(k) ? k : null; } catch (e) { return null; } }
+  function waStore(kind) { try { if (kind) localStorage.setItem(K.wa, kind); else localStorage.removeItem(K.wa); } catch (e) {} }
+  // Only remind while it still fits: something on a placed order, and a placed reminder only until PPR moves it on.
+  function waCheck() {
+    if (!WA || !D) return;
+    var live = D.status !== "draft" && D.items.some(function (it) { return it.qty > 0; });
+    if (!live || (WA === "placed" && D.status !== "placed")) { WA = null; waStore(null); }
+  }
+  function waTitle(kind) {
+    if (kind === "placed") return "Order placed. Last step: send it to PPR on WhatsApp so they get it.";
+    if (!waNumber(kind)) return kind === "status" ? "Status changed. Send the update on WhatsApp." : "Order changed. Send the update on WhatsApp.";
+    return kind === "status" ? "Status changed. Send it to PPR on WhatsApp so they know." : "Order changed. Send it to PPR on WhatsApp so they know.";
+  }
+  function waLink(kind, cls) {
+    return '<a class="' + cls + '" data-wa="1" href="' + esc(waHref(kind)) + '" target="_blank" rel="noopener noreferrer">' +
+      (waNumber(kind) ? "Send to PPR on WhatsApp" : "Send on WhatsApp") + '</a>';
+  }
   function waCard() {
-    if (!WA || !D || !D.wa) return "";
-    var href = "https://wa.me/" + encodeURIComponent(D.wa) + "?text=" + encodeURIComponent(waMsg(WA));
-    var title = WA === "placed" ? "Order placed. Send the WhatsApp so PPR knows." :
-      WA === "status" ? "Status changed. Send the WhatsApp so PPR knows." : "Order changed. Send the WhatsApp so PPR knows.";
-    return '<div class="wa" role="status"><p>' + esc(title) + '</p><div class="wa-row">' +
-      '<a class="wa-btn" id="waGo" href="' + esc(href) + '" target="_blank" rel="noopener noreferrer">Send on WhatsApp</a>' +
-      '<button type="button" class="wa-x" id="waX">Not now</button></div></div>';
+    if (!WA || WA_HIDE || !D) return "";
+    return '<div class="wa" role="status"><p>' + esc(waTitle(WA)) + '</p><div class="wa-row">' + waLink(WA, "wa-btn") +
+      '<button type="button" class="wa-x" id="waX">Later</button></div></div>';
   }
-  function setWa(kind) { WA = kind; var box = $("waBox"); if (box) box.innerHTML = waCard(); }
+  function setWa(kind) { WA = kind; WA_HIDE = false; waStore(kind); waCheck(); var box = $("waBox"); if (box) box.innerHTML = waCard(); }
+  // Later hides the reminder until the page is next opened. Tapping send clears it for good.
+  function waLater() { WA_HIDE = true; var box = $("waBox"); if (box) box.innerHTML = waCard(); }
+  function waSent() { WA = null; WA_HIDE = false; waStore(null); var box = $("waBox"); if (box) box.innerHTML = ""; if ($("waSheet")) closeSheet(); }
+  // Straight after placing: one big button to send it to PPR.
+  function waSheet() {
+    if (!WA || !D) return;
+    $("toast").classList.remove("on");
+    openSheet('<div class="wa-sh" id="waSheet"><div class="wa-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>' +
+      '<h2>Order placed</h2><p class="sh-sub">Last step: send it to PPR on WhatsApp. The message is typed out ready, just tap send.</p>' +
+      waLink("placed", "cta wa-cta") + '<button class="ghost" type="button" data-x="1">Later</button></div>');
+  }
 
-  /* ---------- saving ---------- */
-  // Only what differs from the suggestion or the price list is saved, so the rest keeps
-  // following the stock and the list. null puts one back to the suggestion.
-  function payload() {
-    var qty = {}, price = {};
-    D.items.forEach(function (it) {
-      qty[it.sku] = it.qty === it.need ? null : it.qty;
-      price[it.sku] = Math.abs(it.price - it.base) < 0.00005 ? null : Math.round(it.price * 10000) / 10000;
-    });
-    var ship = Math.abs(D.shipUsd - D.shipBase) < 0.00005 ? null : Math.round(D.shipUsd * 10000) / 10000;
-    var extra = D.extra.map(function (x) { return { id: x.id, sku: x.sku, name: x.name, qty: x.qty, price: Math.round(x.price * 10000) / 10000 }; });
-    var t = sums();
-    return { labs: 1, action: "save", pass: AUTH ? AUTH.pass : "", qty: qty, price: price, shipUsd: ship, extra: extra, removed: D.removed,
-      sum: t.prods + (t.prods === 1 ? " product, " : " products, ") + t.vials + " vials, " + money(t.total) + " USD" };
-  }
-  function queueSave() { dirty = true; state("saving", "Saving"); clearTimeout(saveT); saveT = setTimeout(save, 700); }
-  function save() {
-    if (!signedIn()) { signOut(OUT8); return; }
-    if (saving) { saveT = setTimeout(save, 400); return; }
-    saving = true; dirty = false;
-    post(payload()).then(function (j) {
-      if (j && j.ok) {
-        if (!dirty) state("saved", "Saved");
-        remember();
-        if (D && D.status !== "draft") setWa(WA === "placed" ? "placed" : "change");
-      } else if (j && j.error === "signed_out") signOut("The last change didn't save. Redo it after signing in.");
-      else throw new Error("not saved");
-    }).catch(function () { dirty = true; state("err", "Not saved, tap to retry"); })
-      .then(function () { saving = false; });
-  }
+  /* ---------- status, clearing and new orders ---------- */
   function setStatus(st) {
     if (!D || st === D.status) { closeSheet(); return; }
+    if (st !== "draft" && !sums().prods) { closeSheet(); return toast("Add something to the order first"); }
     var label = STAGES[stageIx(st)][1], placing = st === "placed" && D.status === "draft";
     ask(placing ? "Place this order?" : "Change the status to " + label + "?", placing ? "Place order" : "Change status").then(function (yes) {
-    if (!yes) return;
-    state("saving", "Saving");
-    post({ labs: 1, action: "status", status: st, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
-      if (j && j.ok) {
-        D.status = j.status; D.history = j.history || D.history;
-        closeSheet(); render(); remember(); state("saved", "Saved");
-        setWa(st === "placed" ? "placed" : "status");
-      } else if (j && j.error === "signed_out") signOut("");
-      else throw new Error("no");
-    }).catch(function () { state("err", "Not saved, tap to retry"); toast("Couldn't change the status, try again"); });
+      if (!yes) return;
+      state("saving", "Saving");
+      synced(function () {
+        post({ action: "status", status: st, pass: AUTH.pass }).then(function (j) {
+          if (j && j.error === "empty") { state("", ""); return toast("Add something to the order first"); }
+          if (j && j.ok) {
+            if (!AUTH) return;
+            adopt(j); state("saved", "Saved"); setWa(placing ? "placed" : "status");
+            if (placing) waSheet();
+          }
+          else if (j && j.error === "signed_out") signOut();
+          else throw new Error("no");
+        }).catch(function () { state("err", "Not saved, tap to retry"); toast("Couldn't change the status, try again"); });
+      }, function () { state("err", "Not saved, tap to retry"); });
     });
   }
-  function newOrder() {
-    ask("Start a new order? The items and status on this one are cleared.", "Start new order").then(function (yes) {
-    if (!yes) return;
-    post({ labs: 1, action: "neworder", pass: AUTH ? AUTH.pass : "" }).then(function (j) {
-      if (j && j.error === "signed_out") return signOut("");
-      if (!j || !j.ok) throw new Error("no");
-      WA = null; D = null; toast("New order started"); load(true);
-    }).catch(function () { toast("Couldn't start a new order, try again"); });
-    });
+  // Clearing and switching orders drop anything waiting to save, so it can't land on top of the new order.
+  function swap(body, what, done) {
+    clearTimeout(sendT); Q = []; saveQ();
+    (function go() {
+      if (INF) return setTimeout(go, 150);
+      state("saving", "Saving");
+      post(body).then(function (j) {
+        if (failed(j, "Couldn't " + what + ", try again")) { state("", ""); return; }
+        WA = null; waStore(null); adopt(j); state("saved", "Saved"); toast(done);
+      }).catch(function () { state("", ""); toast("Couldn't " + what + ", try again"); });
+    })();
   }
-  function reset() {
-    ask("Put the items, quantities, prices and shipping back to the suggestions?", "Reset").then(function (yes) {
-    if (!yes) return;
-    clearTimeout(saveT); dirty = false; state("saving", "Saving");
-    post({ labs: 1, action: "save", reset: true, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
-      if (j && j.error === "signed_out") { signOut(""); return; }
-      if (!j || !j.ok) throw new Error("not reset");
-      toast("Reset to suggested"); D = null; load(true);
-    }).catch(function () { state("err", "Not saved, tap to retry"); });
-    });
+  function startOver(msg, yes, done) {
+    ask(msg, yes).then(function (ok) { if (ok) swap({ action: "clear", pass: AUTH.pass }, "clear it", done); });
   }
 
-  /* ---------- adding and removing ---------- */
-  function openSheet(html) {
-    $("sheet").innerHTML = '<button type="button" class="sheet-x" id="sheetX" aria-label="Close">&times;</button>' + html;
+  /* ---------- sheets ---------- */
+  function openSheet(html, cls) {
+    var s = $("sheet"); s.className = "sheet" + (cls ? " " + cls : "");
+    s.innerHTML = '<button type="button" class="sheet-x" id="sheetX" aria-label="Close">&times;</button>' + html;
     $("mask").classList.add("on");
   }
   function closeSheet() {
-    var m = $("mask"); if (m) m.classList.remove("on"); var s = $("sheet"); if (s) s.innerHTML = "";
+    var m = $("mask"); if (m) m.classList.remove("on"); var s = $("sheet"); if (s) { s.innerHTML = ""; s.className = "sheet"; }
+    if (VIEWURL) { var u = VIEWURL; VIEWURL = ""; setTimeout(function () { try { URL.revokeObjectURL(u); } catch (e) {} }, 60000); }
     if (ASK) { var r = ASK; ASK = null; r(false); }
   }
   // Asks inside the page instead of a browser pop up, which browsers let people block.
@@ -858,81 +1126,116 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
           '<span class="ck">' + (i <= ix ? "&#10003;" : "") + '</span><span class="ot">' + esc(st[1]) + '</span><span class="om">' + esc(whenFor(st[0])) + '</span></button>';
       }).join("") + '</div>');
   }
-  function inOrder(sku) {
-    var k = String(sku).toLowerCase();
-    return D.items.some(function (i) { return String(i.sku).toLowerCase() === k; }) ||
-      D.extra.some(function (x) { return x.sku && String(x.sku).toLowerCase() === k; });
-  }
+
+  /* ---------- adding from the price list ----------
+     Tap to put something on the order, tap again to take it off. The sheet stays open so a whole
+     order can be picked in one go. Prices shown are for the box. */
   function openAdd() {
-    openSheet('<h2>Add item</h2><div class="srch"><input id="addQ" type="text" placeholder="Search, or type a new item" autocomplete="off" autocapitalize="words" spellcheck="false" aria-label="Search or type a new item"></div><div class="opts" id="addList"></div>');
-    addSearch(); setTimeout(function () { var q = $("addQ"); if (q) q.focus(); }, 60);
+    openSheet('<h2>Add items</h2><div class="srch stick"><input id="addQ" type="text" placeholder="Search, or type a new item" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="search" aria-label="Search or type a new item"></div>' +
+      '<div class="opts" id="addList"></div><div class="donebar"><button class="cta" type="button" data-x="1">Done</button></div>', "picker");
+    addSearch();
+    // On a phone the keyboard would cover the list, so only jump into the search on a computer.
+    var touch = window.matchMedia && (window.matchMedia("(pointer:coarse)").matches || window.matchMedia("(hover:none)").matches);
+    if (!touch) setTimeout(function () { var q = $("addQ"); if (q) q.focus(); }, 60);
   }
   function addMatches(q) {
-    var ql = q.toLowerCase();
-    return D.products.filter(function (p) { return !inOrder(p.sku) && (!ql || p.name.toLowerCase().indexOf(ql) >= 0); });
+    var words = String(q).split(/\s+/).map(norm).filter(Boolean);
+    return P.filter(function (p) { return words.every(function (w) { return p.hay.indexOf(w) >= 0; }); });
+  }
+  function subOf(p) { return [p.sku, p.note, vials(p.box)].filter(Boolean).join(", "); }
+  function optHtml(p) {
+    var on = onOrder(p.k) >= 0, box = catUnit(p, kindNow()) * p.box;
+    return '<button type="button" class="opt pl' + (on ? " on" : "") + '" data-pk="' + esc(p.k) + '" aria-pressed="' + on + '">' +
+      '<span class="ck">' + (on ? "&#10003;" : "") + '</span>' +
+      '<span class="ot"><span>' + esc(p.name) + '</span><span class="om">' + esc(subOf(p)) + '</span></span>' +
+      '<span class="pr">' + (box > 0 ? money(show(box)) : "") + '</span></button>';
   }
   function addSearch() {
-    var q = $("addQ").value.trim(), ql = q.toLowerCase(), list = addMatches(q);
-    var html = list.map(function (p) {
-      return '<button type="button" class="opt" data-add="' + esc(p.sku) + '"><span class="ot">' + esc(p.name) + '</span>' +
-        '<span class="om">' + p.left + ' left' + (p.base ? ", " + money(show(p.base)) : "") + '</span></button>';
-    }).join("");
-    if (q && !D.products.some(function (p) { return p.name.toLowerCase() === ql; }))
-      html += '<button type="button" class="opt new" data-new="1"><span class="ot">Add ' + esc(q) + ' as a new item</span></button>';
-    $("addList").innerHTML = html || '<p class="empty">Everything is already on the order. Type a name to add something new.</p>';
+    var box = $("addList"), qi = $("addQ"); if (!box || !qi || !D) return;
+    var q = qi.value.trim(), ql = q.toLowerCase(), list = addMatches(q);
+    var html = list.map(optHtml).join("");
+    if (q && !P.some(function (p) { return p.name.toLowerCase() === ql; }))
+      html += '<button type="button" class="opt new" data-new="1"><span class="ck"></span><span class="ot">Add ' + esc(q) + ' as a new item</span></button>';
+    box.innerHTML = html || '<p class="empty">Nothing on the list matches.</p>';
   }
-  function newId() { return "x" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
-  function addProduct(sku) {
-    var p = null;
-    D.products.forEach(function (x) { if (String(x.sku) === String(sku)) p = x; });
-    if (!p) return;
-    var k = String(p.sku).toLowerCase(), ri = D.removed.map(function (x) { return String(x).toLowerCase(); }).indexOf(k);
-    if (ri >= 0 && p.left < (D.low || 15)) {
-      D.removed.splice(ri, 1);
-      D.items.push({ sku: p.sku, name: p.name, left: p.left, need: p.need, qty: p.need, price: p.base, base: p.base, est: !!p.est });
-      D.items.sort(function (a, b) { return a.left - b.left || a.name.localeCompare(b.name); });
-    } else D.extra.push({ id: newId(), sku: p.sku, name: p.name, left: p.left, qty: 10, price: p.base, base: p.base, est: !!p.est });
-    closeSheet(); render(); queueSave(); toast(p.name + " added");
+  function togglePk(k, btn) {
+    var p = PK[k]; if (!p) return;
+    var i = onOrder(k), on;
+    if (i >= 0) { queue({ t: "del", id: D.items[i].id }); on = false; toast(p.name + " removed"); }
+    else { queue({ t: "add", it: { id: newId(), k: p.k, sku: p.sku, name: p.name, box: p.box, qty: p.box } }); on = true; toast(p.name + " added"); }
+    if (btn) {
+      btn.classList.toggle("on", on); btn.setAttribute("aria-pressed", on);
+      btn.querySelector(".ck").innerHTML = on ? "&#10003;" : "";
+    }
+    render();
   }
   function addNew(name) {
-    name = String(name).replace(/[<>"`]/g, "").replace(/\s+/g, " ").trim().slice(0, 60);
+    name = clip(name, 60);
     if (!name) return;
-    D.extra.push({ id: newId(), sku: "", name: name, left: null, qty: 10, price: 0, base: 0 });
-    closeSheet(); render(); queueSave(); toast(name + " added");
+    queue({ t: "add", it: { id: newId(), k: "", sku: "", name: name, box: 10, qty: 10 } });
+    closeSheet(); render(); toast(name + " added");
   }
   function removeRow(btn) {
-    var row = btn.closest(".item"), i = +row.dataset.i, gone;
-    if (row.dataset.k === "x") gone = D.extra.splice(i, 1)[0];
-    else { gone = D.items.splice(i, 1)[0]; if (gone) D.removed.push(String(gone.sku).toLowerCase()); }
-    render(); queueSave(); if (gone) toast(gone.name + " removed");
+    var it = itemOf(btn); if (!it) return;
+    queue({ t: "del", id: it.id }); render(); toast(it.name + " removed");
+  }
+
+  /* ---------- exchange rate, set by you, the same for everyone ---------- */
+  function openRate() {
+    if (!owner()) return;
+    openSheet('<h2>Exchange rate</h2><p class="sh-sub">The price list is in USD. Set what 1 USD is in AUD. It changes for everyone.</p>' +
+      '<div class="group"><label class="si-row"><span class="cap">1 USD in AUD</span><input id="rateIn" inputmode="decimal" autocomplete="off" value="' + rate().toFixed(2) + '"></label></div>' +
+      '<button class="cta" id="rateGo" type="button">Save</button><button class="ghost" data-x="1" type="button">Cancel</button>');
+    setTimeout(function () { var i = $("rateIn"); if (i) { i.focus(); i.select(); } }, 60);
+  }
+  function saveRate() {
+    var btn = $("rateGo"); if (!btn || btn.disabled) return;
+    var v = num($("rateIn").value);
+    if (!(v >= 0.5 && v <= 5)) return toast("Type a rate like 1.43");
+    function undo() { var b = $("rateGo"); if (b) { b.disabled = false; b.textContent = "Save"; } }
+    btn.disabled = true; btn.textContent = "Saving";
+    post({ action: "rate", rate: v, pass: AUTH.pass }).then(function (j) {
+      if (failed(j, "Couldn't change the rate, try again")) return undo();
+      closeSheet(); adopt(j); toast("1 USD is now " + RATE.toFixed(2) + " AUD");
+    }).catch(function () { undo(); toast("Couldn't change the rate, try again"); });
   }
 
   /* ---------- saved orders and compare ----------
-     A saved order is a copy of the order as it was, kept on the script so every device sees it.
-     Compare puts any two side by side: this order as it is now, or any saved one. Money is USD
-     underneath and shown in whichever currency is picked. */
+     A saved order is a copy of the order as it was, kept on the script so every device sees it, at
+     your prices. Compare puts any two side by side: this order as it is now, or any saved one. Money
+     is USD underneath and shown in whichever currency is picked. */
   function curLines() {
-    return all().filter(function (it) { return it.qty > 0; }).map(function (it) { return { sku: it.sku || "", name: it.name, qty: it.qty, price: it.price }; });
+    return D.items.filter(function (it) { return it.qty > 0; }).map(function (it) {
+      return { k: it.k, sku: it.sku, name: it.name, box: it.box, qty: it.qty, price: it.price, sell: sellOf(it) };
+    });
+  }
+  function curPack() {
+    var p = packNow("sell");
+    return { on: p.on, boxes: p.boxes, labels: p.labels, box: p.pr.box, label: p.pr.label, ship: p.pr.ship, cost: owner() ? PRC : null };
+  }
+  function lineUnit(l, kind) { return kind === "cost" && l.price != null ? +l.price || 0 : +l.sell || 0; }
+  // What a packaging snapshot comes to, in AUD, or nothing when it was switched off.
+  function packAudOf(p, kind) {
+    if (!p || !p.on) return 0;
+    var pr = kind === "cost" && p.cost ? p.cost : p;
+    return p.boxes * pr.box + p.labels * pr.label + (p.boxes + p.labels > 0 ? pr.ship : 0);
   }
   function srcOf(key) {
-    if (key === "cur") return D ? { label: "This order", lines: curLines(), ship: D.shipUsd } : null;
+    if (key === "cur") return D ? { label: "This order", lines: curLines(), ship: D.shipUsd, pack: curPack() } : null;
     var r = null; (SAVES || []).forEach(function (x) { if (x.id === key) r = x; });
-    return r ? { label: r.label, lines: r.lines || [], ship: +r.shipUsd || 0, at: r.at } : null;
+    return r ? { label: r.label, lines: r.lines || [], ship: +r.shipUsd || 0, at: r.at, pack: r.pack || null } : null;
   }
-  function sumOf(src) {
-    var sub = 0, vials = 0; src.lines.forEach(function (l) { sub += l.qty * l.price; vials += l.qty; });
-    return { sub: sub, vials: vials, total: sub + src.ship, prods: src.lines.length };
+  function sumOf(src, kind) {
+    kind = kind || "sell";
+    var sub = 0, v = 0; src.lines.forEach(function (l) { sub += l.qty * lineUnit(l, kind); v += l.qty; });
+    var pack = packAudOf(src.pack, kind) / rate();
+    return { sub: sub, vials: v, pack: pack, packOn: !!(src.pack && src.pack.on), total: sub + src.ship + pack, prods: src.lines.length };
   }
   function countText(t) { return t.prods + (t.prods === 1 ? " product, " : " products, ") + t.vials + " vials"; }
   function fmtDay(t) { var d = new Date(t); return isNaN(d) ? "" : d.toLocaleString([], { day: "numeric", month: "short", hour: "numeric", minute: "2-digit" }); }
-  function failed(j, what) {
-    if (j && j.error === "signed_out") { signOut(""); return true; }
-    if (!j || !j.ok) { toast(what); return true; }
-    return false;
-  }
   function withSaves(title, then) {
     openSheet('<h2>' + esc(title) + '</h2><p class="sh-sub">Loading</p>');
-    post({ labs: 1, action: "saves", pass: AUTH ? AUTH.pass : "" }).then(function (j) {
+    post({ action: "saves", pass: AUTH.pass }).then(function (j) {
       if (failed(j, "Couldn't load saved orders, try again")) return;
       SAVES = j.saves || []; then();
     }).catch(function () { toast("Couldn't load saved orders, try again"); });
@@ -948,12 +1251,17 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   }
   function doSaveFor() {
     var btn = $("svGo"); if (!btn || btn.disabled) return;
+    var label = $("svName").value;
+    function undo() { var b = $("svGo"); if (b) { b.disabled = false; b.textContent = "Save"; } }
     btn.disabled = true; btn.textContent = "Saving";
-    post({ labs: 1, action: "saveas", pass: AUTH ? AUTH.pass : "", label: $("svName").value, lines: curLines(), shipUsd: Math.round(D.shipUsd * 10000) / 10000 })
-      .then(function (j) {
-        if (failed(j, "Couldn't save it, try again")) { var b = $("svGo"); if (b) { b.disabled = false; b.textContent = "Save"; } return; }
+    // The script copies the order as it has it, so everything waiting to save goes up first.
+    synced(function () {
+      post({ action: "saveas", pass: AUTH.pass, label: label }).then(function (j) {
+        if (j && j.error === "too_many") { undo(); return toast("Too many saved orders, delete some first"); }
+        if (failed(j, "Couldn't save it, try again")) return undo();
         SAVES = j.saves || SAVES; closeSheet(); toast("Saved as " + j.label);
-      }).catch(function () { var b = $("svGo"); if (b) { b.disabled = false; b.textContent = "Save"; } toast("Couldn't save it, try again"); });
+      }).catch(function () { undo(); toast("Couldn't save it, try again"); });
+    }, undo);
   }
   function drawSaved() {
     var list = (SAVES || []).map(function (x) {
@@ -970,9 +1278,12 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     var t = sumOf(s);
     openSheet('<h2>' + esc(s.label) + '</h2><p class="sh-sub">Saved ' + esc(fmtDay(s.at)) + '</p>' +
       '<div class="group">' + s.lines.map(function (l) {
-        return '<div class="sv-line"><span class="nm">' + esc(l.name) + '</span><span class="sv-q">' + l.qty + ' x ' + money(show(l.price)) + '</span>' +
-          '<span class="sv-v">' + money(show(l.qty * l.price)) + '</span></div>';
-      }).join("") + '<div class="sv-line"><span class="nm">Shipping</span><span class="sv-v">' + money(show(s.ship)) + '</span></div></div>' +
+        var u = lineUnit(l, "sell");
+        return '<div class="sv-line"><span class="nm">' + esc(l.name) + '</span><span class="sv-q">' + l.qty + ' x ' + money(show(u)) + '</span>' +
+          '<span class="sv-v">' + money(show(l.qty * u)) + '</span></div>';
+      }).join("") + '<div class="sv-line"><span class="nm">Shipping</span><span class="sv-v">' + money(show(s.ship)) + '</span></div>' +
+      (t.packOn ? '<div class="sv-line"><span class="nm">Packaging</span><span class="sv-q">' + s.pack.boxes + ' boxes, ' + s.pack.labels + ' labels</span><span class="sv-v">' + money(show(t.pack)) + '</span></div>' : '') +
+      '</div>' +
       '<div class="total"><div class="lbl">Total</div><div class="big">' + money(show(t.total), CUR) + '</div><div class="alt">' + countText(t) + '</div></div>' +
       '<button class="cta" type="button" data-cmpwith="' + esc(id) + '">Compare with this order</button>' +
       '<button class="tint wide" type="button" data-use="' + esc(id) + '">Make this the current order</button>' +
@@ -981,27 +1292,14 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   function useSave(id) {
     var s = srcOf(id); if (!s) return;
     ask("Make " + s.label + " the current order? What's on the order now is replaced, and the status goes back to Not placed yet.", "Make it current").then(function (yes) {
-      if (!yes) return;
-      // Nothing waiting to save may land on top of the swap, so drop it and let any save finish first.
-      clearTimeout(saveT); dirty = false;
-      (function go() {
-        if (saving) return setTimeout(go, 150);
-        state("saving", "Saving");
-        post({ labs: 1, action: "usesave", id: id, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
-          if (failed(j, "Couldn't switch orders, try again")) { state("", ""); return; }
-          // Drop the device copy of the old order so it can't flash up, then fetch the new one once nothing else is loading.
-          try { localStorage.removeItem("pprlog.last"); } catch (e) {}
-          WA = null; D = null; toast(s.label + " is now the current order");
-          (function fetchNew() { if (busy) return setTimeout(fetchNew, 150); load(true); })();
-        }).catch(function () { state("", ""); toast("Couldn't switch orders, try again"); });
-      })();
+      if (yes) swap({ action: "usesave", id: id, pass: AUTH.pass }, "switch orders", s.label + " is now the current order");
     });
   }
   function delSave(id) {
     var s = srcOf(id); if (!s) return;
     ask("Delete " + s.label + "? This can't be undone.", "Delete").then(function (yes) {
       if (!yes) return;
-      post({ labs: 1, action: "delsave", id: id, pass: AUTH ? AUTH.pass : "" }).then(function (j) {
+      post({ action: "delsave", id: id, pass: AUTH.pass }).then(function (j) {
         if (failed(j, "Couldn't delete it, try again")) return;
         SAVES = j.saves || []; if (CMP.b === id) CMP.b = ""; if (CMP.a === id) CMP.a = "cur";
         toast("Deleted"); drawSaved();
@@ -1030,7 +1328,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   function keyOf(l) { return l.sku ? "s:" + String(l.sku).toLowerCase() : "n:" + String(l.name).toLowerCase().replace(/[^a-z0-9+]/g, ""); }
   function merged(src) {
     var m = {}, keys = [];
-    src.lines.forEach(function (l) { var k = keyOf(l); if (!m[k]) { m[k] = { name: l.name, qty: 0, val: 0 }; keys.push(k); } m[k].qty += l.qty; m[k].val += l.qty * l.price; });
+    src.lines.forEach(function (l) { var k = keyOf(l); if (!m[k]) { m[k] = { name: l.name, qty: 0, val: 0 }; keys.push(k); } m[k].qty += l.qty; m[k].val += l.qty * lineUnit(l, "sell"); });
     return { m: m, keys: keys };
   }
   function cell(x, win) {
@@ -1065,6 +1363,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
       '<div class="total cmp-tot"><div class="cmp-tr th"><span></span><span>A</span><span>B</span></div>' +
         '<div class="cmp-tr"><span>Products</span><span>' + money(show(ta.sub)) + '</span><span>' + money(show(tb.sub)) + '</span></div>' +
         '<div class="cmp-tr"><span>Shipping</span><span>' + money(show(A.ship)) + '</span><span>' + money(show(B.ship)) + '</span></div>' +
+        '<div class="cmp-tr"><span>Packaging</span><span>' + (ta.packOn ? money(show(ta.pack)) : "Off") + '</span><span>' + (tb.packOn ? money(show(tb.pack)) : "Off") + '</span></div>' +
         '<div class="cmp-tr tot"><span>Total</span><span>' + money(show(ta.total)) + '</span><span>' + money(show(tb.total)) + '</span></div>' +
         '<div class="cmp-v">' + esc(verdict) + '</div>' +
         (unlike ? '<p class="cmp-note">They don\'t have exactly the same items and amounts, so check the lines below.</p>' : '') + '</div>' +
@@ -1073,40 +1372,292 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     $("sheet").scrollTop = y;
   }
 
-  /* ---------- loading ---------- */
-  function load(fresh) {
-    if (busy) return;
-    if (!signedIn()) { signOut(AUTH ? OUT8 : ""); return; }
-    if (FRESH && D) { FRESH = false; render(); remember(); state("", "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })); return; }
-    if (dirty || saving) { save(); return; }
-    busy = true; $("refresh").classList.add("spin");
-    if (!D) {
-      var c = remembered();
-      if (c) { build(c); render(); state("", "Updating"); }
-      else $("body").innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
-    }
-    var ctrl = window.AbortController ? new AbortController() : null;
-    var timer = setTimeout(function () { if (ctrl) ctrl.abort(); }, 25000);
-    post({ labs: 1, action: "list", pass: AUTH.pass, fresh: !!fresh }, ctrl ? ctrl.signal : undefined)
-      .then(function (d) {
-        if (d && d.ok) {
-          var ae = document.activeElement;
-          if (dirty || saving || (ae && ae.tagName === "INPUT" && $("body").contains(ae))) return;
-          build(d); lastLoad = Date.now(); render(); remember();
-          state("", "Updated " + new Date().toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }));
-        } else if (d && d.error === "signed_out") signOut("");
-        else throw new Error("bad answer");
-      })
-      .catch(function () {
-        if (!AUTH) return;
-        if (D) { toast("Couldn't refresh, showing the last order"); state("", ""); }
-        else { state("", ""); note("bad", "Couldn't load the order", "Check your connection and tap refresh."); }
-      })
-      .then(function () { clearTimeout(timer); busy = false; $("refresh").classList.remove("spin"); });
+  /* ---------- your prices: Cost and Profit ----------
+     Tap the title three times and type the code. The script checks it and gives this device a key, so
+     your costs and markups only ever reach a device that knows the code. Your price per vial follows
+     the markup unless one is typed in by hand; those are kept in AUD by product and carry over to later
+     orders. Profit is what people pay you less what it costs you. Shipping is passed on as it is. */
+  function profitSums() {
+    var c = sums("cost"), s = sums("sell");
+    var income = s.sub + (s.packOn ? s.pack : 0), profit = income - c.sub - (c.packOn ? c.pack : 0);
+    return { sales: s.sub, packSell: s.packOn ? s.pack : 0, income: income, cost: c.sub, pack: c.packOn ? c.pack : 0, ship: c.ship,
+      packOn: c.packOn, profit: profit, margin: income > 0 ? profit / income : 0, vials: c.vials };
+  }
+  function tabsHtml() {
+    if (!owner()) return "";
+    function tab(v, name) { return '<button type="button" role="tab" data-view="' + v + '" class="' + (VIEW === v ? "on" : "") + '" aria-selected="' + (VIEW === v) + '">' + name + '</button>'; }
+    return '<div class="seg tabs" role="tablist" aria-label="View">' + tab("order", "Order") + tab("cost", "Cost") + tab("profit", "Profit") + '</div>';
+  }
+  function sellTag(k) {
+    return hasSell(k) ? '<button type="button" class="pill add" data-sauto="' + esc(k) + '">Match markup</button>' : '<span class="pill">' + numTxt(mk()) + '% markup</span>';
+  }
+  function prowHtml(it) {
+    var k = skey(it);
+    return '<div class="item" data-pid="' + esc(it.id) + '">' +
+      '<div class="head"><span class="nm">' + esc(it.name) + '</span><span class="hr" data-stag="' + esc(k) + '">' + sellTag(k) + '</span></div>' +
+      '<div class="ctrls">' +
+        '<label class="fld"><span class="cap">Cost per vial</span><span class="money"><b>$</b>' +
+          '<input data-pcost="' + esc(it.id) + '" inputmode="decimal" value="' + (costAt(it) > 0 ? fix(costAt(it)) : "") + '" placeholder="Add" aria-label="Cost per vial of ' + esc(it.name) + '"></span></label>' +
+        '<label class="fld"><span class="cap">Your price per vial</span><span class="money"><b>$</b>' +
+          '<input data-sell="' + esc(k) + '" inputmode="decimal" value="' + fix(sellOf(it)) + '" aria-label="Your price per vial of ' + esc(it.name) + '"></span></label>' +
+        '<span class="line pl"><small data-pcap2="1">' + vials(it.qty) + ' profit</small><span data-pline2="1"></span></span>' +
+      '</div></div>';
+  }
+  function profitHtml() {
+    if (!owner()) return '<div class="skel"></div><div class="skel"></div>';
+    var rows = D.items.filter(function (it) { return it.qty > 0; }).map(prowHtml).join("");
+    return '<div class="total pf" id="pCard" aria-live="polite"><div class="tot-h"><div class="lbl" id="pLbl">Profit</div>' + miniCur() + '</div><div class="big" id="pBig"></div><div class="alt" id="pAlt"></div>' +
+        '<div class="rows"><div class="row"><span>Product sales</span><span id="pSales"></span></div>' +
+        '<div class="row" id="pPackSellRow"><span>Packaging charged</span><span id="pPackSell"></span></div>' +
+        '<div class="row"><span>Products cost</span><span id="pCost"></span></div>' +
+        '<div class="row" id="pPackRow"><span>Packaging cost</span><span id="pPack"></span></div>' +
+        '<div class="row"><span>Shipping, passed on</span><span id="pShip"></span></div></div></div>' + rateHtml("under") +
+      '<div class="group"><div class="pk-head mk"><div><span class="nm">Markup</span><small>Added to the cost of every product</small></div>' +
+        '<span class="money"><input data-markup="1" inputmode="decimal" value="' + numTxt(mk()) + '" aria-label="Markup percent"><b class="suf">%</b></span></div>' +
+        '<div class="pk-head mk"><div><span class="nm">Packaging markup</span><small>Added to boxes, labels and packaging shipping</small></div>' +
+        '<span class="money"><input data-pmarkup="1" inputmode="decimal" value="' + numTxt(pmk()) + '" aria-label="Packaging markup percent"><b class="suf">%</b></span></div></div>' +
+      '<div class="group pk">' + (rows || '<div class="empty">Add something to the order to see the profit.</div>') + shipRow(true) + '</div>' +
+      packHtml("cost") +
+      '<button class="tint wide" id="allPrices" type="button">See all your prices</button>' +
+      '<button class="ghost" id="lockP" type="button">Lock your prices</button>';
+  }
+  function profitTotals() {
+    if (!owner() || !$("pBig") || !D) return;
+    var t = profitSums(), ae = document.activeElement;
+    // A loss reads as Loss and the amount, never a minus sign.
+    var loss = t.profit < -0.005;
+    $("pLbl").textContent = loss ? "Loss" : "Profit";
+    $("pBig").textContent = money(show(Math.abs(t.profit)), CUR);
+    $("pCard").classList.toggle("neg", loss);
+    $("pAlt").textContent = !(t.income > 0) ? "Nothing on the order yet" :
+      (loss ? "Losing " + Math.round(-t.margin * 100) + "%" : "Margin " + Math.round(t.margin * 100) + "%") + ", selling all " + vials(t.vials);
+    $("pSales").textContent = money(show(t.sales));
+    $("pCost").textContent = money(show(t.cost));
+    $("pShip").textContent = money(show(t.ship));
+    $("pPackRow").style.display = t.packOn ? "" : "none";
+    $("pPack").textContent = money(show(t.pack));
+    $("pPackSellRow").style.display = t.packOn ? "" : "none";
+    $("pPackSell").textContent = money(show(t.packSell));
+    Array.prototype.forEach.call(document.querySelectorAll("[data-pid]"), function (row) {
+      var it = byId(row.dataset.pid); if (!it) return;
+      var sl = row.querySelector("[data-sell]"), ln = row.querySelector("[data-pline2]"), tg = row.querySelector("[data-stag]"), cp = row.querySelector("[data-pcap2]");
+      var lp = it.qty * (sellOf(it) - costAt(it)), lose = lp < -0.005, pc = row.querySelector("[data-pcost]");
+      if (sl && sl !== ae) sl.value = fix(sellOf(it));
+      if (pc && pc !== ae) pc.value = costAt(it) > 0 ? fix(costAt(it)) : "";
+      if (ln) { ln.textContent = money(show(Math.abs(lp))); ln.className = lose ? "neg" : ""; }
+      if (cp) cp.textContent = vials(it.qty) + (lose ? " loss" : " profit");
+      if (tg) tg.innerHTML = sellTag(skey(it));
+    });
+    var mi = document.querySelector("[data-markup]"); if (mi && mi !== ae) mi.value = numTxt(mk());
+    var pmi = document.querySelector("[data-pmarkup]"); if (pmi && pmi !== ae) pmi.value = numTxt(pmk());
+    packTotals("cost");
+  }
+  function openCode() {
+    openSheet('<div class="si pc"><div class="si-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8.5 11V7.5a3.5 3.5 0 0 1 7 0V11"/></svg></div>' +
+      '<input class="si-pw code-in" id="pcode" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Code" aria-label="Code">' +
+      '<p class="si-err" id="pcErr" role="alert"></p><button class="cta" id="pcGo" type="button">Open</button></div>');
+    setTimeout(function () { var i = $("pcode"); if (i) i.focus(); }, 60);
+  }
+  function tryCode() {
+    var inp = $("pcode"); if (!inp || PBUSY || !AUTH) return;
+    var code = inp.value.trim(); if (!code) return;
+    PBUSY = true; $("pcErr").textContent = "";
+    // Anything still saving goes up first, so the order that comes back is the latest.
+    synced(function () {
+      post({ action: "unlock", code: code, pass: AUTH.pass }).then(function (j) {
+        if (j && j.ok && j.otok) {
+          OTOK = j.otok; SRV = null; VIEW = "profit";
+          closeSheet(); adopt(j); window.scrollTo(0, 0); return;
+        }
+        if (j && j.error === "signed_out") return signOut();
+        if ($("pcErr")) $("pcErr").textContent = j && j.error === "locked" ? "Too many tries. Try again in " + Math.max(1, +j.mins || 10) + (+j.mins === 1 ? " minute." : " minutes.") :
+          j && j.error === "bad_action" ? "The Google script needs updating first." : "That code isn't right.";
+        if ($("pcode")) $("pcode").value = "";
+      }).catch(function () { if ($("pcErr")) $("pcErr").textContent = "No connection. Check it and try again."; })
+        .then(function () { PBUSY = false; });
+    }, function () { PBUSY = false; });
+  }
+  // Locking drops your costs from this device and fetches the order again at your prices only.
+  function lockProfit() {
+    if (PQ.length && !PINF) sendP();
+    if (Q.length && !INF && OTOK) send();
+    OTOK = null; PROFIT = null; PRC = null; PQ = []; VIEW = "order"; clearTimeout(psendT);
+    if (D) D.items.forEach(function (it) { it.sell = it.sell || 0; it.price = 0; });
+    SAVES = null; CMP = { a: "cur", b: "" };
+    closeSheet(); SRV = null; render(); load(false);
+  }
+  // Your prices lock themselves after 5 minutes without a tap, or 5 minutes away from the page.
+  function idleCheck() {
+    if (OTOK && Date.now() - LAST_ACT > IDLE_LOCK) { lockProfit(); toast("Your prices locked"); }
+  }
+  function applyP(op) {
+    if (!PROFIT || !op) return;
+    if (op.t === "markup") PROFIT.markup = Math.max(0, +op.v || 0);
+    else if (op.t === "pmarkup") PROFIT.pmarkup = Math.max(0, +op.v || 0);
+    else if (op.t === "sell" && op.k) { if (op.v == null || !(+op.v > 0)) delete PROFIT.sell[op.k]; else PROFIT.sell[op.k] = +op.v; }
+  }
+  function queueP(op) {
+    applyP(op);
+    PQ = PQ.filter(function (x) { return !(x.t === op.t && x.k === op.k); }); PQ.push(op);
+    state("saving", "Saving");
+    clearTimeout(psendT); psendT = setTimeout(sendP, 600);
+  }
+  function sendP() {
+    clearTimeout(psendT);
+    if (PINF || !PQ.length || !OTOK || !signedIn()) return;
+    var batch = PQ, key = OTOK; PINF = batch; PQ = [];
+    post({ action: "psave", pass: AUTH.pass, ops: batch }).then(function (j) {
+      PINF = null;
+      if (OTOK !== key) return;
+      if (j && j.ok) {
+        adopt(j);
+        if (PQ.length) { state("saving", "Saving"); psendT = setTimeout(sendP, 300); } else state("saved", "Saved");
+      } else if (j && j.error === "signed_out") signOut();
+      else if (j && (j.ownerOut || j.error === "owner_only")) { lockProfit(); toast("Your prices locked again"); }
+      else throw new Error("not saved");
+    }).catch(function () {
+      if (PINF === batch) { PQ = batch.concat(PQ); PINF = null; }
+      if (AUTH) state("err", "Not saved, tap to retry");
+    });
+  }
+  // Every product on the price list with your price, for setting prices before they're on an order.
+  function openAllPrices() {
+    openSheet('<h2>All your prices</h2><p class="sh-sub">Per vial. Clear one to go back to the markup.</p>' +
+      '<div class="srch stick"><input id="apQ" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search the price list"></div>' +
+      '<div class="opts" id="apList"></div><div class="donebar"><button class="cta" type="button" data-x="1">Done</button></div>', "picker");
+    apSearch();
+  }
+  function apSub(p) { return [p.sku, "cost " + money(show(catCost(p))), hasSell(p.k) ? "set by hand" : numTxt(mk()) + "% markup"].filter(Boolean).join(", "); }
+  function apRow(p) {
+    return '<div class="opt ap"><span class="ot"><span>' + esc(p.name) + '</span><span class="om" data-apsub="' + esc(p.k) + '">' + esc(apSub(p)) + '</span></span>' +
+      '<span class="money"><b>$</b><input data-sell="' + esc(p.k) + '" inputmode="decimal" value="' + fix(catSell(p)) + '" aria-label="Your price per vial of ' + esc(p.name) + '"></span></div>';
+  }
+  function apSearch() {
+    var box = $("apList"), q = $("apQ"); if (!box || !q || !owner()) return;
+    var ae = document.activeElement;
+    if (ae && box.contains(ae)) return;
+    box.innerHTML = addMatches(q.value.trim()).map(apRow).join("") || '<p class="empty">Nothing on the list matches.</p>';
+  }
+
+  /* ---------- designs ----------
+     Any file, up to 15 MB each. Pictures get a small preview made here before they go up. They're kept
+     in a Drive folder on the script, so everyone signed in sees the same ones. */
+  function sizeText(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
+  function extOf(name) { var m = /\.([a-z0-9]{1,5})$/i.exec(String(name)); return m ? m[1].toUpperCase() : "FILE"; }
+  function filesHtml() {
+    var rows = (FILES || []).map(function (f) {
+      var th = f.thumb ? '<img class="fth" src="' + esc(f.thumb) + '" alt="">' : '<span class="fth ext">' + esc(extOf(f.name)) + '</span>';
+      return '<button type="button" class="opt fl" data-file="' + esc(f.id) + '">' + th +
+        '<span class="ot"><span class="fnm">' + esc(f.name) + '</span><span class="om">' + esc(sizeText(+f.size || 0) + ", " + fmtDay(f.at)) + '</span></span></button>';
+    }).join("") + UPS.map(function (n) {
+      return '<div class="opt fl up"><span class="fth ext">' + esc(extOf(n)) + '</span><span class="ot"><span class="fnm">' + esc(n) + '</span><span class="om">Uploading</span></span></div>';
+    }).join("");
+    if (!rows) rows = '<div class="empty">' + (FILES ? "No designs yet." : "Loading") + '</div>';
+    return '<div class="group dz"><div class="pk-head"><div><span class="nm">Designs</span><small>Box and label artwork, everyone sees these</small></div></div>' +
+      rows + '<button type="button" class="addrow" id="upBtn">+ Upload design</button>' +
+      '<input type="file" id="upIn" multiple hidden></div>';
+  }
+  function drawFiles() { var box = $("dzBox"); if (box) box.innerHTML = filesHtml(); }
+  function loadFiles() {
+    if (filesBusy || !AUTH) return;
+    filesBusy = true;
+    post({ action: "files", pass: AUTH.pass }).then(function (j) {
+      if (j && j.ok) { FILES = j.files || []; drawFiles(); }
+      else if (j && j.error === "signed_out") signOut();
+    }).catch(function () {}).then(function () { filesBusy = false; });
+  }
+  function readB64(file) {
+    return new Promise(function (res, rej) {
+      var r = new FileReader();
+      r.onload = function () { var s = String(r.result || ""); res(s.slice(s.indexOf(",") + 1)); };
+      r.onerror = function () { rej(new Error("read")); };
+      r.readAsDataURL(file);
+    });
+  }
+  function makeThumb(file) {
+    return new Promise(function (res) {
+      if (!/^image\//.test(file.type || "") || !window.URL) return res("");
+      var url = URL.createObjectURL(file), img = new Image(), done = false;
+      function end(v) { if (done) return; done = true; try { URL.revokeObjectURL(url); } catch (e) {} res(v); }
+      img.onload = function () {
+        try {
+          var s = Math.min(1, 200 / Math.max(img.naturalWidth || 1, img.naturalHeight || 1)), c = document.createElement("canvas");
+          c.width = Math.max(1, Math.round(img.naturalWidth * s)); c.height = Math.max(1, Math.round(img.naturalHeight * s));
+          var g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(img, 0, 0, c.width, c.height);
+          var d = c.toDataURL("image/jpeg", 0.72); end(d.length < 60000 ? d : "");
+        } catch (e) { end(""); }
+      };
+      img.onerror = function () { end(""); };
+      setTimeout(function () { end(""); }, 8000);
+      img.src = url;
+    });
+  }
+  function upload(list) {
+    list = Array.prototype.slice.call(list || []);
+    var ok = list.filter(function (f) { if (f.size > MAXUP) { toast(f.name + " is over 15 MB, upload a smaller copy"); return false; } return f.size > 0; });
+    if (!ok.length) return;
+    UPS = UPS.concat(ok.map(function (f) { return f.name; })); drawFiles();
+    (function next(i) {
+      if (i >= ok.length) return;
+      var f = ok[i];
+      state("saving", "Uploading" + (ok.length > 1 ? " " + (i + 1) + " of " + ok.length : ""));
+      Promise.all([readB64(f), makeThumb(f)]).then(function (r) {
+        if (!AUTH) throw new Error("out");
+        return post({ action: "upload", pass: AUTH.pass, name: f.name, mime: f.type || "", data: r[0], thumb: r[1] }, false, 300000);
+      }).then(function (j) {
+        if (j && j.error === "signed_out") return signOut();
+        if (j && j.error === "too_big") throw new Error("big");
+        if (!j || !j.ok) throw new Error("no");
+        FILES = j.files || FILES; FV = +j.fv; adopt(j);
+        state("saved", "Uploaded");
+      }).catch(function () { if (AUTH) { toast("Couldn't upload " + f.name + ", try again"); state("", ""); } })
+        .then(function () { var at = UPS.indexOf(f.name); if (at >= 0) UPS.splice(at, 1); drawFiles(); next(i + 1); });
+    })(0);
+  }
+  // Only plain pictures and PDFs are shown on the page. Anything else, including SVG and web pages, is
+  // only ever downloaded, so a file someone uploads can't run anything here.
+  function cleanMime(m) { return String(m || "").toLowerCase().split(";")[0].trim(); }
+  function viewKind(m) {
+    m = cleanMime(m);
+    if (/^image\/(png|jpeg|gif|webp|avif|bmp)$/.test(m)) return "pic";
+    if (m === "application/pdf") return "pdf";
+    return "";
+  }
+  function fileMeta(id) { var r = null; (FILES || []).forEach(function (f) { if (f.id === id) r = f; }); return r; }
+  function openFile(id) {
+    var f = fileMeta(id); if (!f) return;
+    var pic = viewKind(f.mime) === "pic";
+    openSheet('<h2 class="ask">' + esc(f.name) + '</h2><p class="sh-sub">' + esc(sizeText(+f.size || 0) + ", " + fmtDay(f.at)) + '</p>' +
+      '<div class="pv" id="pv"><span class="pv-wait">Loading</span></div>' +
+      '<a class="cta lnk off" id="fOpen" target="_blank" rel="noopener">Open</a>' +
+      '<button class="ghost danger" type="button" data-delfile="' + esc(f.id) + '">Delete</button>');
+    post({ action: "file", id: f.id, pass: AUTH.pass }, false, 180000).then(function (j) {
+      if (failed(j, "Couldn't open it, try again")) return;
+      if (!$("pv") || ($("sheet").querySelector("[data-delfile]") || {}).getAttribute("data-delfile") !== f.id) return;
+      var bin = atob(j.data || ""), bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      if (VIEWURL) { try { URL.revokeObjectURL(VIEWURL); } catch (e) {} }
+      var kind = viewKind(j.mime);
+      VIEWURL = URL.createObjectURL(new Blob([bytes], { type: kind ? cleanMime(j.mime) : "application/octet-stream" }));
+      $("pv").innerHTML = kind === "pic" ? '<img src="' + VIEWURL + '" alt="' + esc(f.name) + '">' : '<span class="fth ext big">' + esc(extOf(f.name)) + '</span>';
+      var a = $("fOpen"); a.href = VIEWURL; a.classList.remove("off");
+      if (!kind) { a.setAttribute("download", f.name); a.removeAttribute("target"); a.textContent = "Download"; }
+    }).catch(function () { toast("Couldn't open it, try again"); });
+  }
+  function delFile(id) {
+    var f = fileMeta(id); if (!f) return;
+    ask("Delete " + f.name + "? It goes for everyone.", "Delete").then(function (yes) {
+      if (!yes) return;
+      post({ action: "delfile", id: id, pass: AUTH.pass }).then(function (j) {
+        if (failed(j, "Couldn't delete it, try again")) return;
+        FILES = j.files || []; FV = +j.fv; adopt(j); drawFiles(); toast("Deleted");
+      }).catch(function () { toast("Couldn't delete it, try again"); });
+    });
   }
 
   function copy() {
-    var t = ["PPR restock order"].concat(orderLines(), ["Shipping " + money(show(D.shipUsd)), "Total " + money(show(sums().total), CUR)]).join("\n");
+    var kind = kindNow();
+    var t = [kind === "cost" ? "PPR supplier order" : "PPR order"].concat(orderLines(kind), ["Shipping " + money(show(D.shipUsd))], packLines(kind), ["Total " + money(show(sums(kind).total), CUR)]).join("\n");
     function fallback() {
       var ta = document.createElement("textarea"); ta.value = t; ta.setAttribute("readonly", "");
       ta.style.position = "fixed"; ta.style.opacity = "0"; document.body.appendChild(ta); ta.select();
@@ -1118,22 +1669,36 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   }
 
   /* ---------- one set of listeners for the whole page ---------- */
+  document.addEventListener("submit", function (e) {
+    if (e.target.id !== "signin") return;
+    e.preventDefault(); signIn($("pw").value);
+  });
   document.addEventListener("click", function (e) {
     if (e.target.id === "mask") return closeSheet();
     var a = e.target.closest("a");
-    if (a && a.id === "waGo") { setTimeout(function () { setWa(null); }, 300); return; }
+    if (a && a.getAttribute("data-wa")) { setTimeout(waSent, 300); return; }
+    // Three quick taps on the title.
+    if (e.target.closest("h1") && D && signedIn()) {
+      var tnow = Date.now(); TAPS = TAPS.filter(function (t) { return tnow - t < 900; }); TAPS.push(tnow);
+      if (TAPS.length >= 3) { TAPS = []; if (owner()) { VIEW = "profit"; render(); window.scrollTo(0, 0); } else openCode(); }
+      return;
+    }
     var b = e.target.closest("button"); if (!b) return;
     var id = b.id;
-    if (id === "refresh") return load(true);
-    if (id === "signout") return signOut("", true);
-    if (id === "state") { if (b.classList.contains("err")) save(); return; }
+    if (id === "refresh") { if (Q.length && !INF) send(); return load(true); }
+    if (id === "pcGo") return tryCode();
+    if (id === "signout") return signOut(true);
+    if (id === "state") { if (b.classList.contains("err")) { sendErr = false; send(); sendP(); } return; }
+    if (!D && !b.closest("#sheet")) return;
     if (id === "copy") return copy();
-    if (id === "reset") return reset();
+    if (id === "reset") return startOver("Clear the order and start again? Everything on it comes off and the status goes back to Not placed yet.", "Clear order", "Order cleared");
     if (id === "place") return setStatus("placed");
     if (id === "chg") return openStatus();
-    if (id === "neworder") return newOrder();
-    if (id === "waX") return setWa(null);
+    if (id === "neworder") return startOver("Start a new order? The items and status on this one are cleared.", "Start new order", "New order started");
+    if (id === "waX") return waLater();
     if (id === "addBtn") return openAdd();
+    if (id === "rateBtn") return openRate();
+    if (id === "rateGo") return saveRate();
     if (id === "sheetX" || b.dataset.x) return closeSheet();
     if (id === "saveFor") return openSaveFor();
     if (id === "svGo") return doSaveFor();
@@ -1146,59 +1711,126 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     if (id === "askYes") return answer(true);
     if (id === "askNo") return answer(false);
     if (b.dataset.st) return setStatus(b.dataset.st);
-    if (b.dataset.add) return addProduct(b.dataset.add);
+    if (b.dataset.pk) return togglePk(b.dataset.pk, b);
+    if (b.dataset.view) { VIEW = owner() ? b.dataset.view : "order"; render(); return window.scrollTo(0, 0); }
+    if (b.dataset.sauto) { queueP({ t: "sell", k: b.dataset.sauto, v: null }); return profitTotals(); }
+    if (id === "allPrices") return openAllPrices();
+    if (id === "lockP") { lockProfit(); return toast("Your prices are locked"); }
+    if (id === "packOn") { queue({ t: "pon", v: !D.pack.on }); return render(); }
+    if (b.dataset.pauto) { queue({ t: "pqty", f: b.dataset.pauto, v: null }); return totals(); }
+    if (b.dataset.pact) {
+      var pr = b.closest("[data-prow]"); if (!pr) return;
+      var pf = pr.dataset.prow, cur = packNow()[pf], pstep = pf === "labels" ? 10 : 1;
+      queue({ t: "pqty", f: pf, v: b.dataset.pact === "plus" ? cur + pstep : Math.max(0, cur - pstep) });
+      return totals();
+    }
+    if (id === "upBtn") { var ui = $("upIn"); if (ui) ui.click(); return; }
+    if (b.dataset.file) return openFile(b.dataset.file);
+    if (b.dataset.delfile) return delFile(b.dataset.delfile);
     if (b.dataset["new"]) return addNew($("addQ").value);
     if (b.dataset.cur) {
-      CUR = b.dataset.cur; try { localStorage.setItem("pprlog.cur", CUR); } catch (err) {}
-      return render();
+      CUR = b.dataset.cur; try { localStorage.setItem(K.cur, CUR); } catch (err) {}
+      render();
+      if ($("addList")) addSearch();
+      return;
     }
     var act = b.dataset.act; if (!act || !D) return;
     if (act === "remove") return removeRow(b);
     var it = itemOf(b); if (!it) return;
-    it.qty = act === "plus" ? it.qty + 10 : Math.max(0, it.qty - 10);
-    b.closest(".item").querySelector('[data-f="qty"]').value = it.qty;
-    totals(); queueSave();
+    var step = it.box || 10;
+    queue({ t: "qty", id: it.id, k: it.k, v: act === "plus" ? it.qty + step : Math.max(0, it.qty - step) });
+    var row = document.querySelector('.item[data-id="' + it.id + '"]'), now = byId(it.id);
+    if (row && now) row.querySelector('[data-f="qty"]').value = now.qty;
+    totals();
   });
   document.addEventListener("input", function (e) {
     if (e.target.id === "addQ") return addSearch();
-    var f = e.target.dataset && e.target.dataset.f; if (!f || !D) return;
-    if (f === "ship") D.shipUsd = toUsd(num(e.target.value));
-    else {
-      var it = itemOf(e.target); if (!it) return;
-      if (f === "qty") it.qty = Math.round(num(e.target.value));
-      if (f === "price") it.price = toUsd(num(e.target.value));
+    if (e.target.id === "apQ") return apSearch();
+    if (e.target.id === "notes" && D) { queue({ t: "notes", v: e.target.value.slice(0, 5000) }); return; }
+    if (e.target.id === "pcode") { if (e.target.value.replace(/\D/g, "").length === 4) tryCode(); return; }
+    var ds = e.target.dataset || {};
+    if (D && ds.pq) { queue({ t: "pqty", f: ds.pq, v: e.target.value.trim() === "" ? null : Math.round(num(e.target.value)) }); return totals(); }
+    if (D && ds.f === "qty") { var qi = itemOf(e.target); if (qi) queue({ t: "qty", id: qi.id, k: qi.k, v: Math.round(num(e.target.value)) }); return totals(); }
+    // Everything below changes prices, so only works with the code.
+    if (!D || !owner()) return;
+    if (ds.markup) { queueP({ t: "markup", v: Math.max(0, num(e.target.value)) }); return profitTotals(); }
+    if (ds.pmarkup) { queueP({ t: "pmarkup", v: Math.max(0, num(e.target.value)) }); return profitTotals(); }
+    if (ds.sell) {
+      var raw = e.target.value.trim();
+      queueP({ t: "sell", k: ds.sell, v: raw === "" ? null : r4(toAud(num(raw))) });
+      var sub = document.querySelector('[data-apsub="' + ds.sell + '"]'), pp = PK[ds.sell];
+      if (sub && pp) sub.textContent = apSub(pp);
+      return profitTotals();
     }
-    totals(); queueSave();
+    if (ds.pcost) { var pit = byId(ds.pcost); if (pit) queue({ t: "price", id: pit.id, k: pit.k, v: r4(toUsd(num(e.target.value))) }); return profitTotals(); }
+    if (ds.pf) { queue({ t: "pprice", f: ds.pf, v: r4(toAud(num(e.target.value))) }); return totals(); }
+    if (ds.f === "ship") { queue({ t: "ship", v: r4(toUsd(num(e.target.value))) }); return totals(); }
+    if (ds.f === "price") { var it = itemOf(e.target); if (it) queue({ t: "price", id: it.id, k: it.k, v: r4(toUsd(num(e.target.value))) }); return totals(); }
   });
   document.addEventListener("change", function (e) {
     if (e.target.id === "cmpA" || e.target.id === "cmpB") { CMP[e.target.id === "cmpA" ? "a" : "b"] = e.target.value; return drawCompare(); }
-    var f = e.target.dataset && e.target.dataset.f; if (!f || !D) return;
-    if (f === "ship") { e.target.value = fix(D.shipUsd); return; }
-    var it = itemOf(e.target); if (!it) return;
-    e.target.value = f === "qty" ? it.qty : (it.price > 0 ? fix(it.price) : "");
-    var cap = e.target.closest(".item").querySelector("[data-pcap]"); if (cap) cap.textContent = capText(it);
+    if (e.target.id === "upIn") { upload(e.target.files); e.target.value = ""; return; }
+    var ds = e.target.dataset || {};
+    if (!D) return;
+    if (ds.pq) { e.target.value = packNow()[ds.pq]; return; }
+    if (ds.f === "qty") { var qi = itemOf(e.target); if (qi) e.target.value = qi.qty; return; }
+    if (!owner()) return;
+    if (ds.markup) { e.target.value = numTxt(mk()); return; }
+    if (ds.pmarkup) { e.target.value = numTxt(pmk()); return; }
+    if (ds.sell) {
+      var cit = null; D.items.forEach(function (x) { if (skey(x) === ds.sell) cit = x; });
+      var cp = PK[ds.sell];
+      e.target.value = fix(cit ? sellOf(cit) : cp ? catSell(cp) : 0);
+      return;
+    }
+    if (ds.pcost) { var cpi = byId(ds.pcost); if (cpi) e.target.value = costAt(cpi) > 0 ? fix(costAt(cpi)) : ""; return; }
+    if (ds.pf) { e.target.value = ds.pf === "ship" ? fixAud(PRC.ship) : unitNum(showAud(PRC[ds.pf])); return; }
+    if (ds.f === "ship") { e.target.value = fix(D.shipUsd); return; }
+    if (ds.f === "price") { var it = itemOf(e.target); if (it) e.target.value = costAt(it) > 0 ? fix(costAt(it)) : ""; }
+  });
+  // Something changed on another device while a box here was being typed in, so redraw once typing stops.
+  document.addEventListener("focusout", function () {
+    clearTimeout(rendT);
+    rendT = setTimeout(function () { if (NEEDR && !typing()) render(); }, 400);
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") return closeSheet();
     if (e.key === "Enter" && e.target.id === "svName") { e.preventDefault(); return doSaveFor(); }
+    if (e.key === "Enter" && e.target.id === "rateIn") { e.preventDefault(); return saveRate(); }
+    if (e.key === "Enter" && e.target.id === "pcode") { e.preventDefault(); return tryCode(); }
     if (e.key === "Enter" && e.target.id === "addQ") {
       e.preventDefault();
       var q = e.target.value.trim(), m = addMatches(q);
-      if (m.length === 1) addProduct(m[0].sku); else if (q && !m.length) addNew(q);
+      if (q && m.length === 1) {
+        if (onOrder(m[0].k) < 0) togglePk(m[0].k); else toast(m[0].name + " is already on the order");
+        e.target.value = ""; addSearch();
+      } else if (q && !m.length) addNew(q);
+      else e.target.blur();
     }
   });
-  // Phones pause timers in the background, so check the 8 hours again whenever the page comes back.
-  document.addEventListener("visibilitychange", function () {
-    if (document.hidden) return;
-    if (AUTH && !signedIn()) return signOut(OUT8);
-    if (signedIn() && !dirty && !saving && Date.now() - lastLoad > 60000) load(false);
+  ["pointerdown", "keydown", "input", "wheel", "touchmove"].forEach(function (ev) {
+    document.addEventListener(ev, function () { idleCheck(); LAST_ACT = Date.now(); }, { capture: true, passive: true });
   });
-  window.__log = { waMsg: function (k) { return waMsg(k); }, payload: payload, sums: function () { return sums(); }, saves: function () { return SAVES; } };
-  PK.setup({ store: "pprlog.pk", name: "PPR Logistics" });
-  Gate.init({ login: login, enter: enter, toast: toast, signOut: function () { signOut("", true); },
-    storeBlocked: function () { try { localStorage.setItem("__p", "1"); localStorage.removeItem("__p"); return false; } catch (e) { return true; } } });
-  if (signedIn()) enter();
-  else signOut(AUTH ? OUT8 : "");
+  setInterval(idleCheck, 5000);
+  window.addEventListener("pageshow", idleCheck);
+  // Phones pause timers in the background, so check the 8 hours and catch up whenever the page comes back.
+  document.addEventListener("visibilitychange", function () {
+    if (document.hidden) { clearTimeout(pollT); if (Q.length && !INF) send(true); return; }
+    idleCheck();
+    if (AUTH && !signedIn()) return signOut();
+    if (signedIn()) { if (Q.length && !INF) send(); load(false); }
+  });
+  window.addEventListener("pagehide", function () { if (Q.length && !INF && signedIn()) send(true); });
+  window.addEventListener("online", function () { if (signedIn()) { if (Q.length && !INF) send(); load(false); } });
+  window.__log = { waMsg: function (k) { return waMsg(k); }, waHref: function (k) { return waHref(k); }, sums: function (k) { return sums(k); }, saves: function () { return SAVES; },
+    order: function () { return D; }, v: function () { return V; }, pending: function () { return Q.length + (INF ? INF.length : 0) + PQ.length + (PINF ? PINF.length : 0); },
+    profit: function () { return owner() ? profitSums() : null; }, unlocked: function () { return owner(); } };
+
+  if (!LIVE) {
+    document.body.classList.remove("out"); $("tools").style.visibility = "hidden";
+    note("bad", "Not connected yet", "This page needs its Google script link added.");
+  } else if (signedIn()) { document.body.classList.remove("out"); armExpiry(); load(false); if (Q.length) send(); }
+  else signOut();
 })();
 </script>
 </body>
