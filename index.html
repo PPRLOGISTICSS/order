@@ -329,8 +329,11 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
    It needs the password to open and signs itself out after 8 hours. Money is kept in USD and shown in
    USD or AUD; packaging is priced in AUD. */
 (function () {
-  // The Google script link.
+  // The Google script link. Each site has its own script, so each site is its own order.
   var EP = "https://script.google.com/macros/s/AKfycbwkfpbVjmepHpUEARAxJ0aF2AWNndlN5WhBbHwsrDQPbUxHsmVdQ13ZpHgyi9JTYwv5KA/exec";
+  // This site's name. It goes on the WhatsApp message and keeps this site's saved password apart
+  // from the other sites' when they share a web address.
+  var SITE = "Evolve";
   var LIVE = /^https:\/\/script\.google\.com\/(a\/macros\/[\w.-]+|macros)\/s\/[\w-]+\/exec$/.test(EP);
   var RATE0 = 1.43, POLL = 10000, MAXUP = 15 * 1024 * 1024;
   // The 12 May 2026 price list: part number, name, more detail, vials in the box, other words to find it by.
@@ -471,7 +474,12 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   var STAGES = [["draft", "Not placed yet"], ["placed", "Order placed"], ["looking", "Being looked at"],
     ["payreq", "Payment requested"], ["paid", "Payment made"], ["ordered", "Ordered"],
     ["making", "Being made"], ["sent", "Sent"], ["delivered", "Delivered"]];
-  var K = { auth: "pprorder.auth", last: "pprorder.last", cur: "pprorder.cur", q: "pprorder.q", wa: "pprorder.wa" };
+  // What this page keeps on the phone is filed under its own script, so two sites on the same web
+  // address never share a sign in or an order queue. A sign in filed the old way is picked up once.
+  var NS = (function () { var h = 0; for (var i = 0; i < EP.length; i++) h = (h * 31 + EP.charCodeAt(i)) >>> 0; return "pprorder." + h.toString(36) + "."; })();
+  var K = { auth: NS + "auth", last: NS + "last", cur: NS + "cur", q: NS + "q", wa: NS + "wa" };
+  if (SITE) document.title = "PPR Order " + SITE;
+  try { ["auth", "cur"].forEach(function (n) { var old = localStorage.getItem("pprorder." + n); if (old != null) { if (localStorage.getItem(K[n]) == null) localStorage.setItem(K[n], old); localStorage.removeItem("pprorder." + n); } }); } catch (e) {}
 
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
@@ -561,7 +569,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
         '<div class="si-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8.5 11V7.5a3.5 3.5 0 0 1 7 0V11"/></svg></div>' +
         '<h2>PPR Logistics</h2>' +
         // A name for the phone to save the password under, kept out of sight.
-        '<input type="text" name="username" autocomplete="username" value="PPR order" tabindex="-1" aria-hidden="true" style="display:none">' +
+        '<input type="text" name="username" autocomplete="username" value="PPR order' + (SITE ? " " + esc(SITE) : "") + '" tabindex="-1" aria-hidden="true" style="display:none">' +
         '<input class="si-pw" id="pw" name="password" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="Password" aria-label="Password">' +
         '<p class="si-err" id="siErr" role="alert">' + esc(msg) + '</p>' +
         '<button class="cta" type="submit" id="siBtn">Sign in</button>' +
@@ -1009,7 +1017,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     return out;
   }
   function waMsg(kind) {
-    var lines = ["PPR Logistics", kind === "placed" ? "New order placed." :
+    var lines = ["PPR Logistics" + (SITE ? ", " + SITE : ""), kind === "placed" ? "New order placed." :
       kind === "status" ? "Order update: " + STAGES[stageIx(D.status)][1] + "." : "The order was changed."];
     if (kind !== "status") {
       var t = sums("sell").total, other = CUR === "aud" ? "usd" : "aud";
