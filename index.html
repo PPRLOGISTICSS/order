@@ -228,6 +228,8 @@ body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:co
 .mask{position:fixed;inset:0;background:rgba(29,29,31,.28);display:none;align-items:flex-end;justify-content:center;z-index:20}
 .mask.on{display:flex}
 .sheet{position:relative;background:var(--canvas);width:100%;max-width:600px;max-height:86vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px))}
+@media (max-width:699px){.mask.top{align-items:flex-start}.mask.top .sheet{border-radius:0 0 20px 20px;padding-top:calc(18px + env(safe-area-inset-top,0px))}
+  .mask.top .sheet-x{top:calc(14px + env(safe-area-inset-top,0px))}}
 @media (min-width:700px){.mask{align-items:center}.sheet{border-radius:20px}.mask.on ~ .toast{bottom:calc(7vh + 96px)}}
 .sheet h2{font-size:22px;margin:4px 0 4px}
 .sh-sub{color:var(--ink2);font-size:15px;margin:0 0 12px}
@@ -477,7 +479,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   // What this page keeps on the phone is filed under its own script, so two sites on the same web
   // address never share a sign in or an order queue. A sign in filed the old way is picked up once.
   var NS = (function () { var h = 0; for (var i = 0; i < EP.length; i++) h = (h * 31 + EP.charCodeAt(i)) >>> 0; return "pprorder." + h.toString(36) + "."; })();
-  var K = { auth: NS + "auth", last: NS + "last", cur: NS + "cur", q: NS + "q", wa: NS + "wa" };
+  var K = { auth: NS + "auth", last: NS + "last", cur: NS + "cur", q: NS + "q", wa: NS + "wa", cl: NS + "cl" };
   if (SITE) document.title = "PPR Order " + SITE;
   try { ["auth", "cur"].forEach(function (n) { var old = localStorage.getItem("pprorder." + n); if (old != null) { if (localStorage.getItem(K[n]) == null) localStorage.setItem(K[n], old); localStorage.removeItem("pprorder." + n); } }); } catch (e) {}
 
@@ -1107,12 +1109,12 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
 
   /* ---------- sheets ---------- */
   function openSheet(html, cls) {
-    var s = $("sheet"); s.className = "sheet" + (cls ? " " + cls : "");
+    var s = $("sheet"); s.className = "sheet" + (cls ? " " + cls : ""); $("mask").classList.remove("top");
     s.innerHTML = '<button type="button" class="sheet-x" id="sheetX" aria-label="Close">&times;</button>' + html;
     $("mask").classList.add("on");
   }
   function closeSheet() {
-    var m = $("mask"); if (m) m.classList.remove("on"); var s = $("sheet"); if (s) { s.innerHTML = ""; s.className = "sheet"; }
+    var m = $("mask"); if (m) m.classList.remove("on", "top"); var s = $("sheet"); if (s) { s.innerHTML = ""; s.className = "sheet"; }
     if (VIEWURL) { var u = VIEWURL; VIEWURL = ""; setTimeout(function () { try { URL.revokeObjectURL(u); } catch (e) {} }, 60000); }
     if (ASK) { var r = ASK; ASK = null; r(false); }
   }
@@ -1462,10 +1464,15 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   }
   function openCode() {
     openSheet('<div class="si pc"><div class="si-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8.5 11V7.5a3.5 3.5 0 0 1 7 0V11"/></svg></div>' +
-      '<input class="si-pw code-in" id="pcode" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Code" aria-label="Code">' +
+      '<input class="si-pw code-in" id="pcode" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="16" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Code" aria-label="Code">' +
       '<p class="si-err" id="pcErr" role="alert"></p><button class="cta" id="pcGo" type="button">Open</button></div>');
+    $("mask").classList.add("top");
     setTimeout(function () { var i = $("pcode"); if (i) i.focus(); }, 60);
   }
+  /* The code can be any length. Once it has worked on this phone, typing that many numbers opens it
+     straight away. Until then, or after a wrong one, it waits for Open, so a longer code is never
+     sent part way through and counted as a wrong try. */
+  function codeLen() { try { var n = +localStorage.getItem(K.cl); return n >= 1 && n <= 16 ? n : 0; } catch (e) { return 0; } }
   function tryCode() {
     var inp = $("pcode"); if (!inp || PBUSY || !AUTH) return;
     var code = inp.value.trim(); if (!code) return;
@@ -1474,10 +1481,12 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     synced(function () {
       post({ action: "unlock", code: code, pass: AUTH.pass }).then(function (j) {
         if (j && j.ok && j.otok) {
+          try { localStorage.setItem(K.cl, String(code.length)); } catch (e) {}
           OTOK = j.otok; SRV = null; VIEW = "profit";
           closeSheet(); adopt(j); window.scrollTo(0, 0); return;
         }
         if (j && j.error === "signed_out") return signOut();
+        if (j && j.error === "wrong_code") { try { localStorage.removeItem(K.cl); } catch (e) {} }
         if ($("pcErr")) $("pcErr").textContent = j && j.error === "locked" ? "Too many tries. Try again in " + Math.max(1, +j.mins || 10) + (+j.mins === 1 ? " minute." : " minutes.") :
           j && j.error === "bad_action" ? "The Google script needs updating first." : "That code isn't right.";
         if ($("pcode")) $("pcode").value = "";
@@ -1755,7 +1764,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     if (e.target.id === "addQ") return addSearch();
     if (e.target.id === "apQ") return apSearch();
     if (e.target.id === "notes" && D) { queue({ t: "notes", v: e.target.value.slice(0, 5000) }); return; }
-    if (e.target.id === "pcode") { if (e.target.value.replace(/\D/g, "").length === 4) tryCode(); return; }
+    if (e.target.id === "pcode") { var cl = codeLen(); if (cl && e.target.value.trim().length === cl) tryCode(); return; }
     var ds = e.target.dataset || {};
     if (D && ds.pq) { queue({ t: "pqty", f: ds.pq, v: e.target.value.trim() === "" ? null : Math.round(num(e.target.value)) }); return totals(); }
     if (D && ds.f === "qty") { var qi = itemOf(e.target); if (qi) queue({ t: "qty", id: qi.id, k: qi.k, v: Math.round(num(e.target.value)) }); return totals(); }
