@@ -185,7 +185,18 @@ body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:co
 .si-pw::placeholder{letter-spacing:normal;font-size:17px;color:var(--ink3)}
 .si-pw:focus{box-shadow:0 0 0 2px var(--peri)}
 .si-err{color:var(--blush);font-size:15px;min-height:22px;margin:10px 0 2px}
+.si-err.good{color:#1f9d55}
 .si .cta{margin-top:6px}
+/* the sign in has a few faces: Face ID, the PIN, and the offer to switch; one shows at a time */
+.si .g{display:none}
+.si[data-mode="face"] .g-face,.si[data-mode="pw"] .g-pw,.si[data-mode="offer"] .g-offer,.si[data-mode="finish"] .g-finish{display:block}
+.si .cta.fid{display:flex;align-items:center;justify-content:center;gap:10px}
+.si .cta svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.si .cta svg:empty{display:none}
+.si-link{display:block;margin:14px auto 0;border:0;background:transparent;color:var(--peri);font-size:16px;font-weight:500;padding:8px 12px;cursor:pointer}
+.si-link[hidden]{display:none}
+.si.busy .cta{opacity:.6;pointer-events:none}
+.si .sub2{color:var(--ink2);font-size:15px;line-height:1.4;margin:-10px 0 18px}
 
 .toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);
   background:rgba(29,29,31,.9);color:#fff;padding:10px 16px;border-radius:999px;font-size:15px;
@@ -324,6 +335,124 @@ body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:co
 <script>
 // Never run inside another site's page.
 if (window.top !== window.self) { try { window.top.location = window.self.location; } catch (e) { document.documentElement.innerHTML = ""; } }
+
+/* Face ID sign in, the same as the hub's. A passkey made on this device holds a key that unlocks the
+   PIN kept here, encrypted. The PIN then goes to the script exactly as if it was typed, so the script
+   and its 8 hour pass work the same as before. Nothing new is kept on the server. */
+window.FID = (function () {
+  var cfg = { store: "pk", name: "App" };
+  var enc = new TextEncoder(), dec = new TextDecoder(), pending = null, ctl = null;
+  function b64(buf) { var b = new Uint8Array(buf), s = ""; for (var i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""); }
+  function unb64(s) { s = String(s).replace(/-/g, "+").replace(/_/g, "/"); while (s.length % 4) s += "="; var bin = atob(s), b = new Uint8Array(bin.length); for (var i = 0; i < bin.length; i++) b[i] = bin.charCodeAt(i); return b; }
+  function rnd(n) { var b = new Uint8Array(n); crypto.getRandomValues(b); return b; }
+  function err(code) { var e = new Error(code); e.code = code; return e; }
+  function ok() { return !!(window.PublicKeyCredential && window.crypto && crypto.subtle && window.isSecureContext && location.hostname); }
+  function read() { try { var j = JSON.parse(localStorage.getItem(cfg.store) || "null"); return j && j.id && j.ct && j.iv && j.salt ? j : null; } catch (e) { return null; } }
+  function ready() { return ok() && !!read(); }
+  function forget() { pending = null; try { localStorage.removeItem(cfg.store); } catch (e) {} }
+  function declined() { try { return +localStorage.getItem(cfg.store + ".no") > Date.now() - 30 * 86400000; } catch (e) { return false; } }
+  function decline() { pending = null; try { localStorage.setItem(cfg.store + ".no", String(Date.now())); } catch (e) {} }
+  function device() {
+    var u = navigator.userAgent || "", mac = /Mac/.test(navigator.platform || "") || /Mac OS X/.test(u);
+    if (/iPhone|iPod/.test(u)) return "iPhone";
+    if (/iPad/.test(u) || (mac && navigator.maxTouchPoints > 1)) return "iPad";
+    if (mac) return "Mac";
+    if (/Android/.test(u)) return "Android";
+    if (/Windows/.test(u)) return "Windows";
+    return "device";
+  }
+  /* What to call it on screen. iPhones say Face ID, Macs Touch ID, Windows has Hello. */
+  function bio() {
+    var d = device();
+    if (d === "iPhone" || d === "iPad") return "Face ID";
+    if (d === "Mac") return "Touch ID";
+    if (d === "Windows") return "Windows Hello";
+    return "fingerprint or face";
+  }
+  /* Can this browser do it at all. The answer is a guess until the first try. */
+  function canOffer(force) {
+    if (!ok() || declined() || (read() && !force)) return Promise.resolve(false);
+    try { localStorage.setItem("__pk", "1"); localStorage.removeItem("__pk"); } catch (e) { return Promise.resolve(false); }
+    var caps = PublicKeyCredential.getClientCapabilities ? PublicKeyCredential.getClientCapabilities() : Promise.resolve(null);
+    return caps.then(function (c) {
+      if (c && (c["extension:prf"] === false || c.userVerifyingPlatformAuthenticator === false)) return false;
+      if (c && c.userVerifyingPlatformAuthenticator === true) return true;
+      return PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable ? PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable() : false;
+    }).catch(function () { return false; });
+  }
+  function keyFrom(prf) { return crypto.subtle.importKey("raw", prf, { name: "AES-GCM" }, false, ["encrypt", "decrypt"]); }
+  function prfOf(cred) { var r = cred.getClientExtensionResults(); return r && r.prf && r.prf.results && r.prf.results.first ? r.prf.results.first : null; }
+  function seal(prf, pw, id, salt) {
+    var iv = rnd(12);
+    return keyFrom(prf).then(function (k) { return crypto.subtle.encrypt({ name: "AES-GCM", iv: iv }, k, enc.encode(pw)); })
+      .then(function (ct) {
+        localStorage.setItem(cfg.store, JSON.stringify({ id: b64(id), salt: b64(salt), iv: b64(iv), ct: b64(ct), t: Date.now() }));
+        try { localStorage.removeItem(cfg.store + ".no"); } catch (e) {}
+        pending = null;
+      });
+  }
+  function ask(id, salt) {
+    cancel(); ctl = window.AbortController ? new AbortController() : null;
+    return navigator.credentials.get({ signal: ctl ? ctl.signal : undefined, publicKey: {
+      challenge: rnd(32), rpId: location.hostname, userVerification: "required", timeout: 120000,
+      allowCredentials: [{ type: "public-key", id: id, transports: ["internal", "hybrid"] }],
+      extensions: { prf: { eval: { first: salt } } }
+    } });
+  }
+  // Drop a Face ID ask that's still waiting, so the PIN can be used instead.
+  function cancel() { if (ctl) { try { ctl.abort(); } catch (e) {} ctl = null; } }
+  /* First time: make the passkey, then lock the PIN with it. */
+  function enrol(pw) {
+    if (!ok()) return Promise.reject(err("unsupported"));
+    var salt = rnd(32), name = cfg.name + " " + device();
+    return navigator.credentials.create({ publicKey: {
+      rp: { name: cfg.name, id: location.hostname },
+      user: { id: rnd(16), name: name, displayName: name },
+      challenge: rnd(32), timeout: 120000,
+      pubKeyCredParams: [{ type: "public-key", alg: -7 }, { type: "public-key", alg: -257 }],
+      authenticatorSelection: { authenticatorAttachment: "platform", residentKey: "required", userVerification: "required" },
+      attestation: "none",
+      extensions: { prf: { eval: { first: salt } } }
+    } }).then(function (cred) {
+      var r = cred.getClientExtensionResults() || {};
+      if (!r.prf || r.prf.enabled === false) { decline(); throw err("noprf"); }
+      var prf = prfOf(cred);
+      if (prf) return seal(prf, pw, cred.rawId, salt);
+      // Some phones only hand the key over on a sign in, so do one straight away. Safari
+      // wants a fresh tap for that, which the page asks for if this is refused.
+      pending = { id: cred.rawId, salt: salt, pw: pw };
+      return finish();
+    });
+  }
+  function finish() {
+    if (!pending) return Promise.reject(err("nothing"));
+    var p = pending;
+    return ask(p.id, p.salt).then(function (cred) {
+      var prf = prfOf(cred);
+      if (!prf) { decline(); throw err("noprf"); }
+      return seal(prf, p.pw, p.id, p.salt);
+    });
+  }
+  /* Every time after: the passkey unlocks the PIN. */
+  function unlock() {
+    var s = read(); if (!s) return Promise.reject(err("none"));
+    return ask(unb64(s.id), unb64(s.salt)).then(function (cred) {
+      var prf = prfOf(cred); if (!prf) throw err("noprf");
+      return keyFrom(prf).then(function (k) { return crypto.subtle.decrypt({ name: "AES-GCM", iv: unb64(s.iv) }, k, unb64(s.ct)); })
+        .then(function (pt) { return dec.decode(pt); }, function () { throw err("broken"); });
+    });
+  }
+  /* Sort a failure into something the page can act on. */
+  function why(e, tapped) {
+    var c = e && (e.code || e.name) || "";
+    if (c === "NotAllowedError" || c === "AbortError" || c === "TimeoutError") return tapped ? "cancel" : "notap";
+    if (c === "cancel" || c === "notap" || c === "noprf" || c === "broken" || c === "none" || c === "nothing") return c;
+    if (c === "InvalidStateError") return "cancel";
+    return "unsupported";
+  }
+  return { setup: function (c) { cfg = c; }, ok: ok, ready: ready, canOffer: canOffer, enrol: enrol, finish: finish, unlock: unlock,
+    forget: forget, decline: decline, cancel: cancel, needsTap: function () { return !!pending; }, bio: bio, device: device, why: why };
+})();
 
 /* PPR Logistics order. People pick from the price list, set the amounts, add packaging and designs,
    and see everything at PPR's prices. No supplier prices are in this file, and the script only ever
@@ -481,6 +610,7 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
   var NS = (function () { var h = 0; for (var i = 0; i < EP.length; i++) h = (h * 31 + EP.charCodeAt(i)) >>> 0; return "pprorder." + h.toString(36) + "."; })();
   var K = { auth: NS + "auth", last: NS + "last", cur: NS + "cur", q: NS + "q", wa: NS + "wa", cl: NS + "cl" };
   if (SITE) document.title = "PPR Order " + SITE;
+  FID.setup({ store: NS + "pk", name: "PPR" + (SITE ? " " + SITE : "") });
   try { ["auth", "cur"].forEach(function (n) { var old = localStorage.getItem("pprorder." + n); if (old != null) { if (localStorage.getItem(K[n]) == null) localStorage.setItem(K[n], old); localStorage.removeItem("pprorder." + n); } }); } catch (e) {}
 
   function $(id) { return document.getElementById(id); }
@@ -562,41 +692,136 @@ if (window.top !== window.self) { try { window.top.location = window.self.locati
     OTOK = null; PROFIT = null; PRC = null; VIEW = "order"; PQ = []; PINF = null; clearTimeout(psendT);
     clearTimeout(sendT); clearTimeout(pollT); clearTimeout(outT); closeSheet();
     try { localStorage.removeItem(K.auth); localStorage.removeItem(K.last); } catch (e) {}
-    showSignIn("");
+    showSignIn("", manual);
   }
-  function showSignIn(msg) {
+
+  /* ---------- the sign in screen ----------
+     With Face ID set up on this device it asks for that the moment the page opens, and signs in by
+     itself. If it can't, or you'd rather, there's the PIN. Once the PIN has worked on a device that
+     can do Face ID, it offers to switch. */
+  var G = { mode: "pw", held: "", keep: null, was: false, busy: false, pin: false };
+  var FACE_SVG = '<path d="M4 8.5V6.5A2.5 2.5 0 0 1 6.5 4h2M15.5 4h2A2.5 2.5 0 0 1 20 6.5v2M20 15.5v2a2.5 2.5 0 0 1-2.5 2.5h-2M8.5 20h-2A2.5 2.5 0 0 1 4 17.5v-2"/><path d="M9 9.3v1.4M15 9.3v1.4M8.7 14.2c.8 1.1 2 1.7 3.3 1.7s2.5-.6 3.3-1.7"/>';
+  var PRINT_SVG = '<path d="M6 8.2A6.8 6.8 0 0 1 18.8 11c0 2.6-.3 5.1-1 7.4"/><path d="M8.4 9.6A4.3 4.3 0 0 1 16.3 11c0 3.4-.5 6.3-1.5 8.8"/><path d="M10.6 11.1a1.4 1.4 0 0 1 2.8 0c0 3.6-.7 6.7-2 9.4"/><path d="M12 13.9c0 2.4-.5 4.6-1.5 6.8"/><path d="M5.4 11c0 2.6-.2 4.9-.8 7"/>';
+  function loginMsg(e) {
+    return e === "wrong_password" ? "That PIN isn't right." : e === "locked" ? "Too many tries. Wait 10 minutes, then try again." :
+      e === "no_password" ? "Sign in isn't set up yet." : e === "net" ? "No connection. Check it and try again." : "Couldn't sign in. Try again.";
+  }
+  function gErr(t, good) { var el = $("siErr"); if (el) { el.textContent = t || ""; el.className = "si-err" + (good ? " good" : ""); } }
+  function gMode(m) {
+    G.mode = m; var g = $("gate"); if (!g) return;
+    g.setAttribute("data-mode", m);
+    var h = $("gateTitle"), sub = $("gateSub");
+    if (h) h.textContent = m === "offer" ? "Use " + FID.bio() + " next time?" : m === "finish" ? "One more step" : "PPR Logistics";
+    if (sub) sub.textContent = m === "offer" ? "No PIN to type. Just look at your phone." : m === "finish" ? "Confirm with " + FID.bio() + " once to finish setting it up." : "";
+    // only computers get the cursor put in the box; on a phone that would throw the keyboard up
+    if (m === "pw" && window.matchMedia && matchMedia("(hover:hover) and (pointer:fine)").matches) setTimeout(function () { var i = $("pw"); if (i && G.mode === "pw") i.focus(); }, 60);
+  }
+  function gBusy(on, id, txt) {
+    G.busy = on; var g = $("gate"); if (g) g.classList.toggle("busy", on);
+    var b = id && $(id), sp = b && (b.querySelector("span") || b);
+    if (sp) { if (on) { sp.dataset.was = sp.textContent; sp.textContent = txt; } else if (sp.dataset.was) { sp.textContent = sp.dataset.was; delete sp.dataset.was; } }
+  }
+  function showSignIn(msg, quiet) {
     document.body.classList.add("out"); state("", "");
+    G.was = FID.ready(); G.held = ""; G.keep = null; G.busy = false; G.pin = false;
+    var bio = FID.bio(), apple = /iPhone|iPad|Mac/.test(FID.device()), glyph = apple ? FACE_SVG : PRINT_SVG;
     $("body").innerHTML =
-      '<form id="signin" class="si" novalidate autocomplete="on" action="#">' +
+      '<div class="si" id="gate" data-mode="pw">' +
         '<div class="si-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2.5"/><path d="M8.5 11V7.5a3.5 3.5 0 0 1 7 0V11"/></svg></div>' +
-        '<h2>PPR Logistics</h2>' +
-        // A name for the phone to save the password under, kept out of sight.
-        '<input type="text" name="username" autocomplete="username" value="PPR order' + (SITE ? " " + esc(SITE) : "") + '" tabindex="-1" aria-hidden="true" style="display:none">' +
-        '<input class="si-pw" id="pw" name="password" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="Password" aria-label="Password">' +
-        '<p class="si-err" id="siErr" role="alert">' + esc(msg) + '</p>' +
-        '<button class="cta" type="submit" id="siBtn">Sign in</button>' +
-      '</form>';
-    setTimeout(function () { var i = $("pw"); if (i) i.focus(); }, 50);
+        '<h2 id="gateTitle">PPR Logistics</h2><p class="sub2" id="gateSub"></p>' +
+        '<div class="g g-face">' +
+          '<button class="cta fid" id="gateFace" type="button"><svg viewBox="0 0 24 24" aria-hidden="true">' + glyph + '</svg><span>Sign in with ' + esc(bio) + '</span></button>' +
+          '<button class="si-link" id="gatePw" type="button">Use PIN</button>' +
+        '</div>' +
+        '<form class="g g-pw" id="signin" novalidate autocomplete="on" action="#">' +
+          // A name for the phone to save the PIN under, kept out of sight.
+          '<input type="text" name="username" autocomplete="username" value="PPR order' + (SITE ? " " + esc(SITE) : "") + '" tabindex="-1" aria-hidden="true" style="display:none">' +
+          '<input class="si-pw" id="pw" name="password" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="PIN" aria-label="PIN">' +
+          '<button class="cta" type="submit" id="siBtn"><span>Sign in</span></button>' +
+          '<button class="si-link" id="gateBack" type="button"' + (G.was ? "" : " hidden") + '>Use ' + esc(bio) + '</button>' +
+        '</form>' +
+        '<div class="g g-offer">' +
+          '<button class="cta fid" id="offerOn" type="button"><svg viewBox="0 0 24 24" aria-hidden="true">' + glyph + '</svg><span>Turn on</span></button>' +
+          '<button class="si-link" id="offerNo" type="button">Not now</button>' +
+        '</div>' +
+        '<div class="g g-finish">' +
+          '<button class="cta" id="finishBtn" type="button"><span>Finish</span></button>' +
+          '<button class="si-link" id="finishNo" type="button">Not now</button>' +
+        '</div>' +
+        '<p class="si-err" id="siErr" role="alert"></p>' +
+      '</div>';
+    gErr(msg);
+    var on = function (id, fn) { var b = $(id); if (b) b.addEventListener("click", fn); };
+    on("gateFace", function () { gFace(true); });
+    on("gatePw", function () { FID.cancel(); gBusy(false, "gateFace"); gMode("pw"); gErr(""); });
+    on("gateBack", function () { gMode("face"); gFace(true); });
+    on("offerOn", gOfferOn); on("offerNo", gSkip);
+    on("finishBtn", gFinish); on("finishNo", gSkip);
+    if (G.was) { gMode("face"); if (!quiet) gFace(false); }
+    else gMode("pw");
   }
+  /* Signed in: the pass goes on the device, and if the script sent the order along it shows at once. */
+  function enter(j) {
+    AUTH = { pass: j.pass, exp: +j.exp }; WA = waStored(); WA_HIDE = false;
+    try { localStorage.setItem(K.auth, JSON.stringify(AUTH)); } catch (e) {}
+    G.held = ""; G.keep = null;
+    document.body.classList.remove("out"); $("body").innerHTML = ""; armExpiry();
+    if (j.v != null && j.order) { if (adopt(j)) state("", "Updated " + clock()); tick(); }
+    else load(false);
+    if (Q.length) send();
+  }
+  /* The PIN typed in. */
   function signIn(pw) {
-    var btn = $("siBtn"), err = $("siErr");
-    if (!pw) { err.textContent = "Type the password first."; return; }
-    btn.disabled = true; btn.textContent = "Signing in"; err.textContent = "";
+    if (G.pin) return;
+    if (!pw) { gErr("Type the PIN first."); return; }
+    FID.cancel(); G.pin = true; gErr(""); gBusy(true, "siBtn", "Signing in");
     post({ action: "login", pw: pw }).then(function (j) {
-      if (j && j.ok && j.pass) {
-        AUTH = { pass: j.pass, exp: +j.exp }; WA = waStored(); WA_HIDE = false;
-        try { localStorage.setItem(K.auth, JSON.stringify(AUTH)); } catch (e) {}
-        document.body.classList.remove("out"); armExpiry(); load(false);
-        if (Q.length) send();
-        return;
-      }
-      var e = j && j.error;
-      if ($("siErr")) $("siErr").textContent = e === "wrong_password" ? "That password isn't right." :
-        e === "locked" ? "Too many tries. Wait 10 minutes, then try again." :
-        e === "no_password" ? "Sign in isn't set up yet." : "Couldn't sign in. Try again.";
-    }).catch(function () { if ($("siErr")) $("siErr").textContent = "No connection. Check it and try again."; })
-      .then(function () { var b = $("siBtn"); if (b) { b.disabled = false; b.textContent = "Sign in"; } });
+      if (j && j.ok && j.pass) { if ($("pw")) $("pw").value = ""; return gAfter(pw, j); }
+      gErr(loginMsg(j && j.error));
+    }).catch(function () { gErr(loginMsg("net")); }).then(function () { G.pin = false; gBusy(false, "siBtn"); });
   }
+  /* In with the PIN: offer the switch to Face ID, unless this device already has it or can't. */
+  function gAfter(pw, j) {
+    return FID.canOffer(false).then(function (can) {
+      if (can) { G.held = pw; G.keep = j; gMode("offer"); gErr(""); }
+      else enter(j);
+    });
+  }
+  /* Face ID unlocks the PIN, which signs in like normal. */
+  function gFace(tapped) {
+    if (G.busy) return;
+    gErr(""); gBusy(true, "gateFace", "Signing in");
+    FID.unlock().then(function (pw) {
+      return post({ action: "login", pw: pw }).then(function (j) {
+        if (j && j.ok && j.pass) return enter(j);
+        if (j && j.error === "wrong_password") { FID.forget(); G.was = false; var b = $("gateBack"); if (b) b.hidden = true; gMode("pw"); gErr("The PIN has changed. Type it once."); return; }
+        gErr(loginMsg(j && j.error));
+      }, function () { gErr(loginMsg("net")); });
+    }).catch(function (e) {
+      var w = FID.why(e, tapped);
+      if (w === "cancel" || w === "notap" || G.mode !== "face") return;
+      FID.forget(); G.was = false; var b = $("gateBack"); if (b) b.hidden = true; gMode("pw");
+    }).then(function () { if (G.mode === "face") gBusy(false, "gateFace"); });
+  }
+  function gOfferOn() {
+    if (G.busy || !G.held) return;
+    gErr(""); gBusy(true, "offerOn", "Setting up");
+    FID.enrol(G.held).then(function () { gDone(true); }).catch(function (e) {
+      if (FID.needsTap()) { gMode("finish"); return; }
+      if (FID.why(e, true) === "cancel") FID.decline();
+      gDone(false);
+    }).then(function () { gBusy(false, "offerOn"); });
+  }
+  function gFinish() {
+    if (G.busy) return;
+    gErr(""); gBusy(true, "finishBtn", "Finishing");
+    FID.finish().then(function () { gDone(true); }).catch(function (e) {
+      if (FID.why(e, true) === "cancel") gErr("Didn't finish. Tap Finish to try again.");
+      else gDone(false);
+    }).then(function () { gBusy(false, "finishBtn"); });
+  }
+  function gDone(on) { var j = G.keep; if (on) toast(FID.bio() + " is on"); if (j) enter(j); }
+  function gSkip() { FID.decline(); var j = G.keep; if (j) enter(j); }
 
   /* ---------- prices ----------
      Everyone gets your price per vial from the script. On a device with the code it's worked out here
