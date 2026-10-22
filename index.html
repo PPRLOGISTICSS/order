@@ -1698,7 +1698,17 @@ window.FID = (function () {
      straight away. Until then, or after a wrong one, it waits for Open, so a longer code is never
      sent part way through and counted as a wrong try. */
   function codeLen() { try { var n = +localStorage.getItem(K.cl); return n >= 1 && n <= 16 ? n : 0; } catch (e) { return 0; } }
+  /* Typing the code: once it has worked on this phone it goes the moment the last number is in.
+     Before that it goes after a short pause in typing, so there's nothing to tap, and a longer code
+     typed steadily is never cut off. Open and Enter send it straight away. */
+  var codeT = null;
+  function codeTyped(v) {
+    clearTimeout(codeT);
+    if (v.length && v.length === codeLen()) return tryCode();
+    if (v.length >= 4) codeT = setTimeout(function () { var i = $("pcode"); if (i && i.value.trim() === v) tryCode(); }, 1000);
+  }
   function tryCode() {
+    clearTimeout(codeT);
     var inp = $("pcode"); if (!inp || PBUSY || !AUTH) return;
     var code = inp.value.trim(); if (!code) return;
     PBUSY = true; $("pcErr").textContent = "";
@@ -1989,7 +1999,7 @@ window.FID = (function () {
     if (e.target.id === "addQ") return addSearch();
     if (e.target.id === "apQ") return apSearch();
     if (e.target.id === "notes" && D) { queue({ t: "notes", v: e.target.value.slice(0, 5000) }); return; }
-    if (e.target.id === "pcode") { var cl = codeLen(); if (cl && e.target.value.trim().length === cl) tryCode(); return; }
+    if (e.target.id === "pcode") { codeTyped(e.target.value.trim()); return; }
     var ds = e.target.dataset || {};
     if (D && ds.pq) { queue({ t: "pqty", f: ds.pq, v: e.target.value.trim() === "" ? null : Math.round(num(e.target.value)) }); return totals(); }
     if (D && ds.f === "qty") { var qi = itemOf(e.target); if (qi) queue({ t: "qty", id: qi.id, k: qi.k, v: Math.round(num(e.target.value)) }); return totals(); }
