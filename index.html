@@ -27,7 +27,6 @@ button,input,textarea{font:inherit;color:inherit}
 .page{max-width:600px;margin:0 auto;
   padding:calc(12px + env(safe-area-inset-top,0px)) 16px calc(32px + env(safe-area-inset-bottom,0px))}
 
-/* header */
 .top{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:38px}
 .state{font-size:13px;font-weight:600;border-radius:999px;padding:5px 11px;border:0;background:transparent;color:var(--ink3)}
 .state.saved{background:var(--mint-tint);color:var(--mint)}
@@ -43,14 +42,12 @@ h1{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue
   font-size:34px;line-height:1.08;font-weight:700;letter-spacing:.3px;margin:10px 0 4px}
 .sub{color:var(--ink2);font-size:15px;margin:0 0 16px}
 
-/* currency switch */
 .seg{display:flex;background:#e6e8f1;border-radius:11px;padding:2px;margin:0 0 6px}
 .seg button{flex:1;border:0;background:transparent;border-radius:9px;min-height:36px;font-size:15px;font-weight:600;color:var(--ink2);cursor:pointer}
 .seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(29,29,31,.12)}
 .rate{font-size:13px;color:var(--ink3);margin:0 4px 18px}
 .rate-b{border:0;background:transparent;padding:0;font:inherit;font-weight:600;color:var(--peri);cursor:pointer;font-variant-numeric:tabular-nums}
 
-/* order list, Apple inset grouped style */
 .group{background:var(--card);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 2px rgba(29,29,31,.04)}
 .item{padding:14px 16px;position:relative}
 .item + .item::before,.ship::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
@@ -76,7 +73,6 @@ input:focus{outline:none}
 .ship .nm{font-weight:500}
 .ship small{display:block;font-size:13px;color:var(--ink3)}
 
-/* total, the one standout piece */
 .total{background:var(--lav);border-radius:var(--r);padding:18px 18px 16px;margin-top:16px}
 .total .lbl{font-size:15px;color:var(--lav-ink);font-weight:600}
 .total .big{font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",Arial,sans-serif;
@@ -99,7 +95,6 @@ input:focus{outline:none}
 .skel{height:92px;border-radius:var(--r);background:var(--card);margin-bottom:10px;animation:pulse 1.2s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:.8}50%{opacity:.45}}
 
-/* packaging and designs */
 .group.pk,.group.dz{margin-top:16px}
 .group.dz{margin-top:22px}
 .pk-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;position:relative}
@@ -124,7 +119,6 @@ button.pill{border:0;cursor:pointer;font-family:inherit}
 .cta.lnk{display:flex;align-items:center;justify-content:center;text-decoration:none}
 .cta.lnk.off{opacity:.5;pointer-events:none}
 
-/* USD and AUD switch on the totals */
 .tot-h{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .mini{flex:none;display:inline-flex;background:rgba(75,63,184,.10);border-radius:10px;padding:2px}
 .mini button{border:0;background:transparent;border-radius:8px;min-height:32px;padding:0 12px;font-size:13px;font-weight:600;color:var(--lav-ink);cursor:pointer}
@@ -136,21 +130,18 @@ button.pill{border:0;cursor:pointer;font-family:inherit}
 .total.pf .mini button.on{color:var(--ink)}
 .rate.under{margin:-8px 4px 16px}
 
-/* design notes */
 .nt-l{font-size:13px;color:var(--ink3);margin:16px 16px 6px}
 .group.nt textarea{display:block;width:100%;min-height:110px;border:0;background:transparent;padding:12px 16px;font-size:17px;line-height:1.35;resize:vertical;color:var(--ink)}
 .group.nt textarea::placeholder{color:var(--ink3)}
 .group.nt textarea:focus{outline:none}
 .group.nt:focus-within{box-shadow:0 0 0 2px var(--peri)}
 
-/* prices people can see but not change */
 .money.ro{background:transparent;padding:0 2px;min-width:74px}
 .money.ro b{color:var(--ink);font-weight:400;margin:0}
 .money.ro span{font-size:17px;font-variant-numeric:tabular-nums}
 .money.ro.tbc{color:var(--ink3);font-size:15px}
 .vnote{background:var(--peri-tint);color:var(--lav-ink);border-radius:12px;padding:10px 14px;font-size:15px;margin:0 0 14px}
 
-/* the hidden profit view */
 h1{-webkit-user-select:none;user-select:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .seg.tabs{margin:0 0 14px}
 .total.pf{background:var(--mint-tint);margin:0 0 16px}
@@ -172,7 +163,6 @@ h1{-webkit-user-select:none;user-select:none;touch-action:manipulation;-webkit-t
 .code-in{-webkit-text-security:disc;letter-spacing:12px}
 .code-in::placeholder{letter-spacing:normal}
 
-/* sign in, centred and plain */
 body.out .top,body.out h1,body.out .sub{display:none}
 body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:column;justify-content:center}
 .si{width:100%;max-width:340px;margin:0 auto 8vh;text-align:center}
@@ -187,7 +177,6 @@ body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:co
 .si-err{color:var(--blush);font-size:15px;min-height:22px;margin:10px 0 2px}
 .si-err.good{color:#1f9d55}
 .si .cta{margin-top:6px}
-/* the sign in has a few faces: Face ID, the PIN, and the offer to switch; one shows at a time */
 .si .g{display:none}
 .si[data-mode="face"] .g-face,.si[data-mode="pw"] .g-pw,.si[data-mode="offer"] .g-offer,.si[data-mode="finish"] .g-finish{display:block}
 .si .cta.fid{display:flex;align-items:center;justify-content:center;gap:10px}
@@ -204,7 +193,6 @@ body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:co
 .toast.on{opacity:1}
 .mask.on ~ .toast{bottom:calc(100px + env(safe-area-inset-bottom,0px))}
 :focus-visible{outline:2px solid var(--peri);outline-offset:2px}
-/* status */
 .stat{background:var(--card);border-radius:var(--r);padding:16px;margin:0 0 14px;box-shadow:0 1px 2px rgba(29,29,31,.04)}
 .stat-lbl{font-size:13px;color:var(--ink3)}
 .stat-now{font-size:22px;font-weight:700;margin-top:2px}
@@ -215,7 +203,6 @@ body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:co
 .stat-acts{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .tint{border:0;background:var(--peri-tint);color:var(--peri);font-weight:600;font-size:15px;border-radius:12px;min-height:40px;padding:0 16px;cursor:pointer}
 .cta.mint{background:#1f8a5f;margin-top:14px}
-/* whatsapp nudge */
 .wa{background:#e2f5ea;border-radius:var(--r);padding:14px 16px;margin:0 0 14px;color:#1d5c3f}
 .wa p{margin:0 0 10px;font-size:15px;font-weight:600}
 .wa-row{display:flex;gap:10px;align-items:center}
@@ -227,7 +214,6 @@ body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:co
 .sheet .wa-sh h2{font-size:24px;margin:0 0 6px}
 .sheet .wa-sh .sh-sub{margin:0 8px 18px}
 .cta.wa-cta{display:flex;align-items:center;justify-content:center;text-decoration:none;background:#1f8a5f}
-/* add and remove */
 .hr{display:flex;align-items:center;gap:8px;flex:none}
 .x{width:28px;height:28px;border-radius:50%;border:0;background:var(--field);color:var(--ink3);font-size:18px;line-height:1;cursor:pointer}
 .pill.add{background:var(--peri-tint);color:var(--peri)}
@@ -235,7 +221,6 @@ body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:co
 .addrow{display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--peri);font-size:17px;font-weight:500;padding:14px 16px;cursor:pointer;position:relative}
 .addrow::before{content:"";position:absolute;top:0;left:16px;right:0;border-top:.5px solid var(--line)}
 .empty{padding:16px;color:var(--ink2);font-size:15px}
-/* sheets */
 .mask{position:fixed;inset:0;background:rgba(29,29,31,.28);display:none;align-items:flex-end;justify-content:center;z-index:20}
 .mask.on{display:flex}
 .sheet{position:relative;background:var(--canvas);width:100%;max-width:600px;max-height:86vh;overflow:auto;border-radius:20px 20px 0 0;padding:18px 16px calc(24px + env(safe-area-inset-bottom,0px))}
@@ -256,7 +241,6 @@ body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:co
 .srch{margin:10px 0 12px}
 .sheet h2.ask{font-size:20px;line-height:1.3;margin:6px 44px 4px 0}
 .srch input{width:100%;height:44px;border:0;border-radius:12px;background:#e6e8f1;padding:0 14px;font-size:17px}
-/* picking from the price list */
 .sheet.picker{padding-bottom:0}
 .srch.stick{position:sticky;top:-18px;z-index:2;background:var(--canvas);margin:0 -16px 2px;padding:12px 16px 10px}
 .opt.pl .ck{width:22px;height:22px;border-radius:50%;border:1.5px solid #c7c7cc;display:inline-flex;align-items:center;justify-content:center;font-size:13px;line-height:1;color:#fff}
@@ -274,7 +258,6 @@ body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:co
 .si-row + .si-row{border-top:.5px solid var(--line)}
 .si-row input{flex:1;min-width:0;border:0;background:transparent;height:52px;font-size:17px;text-align:right}
 .si-row input::placeholder{color:var(--ink3)}
-/* save for later, saved orders, compare */
 .acts3{display:flex;gap:8px;margin-top:14px}
 .acts3 .tint{flex:1;min-width:0;padding:0 6px;font-size:15px;min-height:44px}
 .tint.wide{display:block;width:100%;margin-top:10px;min-height:50px;font-size:17px}
@@ -333,12 +316,8 @@ body.out .page{min-height:100vh;min-height:100svh;display:flex;flex-direction:co
 <div class="mask" id="mask"><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Order options"></div></div>
 <div class="toast" id="toast" role="status"></div>
 <script>
-// Never run inside another site's page.
 if (window.top !== window.self) { try { window.top.location = window.self.location; } catch (e) { document.documentElement.innerHTML = ""; } }
 
-/* Face ID sign in, the same as the hub's. A passkey made on this device holds a key that unlocks the
-   PIN kept here, encrypted. The PIN then goes to the script exactly as if it was typed, so the script
-   and its 8 hour pass work the same as before. Nothing new is kept on the server. */
 window.FID = (function () {
   var cfg = { store: "pk", name: "App" };
   var enc = new TextEncoder(), dec = new TextDecoder(), pending = null, ctl = null;
@@ -361,7 +340,6 @@ window.FID = (function () {
     if (/Windows/.test(u)) return "Windows";
     return "device";
   }
-  /* What to call it on screen. iPhones say Face ID, Macs Touch ID, Windows has Hello. */
   function bio() {
     var d = device();
     if (d === "iPhone" || d === "iPad") return "Face ID";
@@ -369,7 +347,6 @@ window.FID = (function () {
     if (d === "Windows") return "Windows Hello";
     return "fingerprint or face";
   }
-  /* Can this browser do it at all. The answer is a guess until the first try. */
   function canOffer(force) {
     if (!ok() || declined() || (read() && !force)) return Promise.resolve(false);
     try { localStorage.setItem("__pk", "1"); localStorage.removeItem("__pk"); } catch (e) { return Promise.resolve(false); }
@@ -399,9 +376,7 @@ window.FID = (function () {
       extensions: { prf: { eval: { first: salt } } }
     } });
   }
-  // Drop a Face ID ask that's still waiting, so the PIN can be used instead.
   function cancel() { if (ctl) { try { ctl.abort(); } catch (e) {} ctl = null; } }
-  /* First time: make the passkey, then lock the PIN with it. */
   function enrol(pw) {
     if (!ok()) return Promise.reject(err("unsupported"));
     var salt = rnd(32), name = cfg.name + " " + device();
@@ -418,8 +393,6 @@ window.FID = (function () {
       if (!r.prf || r.prf.enabled === false) { decline(); throw err("noprf"); }
       var prf = prfOf(cred);
       if (prf) return seal(prf, pw, cred.rawId, salt);
-      // Some phones only hand the key over on a sign in, so do one straight away. Safari
-      // wants a fresh tap for that, which the page asks for if this is refused.
       pending = { id: cred.rawId, salt: salt, pw: pw };
       return finish();
     });
@@ -433,7 +406,6 @@ window.FID = (function () {
       return seal(prf, p.pw, p.id, p.salt);
     });
   }
-  /* Every time after: the passkey unlocks the PIN. */
   function unlock() {
     var s = read(); if (!s) return Promise.reject(err("none"));
     return ask(unb64(s.id), unb64(s.salt)).then(function (cred) {
@@ -442,7 +414,6 @@ window.FID = (function () {
         .then(function (pt) { return dec.decode(pt); }, function () { throw err("broken"); });
     });
   }
-  /* Sort a failure into something the page can act on. */
   function why(e, tapped) {
     var c = e && (e.code || e.name) || "";
     if (c === "NotAllowedError" || c === "AbortError" || c === "TimeoutError") return tapped ? "cancel" : "notap";
@@ -454,159 +425,14 @@ window.FID = (function () {
     forget: forget, decline: decline, cancel: cancel, needsTap: function () { return !!pending; }, bio: bio, device: device, why: why };
 })();
 
-/* PPR Logistics order. People pick from the price list, set the amounts, add packaging and designs,
-   and see everything at PPR's prices. No supplier prices are in this file, and the script only ever
-   sends PPR's prices. Everything syncs, so every device sees the same order within about 10 seconds.
-   It needs the password to open and signs itself out after 8 hours. Money is kept in USD and shown in
-   USD or AUD; packaging is priced in AUD. */
 (function () {
-  // The Google script link. Each site has its own script, so each site is its own order.
   var EP = "https://script.google.com/macros/s/AKfycbw-ZJ_cDQwRoRjE72hND9z2dMTUoAVsV3utaIeZfQjRbHJgpGQXFHY6GJLmBhdhnjMO4g/exec";
-  // This site's name. It goes on the WhatsApp message and keeps this site's saved password apart
-  // from the other sites' when they share a web address.
   var SITE = "Banner";
   var LIVE = /^https:\/\/script\.google\.com\/(a\/macros\/[\w.-]+|macros)\/s\/[\w-]+\/exec$/.test(EP);
   var RATE0 = 1.43, POLL = 10000, MAXUP = 15 * 1024 * 1024;
-  // The 12 May 2026 price list: part number, name, more detail, vials in the box, other words to find it by.
-  // The prices aren't here. They're kept on the Google script.
-  var LIST = [
-    ["SM5", "Semaglutide 5mg", "", 10],
-    ["SM10", "Semaglutide 10mg", "", 10],
-    ["SM15", "Semaglutide 15mg", "", 10],
-    ["SM20", "Semaglutide 20mg", "", 10],
-    ["SM30", "Semaglutide 30mg", "", 10],
-    ["TR5", "Tirzepatide 5mg", "", 10],
-    ["TR10", "Tirzepatide 10mg", "", 10],
-    ["TR15", "Tirzepatide 15mg", "", 10],
-    ["TR20", "Tirzepatide 20mg", "", 10],
-    ["TR30", "Tirzepatide 30mg", "", 10],
-    ["TR40", "Tirzepatide 40mg", "", 10],
-    ["TR50", "Tirzepatide 50mg", "", 10],
-    ["TR60", "Tirzepatide 60mg", "", 10],
-    ["RT5", "Retatrutide 5mg", "", 10],
-    ["RT10", "Retatrutide 10mg", "", 10],
-    ["RT15", "Retatrutide 15mg", "", 10],
-    ["RT20", "Retatrutide 20mg", "", 10],
-    ["RT30", "Retatrutide 30mg", "", 10],
-    ["RT60", "Retatrutide 60mg", "", 10],
-    ["H10", "HGH 10IU", "", 10],
-    ["H15", "HGH 15IU", "", 10],
-    ["H24", "HGH 24IU", "", 10],
-    ["H36", "HGH 36IU", "", 10],
-    ["BPC5", "BPC 157 5mg", "", 10],
-    ["BPC10", "BPC 157 10mg", "", 10],
-    ["TB5", "TB500 5mg", "", 10],
-    ["TB10", "TB500 10mg", "", 10],
-    ["BB10", "BPC 5mg + TB 5mg", "", 10, "bpc157 tb500"],
-    ["BB20", "BPC 10mg + TB 10mg", "", 10, "bpc157 tb500"],
-    ["2S5", "SS-31 5mg", "", 10],
-    ["2S10", "SS-31 10mg", "", 10],
-    ["2S50", "SS-31 50mg", "", 10],
-    ["SL332", "SLU-PP-332 5mg", "", 10],
-    ["CND5", "CJC-1295 no DAC 5mg", "", 10],
-    ["CND10", "CJC-1295 no DAC 10mg", "", 10],
-    ["CP10", "CJC-1295 no DAC 5mg + IPA 5mg", "", 10, "ipamorelin"],
-    ["CD2", "CJC-1295 with DAC 2mg", "", 10],
-    ["CD5", "CJC-1295 with DAC 5mg", "", 10],
-    ["AOD5", "AOD9604 5mg", "", 10, "5AD"],
-    ["AOD10", "AOD9604 10mg", "", 10, "10AD"],
-    ["IGF-01", "IGF-1 LR3 0.1mg", "", 10],
-    ["IGF-1", "IGF-1 LR3 1mg", "", 10],
-    ["MS5", "MOTS-c 5mg", "", 10],
-    ["MS10", "MOTS-c 10mg", "", 10],
-    ["MS40", "MOTS-c 40mg", "", 10],
-    ["MT1", "MT-1 10mg", "", 10, "melanotan"],
-    ["MT2", "MT-2 10mg", "Melanotan 2 Acetate", 10],
-    ["ET10", "Epithalon 10mg", "", 10],
-    ["ET50", "Epithalon 50mg", "", 10],
-    ["G25", "GHRP-2 Acetate 5mg", "", 10],
-    ["G210", "GHRP-2 Acetate 10mg", "", 10],
-    ["G65", "GHRP-6 Acetate 5mg", "", 10],
-    ["G610", "GHRP-6 Acetate 10mg", "", 10],
-    ["PT41", "PT-141 10mg", "", 10],
-    ["SK5", "Selank 5mg", "", 10],
-    ["SK10", "Selank 10mg", "", 10],
-    ["XA5", "Semax 5mg", "", 10],
-    ["XA10", "Semax 10mg", "", 10],
-    ["TSM5", "Tesamorelin 5mg", "", 10],
-    ["TSM10", "Tesamorelin 10mg", "", 10],
-    ["SMO5", "Sermorelin Acetate 5mg", "", 10],
-    ["SMO10", "Sermorelin Acetate 10mg", "", 10],
-    ["TA5", "Thymosin Alpha-1 5mg", "", 10],
-    ["TA10", "Thymosin Alpha-1 10mg", "", 10],
-    ["IP5", "Ipamorelin 5mg", "", 10],
-    ["IP10", "Ipamorelin 10mg", "", 10],
-    ["MAZ5", "Mazdutide 5mg", "", 10],
-    ["MAZ10", "Mazdutide 10mg", "", 10],
-    ["CGL5", "Cagrilintide 5mg", "", 10],
-    ["CGL10", "Cagrilintide 10mg", "", 10],
-    ["SUR2", "Survodutide 2mg", "", 10],
-    ["SUR5", "Survodutide 5mg", "", 10],
-    ["SUR10", "Survodutide 10mg", "", 10],
-    ["NJ500", "NAD+ 500mg", "", 10],
-    ["NJ1000", "NAD+ 1000mg", "", 10],
-    ["CU50", "GHK-Cu 50mg", "", 10],
-    ["CU100", "GHK-Cu 100mg", "", 10],
-    ["GLOW70", "GLOW 70mg", "BPC 157 10mg + GHK-Cu 50mg + TB500 10mg", 10],
-    ["KLOW80", "KLOW 80mg", "BPC 157 10mg + GHK-Cu 50mg + TB500 10mg + KPV 10mg", 10],
-    ["KP5", "KPV 5mg", "", 10],
-    ["KP10", "KPV 10mg", "", 10],
-    ["VP5", "VIP 5mg", "", 10],
-    ["VP10", "VIP 10mg", "", 10],
-    ["KS5", "Kisspeptin-10 5mg", "", 10],
-    ["KS10", "Kisspeptin-10 10mg", "", 10],
-    ["DS5", "DSIP 5mg", "", 10],
-    ["DS10", "DSIP 10mg", "", 10],
-    ["OT5", "Oxytocin Acetate 5mg", "", 10],
-    ["OT10", "Oxytocin Acetate 10mg", "", 10],
-    ["HX2", "Hexarelin Acetate 2mg", "", 10],
-    ["HX5", "Hexarelin Acetate 5mg", "", 10],
-    ["AP2", "Adipotide 2mg", "", 10],
-    ["AP5", "Adipotide 5mg", "", 10],
-    ["FMP2", "PEG MGF 2mg", "", 10],
-    ["G10K", "HCG 10000IU", "", 10],
-    ["G5K", "HCG 5000IU", "", 10],
-    ["G2K", "HCG 2000IU", "", 10],
-    ["IGD", "IGF-DES 2mg", "", 10],
-    ["LL375", "LL37 5mg", "", 10],
-    ["LC600", "L Carnitine 600mg", "", 10],
-    ["LC1200", "L Carnitine 1200mg", "", 10],
-    ["LC216", "LC216 216mg", "Red", 10, "carnitine"],
-    ["LC526", "LC526 526mg", "", 10, "carnitine"],
-    ["TY10", "Thymalin 10mg", "", 10],
-    ["GT600", "Glutathione 600mg", "", 10],
-    ["GT1500", "Glutathione 1500mg", "", 10, "GTT"],
-    ["GND2", "Gonadorelin 2mg", "", 10],
-    ["GND5", "Gonadorelin 5mg", "", 10],
-    ["MT10", "Melatonin 10mg", "", 10],
-    ["5AM", "5-Amino-1MQ 5mg", "", 10],
-    ["10AM", "5-Amino-1MQ 10mg", "", 10],
-    ["50AM", "5-Amino-1MQ 50mg", "", 10],
-    ["G75", "HMG 75IU", "", 10],
-    ["NP810", "Snap-8 10mg", "", 10],
-    ["RA10", "Ara-290 10mg", "", 10],
-    ["CS10", "Cagrilintide 5mg + Semaglutide 5mg", "", 10],
-    ["FM2", "MGF 2mg", "", 10],
-    ["AE1", "ACE-031 1mg", "", 10],
-    ["AR50", "AICAR 50mg", "", 10],
-    ["XT100", "Botulinum toxin 100IU", "", 1, "botox"],
-    ["ADM5", "Ad max 5mg", "", 10, "adamax"],
-    ["ADM10", "Ad max 10mg", "", 10, "adamax"],
-    ["FOX10", "FOXO4-DRI 10mg", "", 10, "fox04"],
-    ["PIN5", "Pinealon 5mg", "", 10],
-    ["PIN10", "Pinealon 10mg", "", 10],
-    ["Bac3", "Bac water 3ml", "", 10, "bacteriostatic"],
-    ["Bac10", "Bac water 10ml", "", 10, "bacteriostatic"],
-    ["", "AA water 10ml", "Acetic acid solution 1%", 10],
-    ["Lipo-C", "Lc120 10ml", "", 10],
-    ["", "Lemon bottle 10ml", "", 10],
-    ["", "B12 injection 10ml", "1mg/ml", 10]
-  ];
   var STAGES = [["draft", "Not placed yet"], ["placed", "Order placed"], ["looking", "Being looked at"],
     ["payreq", "Payment requested"], ["paid", "Payment made"], ["ordered", "Ordered"],
     ["making", "Being made"], ["sent", "Sent"], ["delivered", "Delivered"]];
-  // What this page keeps on the phone is filed under its own script, so two sites on the same web
-  // address never share a sign in or an order queue. A sign in filed the old way is picked up once.
   var NS = (function () { var h = 0; for (var i = 0; i < EP.length; i++) h = (h * 31 + EP.charCodeAt(i)) >>> 0; return "pprorder." + h.toString(36) + "."; })();
   var K = { auth: NS + "auth", last: NS + "last", cur: NS + "cur", q: NS + "q", wa: NS + "wa", cl: NS + "cl" };
   if (SITE) document.title = "PPR Order " + SITE;
@@ -622,10 +448,15 @@ window.FID = (function () {
   function clip(s, n) { return String(s == null ? "" : s).replace(/[<>"`]/g, "").replace(/\s+/g, " ").trim().slice(0, n); }
 
   function ownerOp(o) { return !!o && (o.t === "price" || o.t === "pprice" || o.t === "ship"); }
-  var P = LIST.map(function (r) {
-    return { k: r[0] || slug(r[1]), sku: r[0], name: r[1], note: r[2], box: r[3], hay: norm([r[1], r[0], r[2], r[4] || ""].join(" ")) };
-  });
-  var PK = {}; P.forEach(function (p) { PK[p.k] = p; });
+  var P = [], PK = {};
+  function setList(rows) {
+    if (!Array.isArray(rows) || !rows.length) return;
+    P = rows.filter(function (r) { return Array.isArray(r) && r[1]; }).map(function (r) {
+      return { k: String(r[0] || slug(r[1])), sku: String(r[0] || ""), name: String(r[1]), note: String(r[2] || ""),
+        box: Math.max(1, Math.round(+r[3]) || 1), hay: norm([r[1], r[0], r[2], r[4] || ""].join(" ")) };
+    });
+    PK = {}; P.forEach(function (p) { PK[p.k] = p; });
+  }
 
   var AUTH = null, SRV = null, D = null, V = -1, CUR = "usd", RATE = RATE0, WA = null, SAVES = null,
     SCAT = {}, PRS = { box: 0, label: 0, ship: 0 }, PRC = null, OTOK = null, PROFIT = null,
@@ -636,7 +467,6 @@ window.FID = (function () {
   try { CUR = localStorage.getItem(K.cur) === "aud" ? "aud" : "usd"; } catch (e) {}
   try { AUTH = JSON.parse(localStorage.getItem(K.auth) || "null"); } catch (e) { AUTH = null; }
   WA = waStored();
-  // Changes that hadn't reached the script yet when the page was last closed go up again.
   try { Q = (JSON.parse(localStorage.getItem(K.q) || "[]") || []).filter(function (o) { return o && typeof o.t === "string" && !ownerOp(o); }); } catch (e) { Q = []; }
 
   function rate() { return RATE; }
@@ -666,7 +496,6 @@ window.FID = (function () {
   }
   function whenFor(s) { var t = ""; (D.history || []).forEach(function (h) { if (h.s === s) t = h.t; }); return t ? fmtTime(t) : ""; }
   function vials(n) { return n + (n === 1 ? " vial" : " vials"); }
-  // Once the code is in, every request carries the key the script gave for it. Big uploads get longer.
   function post(body, keep, ms) {
     if (OTOK && body.action !== "login") body.otok = OTOK;
     var ctrl = window.AbortController && !keep ? new AbortController() : null;
@@ -677,8 +506,6 @@ window.FID = (function () {
       .then(function (j) { clearTimeout(timer); return j; }, function (e) { clearTimeout(timer); throw e; });
   }
 
-  /* ---------- signing in and out ----------
-     The phone saves the number password the first time and fills it in with Face ID after that. */
   function signedIn() { return !!(AUTH && AUTH.pass && AUTH.exp > Date.now()); }
   function armExpiry() {
     clearTimeout(outT);
@@ -686,24 +513,20 @@ window.FID = (function () {
   }
   function signOut(manual) {
     if (manual && AUTH) post({ action: "bye", pass: AUTH.pass }).catch(function () {});
-    // Signing out on purpose drops anything unsaved. Running out of time keeps it to send after the next sign in.
     if (manual) { Q = []; INF = null; saveQ(); waStore(null); }
     AUTH = null; SRV = null; D = null; V = -1; WA = null; SAVES = null; NEEDR = false; FILES = null; FV = -1;
     OTOK = null; PROFIT = null; PRC = null; VIEW = "order"; PQ = []; PINF = null; clearTimeout(psendT);
+    P = []; PK = {};
     clearTimeout(sendT); clearTimeout(pollT); clearTimeout(outT); closeSheet();
     try { localStorage.removeItem(K.auth); localStorage.removeItem(K.last); } catch (e) {}
     showSignIn("", manual);
   }
 
-  /* ---------- the sign in screen ----------
-     With Face ID set up on this device it asks for that the moment the page opens, and signs in by
-     itself. If it can't, or you'd rather, there's the PIN. Once the PIN has worked on a device that
-     can do Face ID, it offers to switch. */
   var G = { mode: "pw", held: "", keep: null, was: false, busy: false, pin: false };
   var FACE_SVG = '<path d="M4 8.5V6.5A2.5 2.5 0 0 1 6.5 4h2M15.5 4h2A2.5 2.5 0 0 1 20 6.5v2M20 15.5v2a2.5 2.5 0 0 1-2.5 2.5h-2M8.5 20h-2A2.5 2.5 0 0 1 4 17.5v-2"/><path d="M9 9.3v1.4M15 9.3v1.4M8.7 14.2c.8 1.1 2 1.7 3.3 1.7s2.5-.6 3.3-1.7"/>';
   var PRINT_SVG = '<path d="M6 8.2A6.8 6.8 0 0 1 18.8 11c0 2.6-.3 5.1-1 7.4"/><path d="M8.4 9.6A4.3 4.3 0 0 1 16.3 11c0 3.4-.5 6.3-1.5 8.8"/><path d="M10.6 11.1a1.4 1.4 0 0 1 2.8 0c0 3.6-.7 6.7-2 9.4"/><path d="M12 13.9c0 2.4-.5 4.6-1.5 6.8"/><path d="M5.4 11c0 2.6-.2 4.9-.8 7"/>';
-  function loginMsg(e) {
-    return e === "wrong_password" ? "That PIN isn't right." : e === "locked" ? "Too many tries. Wait 10 minutes, then try again." :
+  function loginMsg(e, mins) {
+    return e === "wrong_password" ? "That PIN isn't right." : e === "locked" ? "Too many tries. Try again in " + Math.max(1, +mins || 10) + (+mins === 1 ? " minute." : " minutes.") :
       e === "no_password" ? "Sign in isn't set up yet." : e === "net" ? "No connection. Check it and try again." : "Couldn't sign in. Try again.";
   }
   function gErr(t, good) { var el = $("siErr"); if (el) { el.textContent = t || ""; el.className = "si-err" + (good ? " good" : ""); } }
@@ -713,7 +536,6 @@ window.FID = (function () {
     var h = $("gateTitle"), sub = $("gateSub");
     if (h) h.textContent = m === "offer" ? "Use " + FID.bio() + " next time?" : m === "finish" ? "One more step" : "PPR Logistics";
     if (sub) sub.textContent = m === "offer" ? "No PIN to type. Just look at your phone." : m === "finish" ? "Confirm with " + FID.bio() + " once to finish setting it up." : "";
-    // only computers get the cursor put in the box; on a phone that would throw the keyboard up
     if (m === "pw" && window.matchMedia && matchMedia("(hover:hover) and (pointer:fine)").matches) setTimeout(function () { var i = $("pw"); if (i && G.mode === "pw") i.focus(); }, 60);
   }
   function gBusy(on, id, txt) {
@@ -734,7 +556,6 @@ window.FID = (function () {
           '<button class="si-link" id="gatePw" type="button">Use PIN</button>' +
         '</div>' +
         '<form class="g g-pw" id="signin" novalidate autocomplete="on" action="#">' +
-          // A name for the phone to save the PIN under, kept out of sight.
           '<input type="text" name="username" autocomplete="username" value="PPR order' + (SITE ? " " + esc(SITE) : "") + '" tabindex="-1" aria-hidden="true" style="display:none">' +
           '<input class="si-pw" id="pw" name="password" type="password" inputmode="numeric" pattern="[0-9]*" autocomplete="current-password" autocapitalize="off" spellcheck="false" enterkeyhint="go" placeholder="PIN" aria-label="PIN">' +
           '<button class="cta" type="submit" id="siBtn"><span>Sign in</span></button>' +
@@ -760,7 +581,6 @@ window.FID = (function () {
     if (G.was) { gMode("face"); if (!quiet) gFace(false); }
     else gMode("pw");
   }
-  /* Signed in: the pass goes on the device, and if the script sent the order along it shows at once. */
   function enter(j) {
     AUTH = { pass: j.pass, exp: +j.exp }; WA = waStored(); WA_HIDE = false;
     try { localStorage.setItem(K.auth, JSON.stringify(AUTH)); } catch (e) {}
@@ -770,24 +590,21 @@ window.FID = (function () {
     else load(false);
     if (Q.length) send();
   }
-  /* The PIN typed in. */
   function signIn(pw) {
     if (G.pin) return;
     if (!pw) { gErr("Type the PIN first."); return; }
     FID.cancel(); G.pin = true; gErr(""); gBusy(true, "siBtn", "Signing in");
     post({ action: "login", pw: pw }).then(function (j) {
       if (j && j.ok && j.pass) { if ($("pw")) $("pw").value = ""; return gAfter(pw, j); }
-      gErr(loginMsg(j && j.error));
+      gErr(loginMsg(j && j.error, j && j.mins));
     }).catch(function () { gErr(loginMsg("net")); }).then(function () { G.pin = false; gBusy(false, "siBtn"); });
   }
-  /* In with the PIN: offer the switch to Face ID, unless this device already has it or can't. */
   function gAfter(pw, j) {
     return FID.canOffer(false).then(function (can) {
       if (can) { G.held = pw; G.keep = j; gMode("offer"); gErr(""); }
       else enter(j);
     });
   }
-  /* Face ID unlocks the PIN, which signs in like normal. */
   function gFace(tapped) {
     if (G.busy) return;
     gErr(""); gBusy(true, "gateFace", "Signing in");
@@ -795,7 +612,7 @@ window.FID = (function () {
       return post({ action: "login", pw: pw }).then(function (j) {
         if (j && j.ok && j.pass) return enter(j);
         if (j && j.error === "wrong_password") { FID.forget(); G.was = false; var b = $("gateBack"); if (b) b.hidden = true; gMode("pw"); gErr("The PIN has changed. Type it once."); return; }
-        gErr(loginMsg(j && j.error));
+        gErr(loginMsg(j && j.error, j && j.mins));
       }, function () { gErr(loginMsg("net")); });
     }).catch(function (e) {
       var w = FID.why(e, tapped);
@@ -823,10 +640,6 @@ window.FID = (function () {
   function gDone(on) { var j = G.keep; if (on) toast(FID.bio() + " is on"); if (j) enter(j); }
   function gSkip() { FID.decline(); var j = G.keep; if (j) enter(j); }
 
-  /* ---------- prices ----------
-     Everyone gets your price per vial from the script. On a device with the code it's worked out here
-     from the cost and your markup, so a change shows straight away. "cost" is what you pay the
-     supplier, "sell" is what people ordering pay. */
   function owner() { return !!(OTOK && PROFIT && PRC); }
   function kindNow() { return VIEW === "cost" && owner() ? "cost" : "sell"; }
   function mk() { return PROFIT && +PROFIT.markup >= 0 ? +PROFIT.markup : 0; }
@@ -840,17 +653,13 @@ window.FID = (function () {
   }
   function catCost(p) { return owner() && +PROFIT.cat[p.k] > 0 ? +PROFIT.cat[p.k] : 0; }
   function catSell(p) { if (!owner()) return +SCAT[p.k] || 0; return hasSell(p.k) ? PROFIT.sell[p.k] / rate() : catCost(p) * (1 + mk() / 100); }
-  // The member list's price for how many of a product are on the order: 10 to 40, 50 to 90, 100 to 200, 300 plus.
   function tierOf(m, q) { q = +q || 0; return q >= 300 ? m[5] : q >= 100 ? m[4] : q >= 50 ? m[3] : m[2]; }
   function memberOf(it) { return owner() && !it.hand && it.k && PROFIT.member ? PROFIT.member[it.k] || null : null; }
-  // What it costs you at the amount on the order: the cheaper of the price list and the member list.
   function costAt(it) { var c = +it.price || 0, m = memberOf(it); return m ? Math.min(c, tierOf(m, it.qty)) : c; }
-  // The code to order it with: the member list's code when that's where the cheaper price is.
   function fromMember(it) { var m = memberOf(it); return !!m && tierOf(m, it.qty) < m[1]; }
   function srcCode(it) { return fromMember(it) ? PROFIT.member[it.k][0] : it.sku; }
   function unit(it, kind) { return kind === "cost" ? costAt(it) : sellOf(it); }
   function catUnit(p, kind) { return kind === "cost" ? catCost(p) : catSell(p); }
-  // Packaging, in AUD: your cost, or what people pay with the packaging markup on top.
   function packPrices(kind) {
     if (!owner()) return PRS;
     if (kind === "cost") return PRC;
@@ -858,7 +667,6 @@ window.FID = (function () {
     return { box: PRC.box * m, label: PRC.label * m, ship: PRC.ship * m };
   }
 
-  /* ---------- the order, as the script has it plus anything not sent yet ---------- */
   function fresh() { return { items: [], shipUsd: 0, status: "draft", history: [], pack: { on: true, boxes: null, labels: null } }; }
   function cnt(v) { return v == null || v === "" || !isFinite(+v) ? null : Math.max(0, Math.round(+v)); }
   function cleanItem(it) {
@@ -894,7 +702,6 @@ window.FID = (function () {
     if (op.k && op.t !== "del") for (var j = 0; j < D.items.length; j++) if (D.items[j].k === op.k) return j;
     return -1;
   }
-  // The same steps the script takes, done here straight away so the page never waits.
   function applyLocal(op) {
     if (!D || !op) return;
     if (op.t === "notes") { NOTES = String(op.v == null ? "" : op.v); return; }
@@ -915,14 +722,13 @@ window.FID = (function () {
     else if (op.t === "price" && owner()) { D.items[ix].price = Math.max(0, +op.v || 0); D.items[ix].hand = true; }
   }
   function typing() { var ae = document.activeElement; return !!(ae && (ae.tagName === "INPUT" || ae.tagName === "TEXTAREA") && $("body").contains(ae)); }
-  // Take the script's copy of the order, then put back on top anything still on its way up.
   function adopt(j, cached) {
+    if (Array.isArray(j.list) && j.list.length) setList(j.list);
     if (!cached && SRV && +j.v < SRV.v) return false;
-    // The key for your prices ran out, or the code was changed: lock them away again.
     if (j.ownerOut && OTOK) { lockProfit(); toast("Your prices locked again"); return false; }
-    // A reply to something sent before the code went in. The next one will have your prices.
     if (OTOK && !j.own && !cached) return false;
-    SRV = { v: +j.v || 0, order: j.order, rate: j.rate, pack: j.pack, notes: j.notes, scat: j.scat };
+    SRV = { v: +j.v || 0, order: j.order, rate: j.rate, pack: j.pack, notes: j.notes, scat: j.scat,
+      list: Array.isArray(j.list) && j.list.length ? j.list : (SRV && SRV.list) || null };
     NOTES = typeof j.notes === "string" ? j.notes : "";
     V = SRV.v; RATE = +j.rate >= 0.5 && +j.rate <= 5 ? +j.rate : RATE0;
     SCAT = cleanMap(j.scat); PRS = cleanPrices(j.pack);
@@ -940,16 +746,12 @@ window.FID = (function () {
     if (!cached && j.fv != null && +j.fv !== FV) { FV = +j.fv; loadFiles(); }
     return true;
   }
-  // A copy of the order kept on this device so the page shows straight away next time. Never your costs.
-  function remember() { if (!SRV || !AUTH) return; try { localStorage.setItem(K.last, JSON.stringify({ exp: AUTH.exp, v: SRV.v, order: SRV.order, rate: SRV.rate, pack: SRV.pack, notes: SRV.notes, scat: SRV.scat })); } catch (e) {} }
+  function remember() { if (!SRV || !AUTH) return; try { localStorage.setItem(K.last, JSON.stringify({ exp: AUTH.exp, v: SRV.v, order: SRV.order, rate: SRV.rate, pack: SRV.pack, notes: SRV.notes, scat: SRV.scat, list: SRV.list })); } catch (e) {} }
   function remembered() {
     try { var c = JSON.parse(localStorage.getItem(K.last) || "null"); return c && AUTH && c.exp === AUTH.exp ? c : null; } catch (e) { return null; }
   }
-  // Changes waiting to save are kept on the device in case the page closes. Price, shipping and packaging
-  // cost changes never are: they only count with the code, and the code never survives a reload anyway.
   function saveQ() { try { localStorage.setItem(K.q, JSON.stringify((INF || []).concat(Q).filter(function (o) { return !ownerOp(o); }))); } catch (e) {} }
 
-  /* ---------- keeping in step with the script ---------- */
   function load(manual) {
     if (busy || !LIVE) return;
     if (!signedIn()) { if (AUTH) signOut(); return; }
@@ -959,7 +761,7 @@ window.FID = (function () {
       if (c) { adopt(c, true); state("", "Updating"); }
       else $("body").innerHTML = '<div class="skel"></div><div class="skel"></div><div class="skel"></div>';
     }
-    post({ action: "get", v: SRV ? SRV.v : -1, pass: AUTH.pass }).then(function (j) {
+    post({ action: "get", v: SRV && P.length ? SRV.v : -1, pass: AUTH.pass }).then(function (j) {
       if (!AUTH) return;
       if (j && j.ok) {
         if (j.ownerOut && OTOK) { lockProfit(); return toast("Your prices locked again"); }
@@ -973,7 +775,6 @@ window.FID = (function () {
       else { state("", ""); note("bad", "Couldn't load the order", "Check your connection and tap refresh."); }
     }).then(function () { busy = false; var r = $("refresh"); if (r) r.classList.remove("spin"); tick(); });
   }
-  // Checks the script every 10 seconds while the page is open on screen.
   function tick() {
     clearTimeout(pollT);
     if (!signedIn() || document.hidden) return;
@@ -987,7 +788,6 @@ window.FID = (function () {
   }
   function queue(op) {
     applyLocal(op);
-    // Only the latest qty, price, shipping, packaging or notes needs to go up.
     if (/^(qty|price|ship|pon|pqty|pprice|notes)$/.test(op.t))
       Q = Q.filter(function (x) { return !(x.t === op.t && x.id === op.id && x.f === op.f); });
     Q.push(op); saveQ();
@@ -1016,7 +816,6 @@ window.FID = (function () {
       if (AUTH) state("err", "Not saved, tap to retry");
     });
   }
-  // Waits for anything still saving to land before doing something that needs the latest order.
   function synced(fn, fail) {
     var tries = 0;
     if (Q.length && !INF) { sendErr = false; send(); }
@@ -1036,7 +835,6 @@ window.FID = (function () {
     return false;
   }
 
-  /* ---------- the order on screen ---------- */
   function sums(kind) {
     kind = kind || kindNow();
     var sub = 0, v = 0, prods = 0, pk = packNow(kind);
@@ -1044,10 +842,6 @@ window.FID = (function () {
     var pack = pk.on ? pk.aud / rate() : 0;
     return { sub: sub, ship: D.shipUsd, pack: pack, packOn: pk.on, total: sub + D.shipUsd + pack, vials: v, prods: prods };
   }
-  /* ---------- packaging ----------
-     Custom boxes and vial labels, priced in AUD. By default it's one box per box of vials on the
-     order and one label per vial; type a number in to set it by hand. Its shipping only counts once
-     there's at least one box or label. */
   function autoBoxes() { var n = 0; D.items.forEach(function (it) { if (it.qty > 0) n += Math.ceil(it.qty / (it.box || 10)); }); return n; }
   function autoLabels() { var n = 0; D.items.forEach(function (it) { if (it.qty > 0) n += it.qty; }); return n; }
   function packNow(kind) {
@@ -1058,18 +852,15 @@ window.FID = (function () {
   }
   function showAud(aud) { return CUR === "aud" ? aud : aud / rate(); }
   function toAud(v) { return CUR === "aud" ? v : v * rate(); }
-  // Small unit prices keep a third decimal so 15c doesn't turn into 10c in USD.
   function unitNum(v) { var r = Math.round(v * 1000) / 1000; return r < 1 && Math.round(r * 100) !== r * 100 ? r.toFixed(3) : r.toFixed(2); }
   function unitMoney(v) { return "$" + unitNum(v); }
   function fixAud(aud) { return (Math.round(showAud(aud) * 100) / 100).toFixed(2); }
   function byId(id) { for (var i = 0; i < D.items.length; i++) if (D.items[i].id === id) return D.items[i]; return null; }
   function itemOf(el) { var row = el.closest(".item"); return row && D ? byId(row.dataset.id) : null; }
   function onOrder(k) { for (var i = 0; i < D.items.length; i++) if (D.items[i].k === k) return i; return -1; }
-  // A price people can see but not change.
   function roMoney(txt, attr) { return '<span class="money ro"' + (attr || "") + '><b>$</b><span>' + txt + '</span></span>'; }
 
   function rowHtml(it, kind) {
-    // The part number, so the supplier knows exactly which one. Something typed in shows as Added.
     var code = kind === "cost" ? srcCode(it) : it.sku;
     var pill = !it.k ? '<span class="pill add">Added</span>' : code ? '<span class="pill' + (kind === "cost" && fromMember(it) ? " mem" : "") + '" data-code="1">' + esc(code) + '</span>' : '';
     var step = it.box || 10, u = unit(it, kind);
@@ -1120,7 +911,6 @@ window.FID = (function () {
     if (!list) list = '<div class="empty">Nothing on the order yet. Add an item from the price list.</div>';
     var group = '<div class="group">' + list + '<button type="button" class="addrow" id="addBtn">+ Add item</button>' + shipRow(kind === "cost") + '</div>';
     if (kind === "cost") {
-      // Your cost view: what the supplier charges, for ordering from them. Only shows with the code.
       $("body").innerHTML = tabsHtml() +
         '<p class="vnote">Your cost prices, what the supplier charges. People ordering never see these.</p>' + curHtml() +
         group + packHtml("cost") + totalCard("Cost to you") +
@@ -1182,7 +972,6 @@ window.FID = (function () {
         '<button type="button" data-cur="usd" class="' + (CUR === "usd" ? "on" : "") + '">USD</button>' +
         '<button type="button" data-cur="aud" class="' + (CUR === "aud" ? "on" : "") + '">AUD</button></div>' + rateHtml("");
   }
-  // Only you can change the exchange rate.
   function rateHtml(cls) {
     var r = rate().toFixed(2);
     return '<p class="rate' + (cls ? " " + cls : "") + '">1 USD is ' +
@@ -1216,11 +1005,6 @@ window.FID = (function () {
     });
   }
 
-  /* ---------- WhatsApp ----------
-     Placing an order opens a screen with one button that opens WhatsApp to PPR on 0494 599 813 with
-     the whole order typed out, so it just needs sending. Until it's sent, a green reminder stays on the
-     page, even after a reload. Changes to a placed order prompt the same way. With the code open,
-     updates you send go to whoever you pick, since you'd be telling the person who ordered. */
   var PPR_WA = "61494599813";
   function orderLine(it, kind) {
     var u = unit(it, kind), code = kind === "cost" ? srcCode(it) : it.sku, nm = (code ? code + " " : "") + it.name + " x " + vials(it.qty);
@@ -1229,7 +1013,6 @@ window.FID = (function () {
   function orderLines(kind) {
     var on = D.items.filter(function (it) { return it.qty > 0; });
     if (kind !== "cost" || !on.some(fromMember)) return on.map(function (it) { return orderLine(it, kind); });
-    // Your supplier order, split by which list each one is cheaper from.
     var list = on.filter(function (it) { return !fromMember(it); }), mem = on.filter(fromMember), out = [];
     if (list.length) out = out.concat(["", "12 May price list"], list.map(function (it) { return orderLine(it, kind); }));
     out = out.concat(["", "Member discount list"], mem.map(function (it) { return orderLine(it, kind); }), [""]);
@@ -1261,7 +1044,6 @@ window.FID = (function () {
   function waHref(kind) { return "https://wa.me/" + waNumber(kind) + "?text=" + encodeURIComponent(waMsg(kind)); }
   function waStored() { try { var k = localStorage.getItem(K.wa); return /^(placed|change|status)$/.test(k) ? k : null; } catch (e) { return null; } }
   function waStore(kind) { try { if (kind) localStorage.setItem(K.wa, kind); else localStorage.removeItem(K.wa); } catch (e) {} }
-  // Only remind while it still fits: something on a placed order, and a placed reminder only until PPR moves it on.
   function waCheck() {
     if (!WA || !D) return;
     var live = D.status !== "draft" && D.items.some(function (it) { return it.qty > 0; });
@@ -1282,10 +1064,8 @@ window.FID = (function () {
       '<button type="button" class="wa-x" id="waX">Later</button></div></div>';
   }
   function setWa(kind) { WA = kind; WA_HIDE = false; waStore(kind); waCheck(); var box = $("waBox"); if (box) box.innerHTML = waCard(); }
-  // Later hides the reminder until the page is next opened. Tapping send clears it for good.
   function waLater() { WA_HIDE = true; var box = $("waBox"); if (box) box.innerHTML = waCard(); }
   function waSent() { WA = null; WA_HIDE = false; waStore(null); var box = $("waBox"); if (box) box.innerHTML = ""; if ($("waSheet")) closeSheet(); }
-  // Straight after placing: one big button to send it to PPR.
   function waSheet() {
     if (!WA || !D) return;
     $("toast").classList.remove("on");
@@ -1294,7 +1074,6 @@ window.FID = (function () {
       waLink("placed", "cta wa-cta") + '<button class="ghost" type="button" data-x="1">Later</button></div>');
   }
 
-  /* ---------- status, clearing and new orders ---------- */
   function setStatus(st) {
     if (!D || st === D.status) { closeSheet(); return; }
     if (st !== "draft" && !sums().prods) { closeSheet(); return toast("Add something to the order first"); }
@@ -1316,7 +1095,6 @@ window.FID = (function () {
       }, function () { state("err", "Not saved, tap to retry"); });
     });
   }
-  // Clearing and switching orders drop anything waiting to save, so it can't land on top of the new order.
   function swap(body, what, done) {
     clearTimeout(sendT); Q = []; saveQ();
     (function go() {
@@ -1332,7 +1110,6 @@ window.FID = (function () {
     ask(msg, yes).then(function (ok) { if (ok) swap({ action: "clear", pass: AUTH.pass }, "clear it", done); });
   }
 
-  /* ---------- sheets ---------- */
   function openSheet(html, cls) {
     var s = $("sheet"); s.className = "sheet" + (cls ? " " + cls : ""); $("mask").classList.remove("top");
     s.innerHTML = '<button type="button" class="sheet-x" id="sheetX" aria-label="Close">&times;</button>' + html;
@@ -1343,7 +1120,6 @@ window.FID = (function () {
     if (VIEWURL) { var u = VIEWURL; VIEWURL = ""; setTimeout(function () { try { URL.revokeObjectURL(u); } catch (e) {} }, 60000); }
     if (ASK) { var r = ASK; ASK = null; r(false); }
   }
-  // Asks inside the page instead of a browser pop up, which browsers let people block.
   function ask(msg, yes) {
     return new Promise(function (res) {
       if (ASK) { var old = ASK; ASK = null; old(false); }
@@ -1362,14 +1138,10 @@ window.FID = (function () {
       }).join("") + '</div>');
   }
 
-  /* ---------- adding from the price list ----------
-     Tap to put something on the order, tap again to take it off. The sheet stays open so a whole
-     order can be picked in one go. Prices shown are for the box. */
   function openAdd() {
     openSheet('<h2>Add items</h2><div class="srch stick"><input id="addQ" type="text" placeholder="Search, or type a new item" autocomplete="off" autocapitalize="words" spellcheck="false" enterkeyhint="search" aria-label="Search or type a new item"></div>' +
       '<div class="opts" id="addList"></div><div class="donebar"><button class="cta" type="button" data-x="1">Done</button></div>', "picker");
     addSearch();
-    // On a phone the keyboard would cover the list, so only jump into the search on a computer.
     var touch = window.matchMedia && (window.matchMedia("(pointer:coarse)").matches || window.matchMedia("(hover:none)").matches);
     if (!touch) setTimeout(function () { var q = $("addQ"); if (q) q.focus(); }, 60);
   }
@@ -1391,7 +1163,7 @@ window.FID = (function () {
     var html = list.map(optHtml).join("");
     if (q && !P.some(function (p) { return p.name.toLowerCase() === ql; }))
       html += '<button type="button" class="opt new" data-new="1"><span class="ck"></span><span class="ot">Add ' + esc(q) + ' as a new item</span></button>';
-    box.innerHTML = html || '<p class="empty">Nothing on the list matches.</p>';
+    box.innerHTML = html || '<p class="empty">' + (P.length ? "Nothing on the list matches." : "The price list hasn't loaded yet. Try again in a moment.") + '</p>';
   }
   function togglePk(k, btn) {
     var p = PK[k]; if (!p) return;
@@ -1415,7 +1187,6 @@ window.FID = (function () {
     queue({ t: "del", id: it.id }); render(); toast(it.name + " removed");
   }
 
-  /* ---------- exchange rate, set by you, the same for everyone ---------- */
   function openRate() {
     if (!owner()) return;
     openSheet('<h2>Exchange rate</h2><p class="sh-sub">The price list is in USD. Set what 1 USD is in AUD. It changes for everyone.</p>' +
@@ -1435,10 +1206,6 @@ window.FID = (function () {
     }).catch(function () { undo(); toast("Couldn't change the rate, try again"); });
   }
 
-  /* ---------- saved orders and compare ----------
-     A saved order is a copy of the order as it was, kept on the script so every device sees it, at
-     your prices. Compare puts any two side by side: this order as it is now, or any saved one. Money
-     is USD underneath and shown in whichever currency is picked. */
   function curLines() {
     return D.items.filter(function (it) { return it.qty > 0; }).map(function (it) {
       return { k: it.k, sku: it.sku, name: it.name, box: it.box, qty: it.qty, price: it.price, sell: sellOf(it) };
@@ -1449,7 +1216,6 @@ window.FID = (function () {
     return { on: p.on, boxes: p.boxes, labels: p.labels, box: p.pr.box, label: p.pr.label, ship: p.pr.ship, cost: owner() ? PRC : null };
   }
   function lineUnit(l, kind) { return kind === "cost" && l.price != null ? +l.price || 0 : +l.sell || 0; }
-  // What a packaging snapshot comes to, in AUD, or nothing when it was switched off.
   function packAudOf(p, kind) {
     if (!p || !p.on) return 0;
     var pr = kind === "cost" && p.cost ? p.cost : p;
@@ -1489,7 +1255,6 @@ window.FID = (function () {
     var label = $("svName").value;
     function undo() { var b = $("svGo"); if (b) { b.disabled = false; b.textContent = "Save"; } }
     btn.disabled = true; btn.textContent = "Saving";
-    // The script copies the order as it has it, so everything waiting to save goes up first.
     synced(function () {
       post({ action: "saveas", pass: AUTH.pass, label: label }).then(function (j) {
         if (j && j.error === "too_many") { undo(); return toast("Too many saved orders, delete some first"); }
@@ -1559,7 +1324,6 @@ window.FID = (function () {
       return '<option value="' + esc(x.id) + '"' + (sel === x.id ? " selected" : "") + '>' + esc(x.label) + '</option>';
     }).join("");
   }
-  // One row per product, matched by its code, or by name for anything typed in.
   function keyOf(l) { return l.sku ? "s:" + String(l.sku).toLowerCase() : "n:" + String(l.name).toLowerCase().replace(/[^a-z0-9+]/g, ""); }
   function merged(src) {
     var m = {}, keys = [];
@@ -1607,11 +1371,6 @@ window.FID = (function () {
     $("sheet").scrollTop = y;
   }
 
-  /* ---------- your prices: Cost and Profit ----------
-     Tap the title three times and type the code. The script checks it and gives this device a key, so
-     your costs and markups only ever reach a device that knows the code. Your price per vial follows
-     the markup unless one is typed in by hand; those are kept in AUD by product and carry over to later
-     orders. Profit is what people pay you less what it costs you. Shipping is passed on as it is. */
   function profitSums() {
     var c = sums("cost"), s = sums("sell");
     var income = s.sub + (s.packOn ? s.pack : 0), profit = income - c.sub - (c.packOn ? c.pack : 0);
@@ -1659,7 +1418,6 @@ window.FID = (function () {
   function profitTotals() {
     if (!owner() || !$("pBig") || !D) return;
     var t = profitSums(), ae = document.activeElement;
-    // A loss reads as Loss and the amount, never a minus sign.
     var loss = t.profit < -0.005;
     $("pLbl").textContent = loss ? "Loss" : "Profit";
     $("pBig").textContent = money(show(Math.abs(t.profit)), CUR);
@@ -1694,25 +1452,18 @@ window.FID = (function () {
     $("mask").classList.add("top");
     setTimeout(function () { var i = $("pcode"); if (i) i.focus(); }, 60);
   }
-  /* The code can be any length. Once it has worked on this phone, typing that many numbers opens it
-     straight away. Until then, or after a wrong one, it waits for Open, so a longer code is never
-     sent part way through and counted as a wrong try. */
   function codeLen() { try { var n = +localStorage.getItem(K.cl); return n >= 1 && n <= 16 ? n : 0; } catch (e) { return 0; } }
-  /* Typing the code: once it has worked on this phone it goes the moment the last number is in.
-     Before that it goes after a short pause in typing, so there's nothing to tap, and a longer code
-     typed steadily is never cut off. Open and Enter send it straight away. */
   var codeT = null;
   function codeTyped(v) {
     clearTimeout(codeT);
     if (v.length && v.length === codeLen()) return tryCode();
-    if (v.length >= 4) codeT = setTimeout(function () { var i = $("pcode"); if (i && i.value.trim() === v) tryCode(); }, 1000);
+    if (v.length >= 6) codeT = setTimeout(function () { var i = $("pcode"); if (i && i.value.trim() === v) tryCode(); }, 1000);
   }
   function tryCode() {
     clearTimeout(codeT);
     var inp = $("pcode"); if (!inp || PBUSY || !AUTH) return;
     var code = inp.value.trim(); if (!code) return;
     PBUSY = true; $("pcErr").textContent = "";
-    // Anything still saving goes up first, so the order that comes back is the latest.
     synced(function () {
       post({ action: "unlock", code: code, pass: AUTH.pass }).then(function (j) {
         if (j && j.ok && j.otok) {
@@ -1723,13 +1474,12 @@ window.FID = (function () {
         if (j && j.error === "signed_out") return signOut();
         if (j && j.error === "wrong_code") { try { localStorage.removeItem(K.cl); } catch (e) {} }
         if ($("pcErr")) $("pcErr").textContent = j && j.error === "locked" ? "Too many tries. Try again in " + Math.max(1, +j.mins || 10) + (+j.mins === 1 ? " minute." : " minutes.") :
-          j && j.error === "bad_action" ? "The Google script needs updating first." : "That code isn't right.";
+          j && j.error === "bad_action" ? "The Google script needs updating first." : j && j.error === "no_code" ? "The code isn't set up yet." : "That code isn't right.";
         if ($("pcode")) $("pcode").value = "";
       }).catch(function () { if ($("pcErr")) $("pcErr").textContent = "No connection. Check it and try again."; })
         .then(function () { PBUSY = false; });
     }, function () { PBUSY = false; });
   }
-  // Locking drops your costs from this device and fetches the order again at your prices only.
   function lockProfit() {
     if (PQ.length && !PINF) sendP();
     if (Q.length && !INF && OTOK) send();
@@ -1738,7 +1488,6 @@ window.FID = (function () {
     SAVES = null; CMP = { a: "cur", b: "" };
     closeSheet(); SRV = null; render(); load(false);
   }
-  // Your prices lock themselves after 5 minutes without a tap, or 5 minutes away from the page.
   function idleCheck() {
     if (OTOK && Date.now() - LAST_ACT > IDLE_LOCK) { lockProfit(); toast("Your prices locked"); }
   }
@@ -1772,7 +1521,6 @@ window.FID = (function () {
       if (AUTH) state("err", "Not saved, tap to retry");
     });
   }
-  // Every product on the price list with your price, for setting prices before they're on an order.
   function openAllPrices() {
     openSheet('<h2>All your prices</h2><p class="sh-sub">Per vial. Clear one to go back to the markup.</p>' +
       '<div class="srch stick"><input id="apQ" type="text" placeholder="Search" autocomplete="off" spellcheck="false" aria-label="Search the price list"></div>' +
@@ -1791,9 +1539,6 @@ window.FID = (function () {
     box.innerHTML = addMatches(q.value.trim()).map(apRow).join("") || '<p class="empty">Nothing on the list matches.</p>';
   }
 
-  /* ---------- designs ----------
-     Any file, up to 15 MB each. Pictures get a small preview made here before they go up. They're kept
-     in a Drive folder on the script, so everyone signed in sees the same ones. */
   function sizeText(n) { return n >= 1048576 ? (n / 1048576).toFixed(1) + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
   function extOf(name) { var m = /\.([a-z0-9]{1,5})$/i.exec(String(name)); return m ? m[1].toUpperCase() : "FILE"; }
   function filesHtml() {
@@ -1866,8 +1611,6 @@ window.FID = (function () {
         .then(function () { var at = UPS.indexOf(f.name); if (at >= 0) UPS.splice(at, 1); drawFiles(); next(i + 1); });
     })(0);
   }
-  // Only plain pictures and PDFs are shown on the page. Anything else, including SVG and web pages, is
-  // only ever downloaded, so a file someone uploads can't run anything here.
   function cleanMime(m) { return String(m || "").toLowerCase().split(";")[0].trim(); }
   function viewKind(m) {
     m = cleanMime(m);
@@ -1920,7 +1663,6 @@ window.FID = (function () {
     else fallback();
   }
 
-  /* ---------- one set of listeners for the whole page ---------- */
   document.addEventListener("submit", function (e) {
     if (e.target.id !== "signin") return;
     e.preventDefault(); signIn($("pw").value);
@@ -1929,7 +1671,6 @@ window.FID = (function () {
     if (e.target.id === "mask") return closeSheet();
     var a = e.target.closest("a");
     if (a && a.getAttribute("data-wa")) { setTimeout(waSent, 300); return; }
-    // Three quick taps on the title.
     if (e.target.closest("h1") && D && signedIn()) {
       var tnow = Date.now(); TAPS = TAPS.filter(function (t) { return tnow - t < 900; }); TAPS.push(tnow);
       if (TAPS.length >= 3) { TAPS = []; if (owner()) { VIEW = "profit"; render(); window.scrollTo(0, 0); } else openCode(); }
@@ -2003,7 +1744,6 @@ window.FID = (function () {
     var ds = e.target.dataset || {};
     if (D && ds.pq) { queue({ t: "pqty", f: ds.pq, v: e.target.value.trim() === "" ? null : Math.round(num(e.target.value)) }); return totals(); }
     if (D && ds.f === "qty") { var qi = itemOf(e.target); if (qi) queue({ t: "qty", id: qi.id, k: qi.k, v: Math.round(num(e.target.value)) }); return totals(); }
-    // Everything below changes prices, so only works with the code.
     if (!D || !owner()) return;
     if (ds.markup) { queueP({ t: "markup", v: Math.max(0, num(e.target.value)) }); return profitTotals(); }
     if (ds.pmarkup) { queueP({ t: "pmarkup", v: Math.max(0, num(e.target.value)) }); return profitTotals(); }
@@ -2040,7 +1780,6 @@ window.FID = (function () {
     if (ds.f === "ship") { e.target.value = fix(D.shipUsd); return; }
     if (ds.f === "price") { var it = itemOf(e.target); if (it) e.target.value = costAt(it) > 0 ? fix(costAt(it)) : ""; }
   });
-  // Something changed on another device while a box here was being typed in, so redraw once typing stops.
   document.addEventListener("focusout", function () {
     clearTimeout(rendT);
     rendT = setTimeout(function () { if (NEEDR && !typing()) render(); }, 400);
@@ -2065,7 +1804,6 @@ window.FID = (function () {
   });
   setInterval(idleCheck, 5000);
   window.addEventListener("pageshow", idleCheck);
-  // Phones pause timers in the background, so check the 8 hours and catch up whenever the page comes back.
   document.addEventListener("visibilitychange", function () {
     if (document.hidden) { clearTimeout(pollT); if (Q.length && !INF) send(true); return; }
     idleCheck();
